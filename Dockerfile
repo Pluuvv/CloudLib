@@ -2,10 +2,9 @@
 # Stage 1: Build & Package
 FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /workspace
-COPY pom.xml mvnw mvnw.cmd ./
-COPY .mvn .mvn
+COPY pom.xml ./
 COPY src src
-RUN ./mvnw package -DskipTests
+RUN mvn -B package -DskipTests quarkus:build
 
 # Stage 2: Minimal Production Runtime
 FROM registry.access.redhat.com/ubi9/openjdk-21-runtime:1.24

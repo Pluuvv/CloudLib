@@ -33,6 +33,7 @@ The image uses a multi-stage Java 21 build and runs as the non-root UID 185.
 ## Deploy to Kubernetes
 
 Create the namespace and runtime Secret before applying the Kustomize resources. Supply the same database password to the application and PostgreSQL; do not commit it or put it in a manifest.
+For a k3d cluster, import the built image with `k3d image import cloudlib:1.0.0 -c <cluster-name>` before deploying. Docker Desktop Kubernetes can use the local Docker image directly.
 
 ```powershell
 kubectl create namespace cloudlib --dry-run=client -o yaml | kubectl apply -f -
