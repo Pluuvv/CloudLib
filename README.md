@@ -1,89 +1,67 @@
-# cloudlib
+# CloudLib
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+CloudLib is a Quarkus-based, multi-tenant campus library service. Its MVP includes book and copy cataloging, borrowing and returns, computer reservations, visitor check-ins, and a per-tenant dashboard.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+## Requirements
 
-## Running the application in dev mode
+- JDK 21
+- Docker, for building the container image
+- `kubectl`, for Kubernetes deployment
 
-You can run your application in dev mode that enables live coding using:
+## Run locally
 
-```shell script
-./mvnw quarkus:dev
+Set `DB_PASSWORD` in your local environment and make a PostgreSQL database available at `localhost:5432` with database/user `cloudlib`. Flyway applies the schema and seed data at startup. Keep the password in a local secret store or environment, not in the repository.
+
+```powershell
+.\mvnw.cmd quarkus:dev
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+Run the automated tests with:
 
-## Packaging and running the application
-
-The application can be packaged using:
-
-```shell script
-./mvnw package
+```powershell
+.\mvnw.cmd test
 ```
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+## Build the container
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
-
-If you want to build an _über-jar_, execute the following command:
-
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
+```powershell
+docker build -t cloudlib:1.0.0 .
 ```
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+The image uses a multi-stage Java 21 build and runs as the non-root UID 185.
 
-## Creating a native executable
+## Deploy to Kubernetes
 
-You can create a native executable using:
+Create the namespace and runtime Secret before applying the Kustomize resources. Supply the same database password to the application and PostgreSQL; do not commit it or put it in a manifest.
 
-```shell script
-./mvnw package -Dnative
+```powershell
+kubectl create namespace cloudlib --dry-run=client -o yaml | kubectl apply -f -
+kubectl -n cloudlib create secret generic cloudlib-secret `
+  --from-literal=DB_PASSWORD="$env:DB_PASSWORD" `
+  --from-literal=POSTGRES_PASSWORD="$env:DB_PASSWORD" `
+  --dry-run=client -o yaml | kubectl apply -f -
+kubectl apply -k .\k8s
 ```
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
+Verify the rollout and services:
 
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
+```powershell
+kubectl -n cloudlib rollout status deployment/cloudlib-app
+kubectl -n cloudlib get deployments,services,ingress
 ```
 
-You can then execute your native executable with: `./target/cloudlib-1.0.0-SNAPSHOT-runner`
+The app Deployment has liveness, readiness, and startup probes, resource requests/limits, and two replicas. The Ingress host is `cloudlib.local`; configure local DNS or a hosts entry to reach it.
 
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
+## Evidence and milestone scope
 
-## Related Guides
+The milestone evidence reports are in [`docs/evidence`](docs/evidence). They describe the tested M2 workflows and the M3 container/Kubernetes baseline, including known limitations.
 
-- Flyway ([guide](https://quarkus.io/guides/flyway)): Handle your database schema migrations
-- Micrometer Registry Prometheus ([guide](https://quarkus.io/guides/micrometer)): Enable Prometheus support for Micrometer
-- Hibernate Validator ([guide](https://quarkus.io/guides/validation)): Bean validation using Hibernate Validator and Jakarta Validation annotations
-- REST Jackson ([guide](https://quarkus.io/guides/rest#json-serialisation)): Jackson serialization support for Quarkus REST. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it
-- OpenID Connect ([guide](https://quarkus.io/guides/security-openid-connect)): Secure applications with OpenID Connect and OAuth 2.0 using bearer tokens and authorization code flow
-- Hibernate ORM with Panache ([guide](https://quarkus.io/guides/hibernate-orm-panache)): Simplified JPA/Hibernate data access layer with active record and repository patterns
-- SmallRye Health ([guide](https://quarkus.io/guides/smallrye-health)): Monitor service health
-- JDBC Driver - PostgreSQL ([guide](https://quarkus.io/guides/datasource)): Connect to the PostgreSQL database via JDBC
+## API overview
 
-## Provided Code
+Tenant-scoped requests use the `X-Tenant` header. The API includes:
 
-### Hibernate ORM
-
-Create your first JPA entity
-
-[Related guide section...](https://quarkus.io/guides/hibernate-orm)
-
-
-[Related Hibernate with Panache section...](https://quarkus.io/guides/hibernate-orm-panache)
-
-
-### REST
-
-Easily start your REST Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
-
-### SmallRye Health
-
-Monitor your application's health using SmallRye Health
-
-[Related guide section...](https://quarkus.io/guides/smallrye-health)
+- `GET/POST /books`, `GET/POST /books/copies`
+- `POST /loans`, `POST /loans/return`, `GET /loans/active`, `GET /loans/history`
+- `GET/POST /computers`, `GET/POST /computers/reservations`
+- `GET/POST /attendance`, `POST /attendance/checkin`
+- `GET /dashboard/summary`

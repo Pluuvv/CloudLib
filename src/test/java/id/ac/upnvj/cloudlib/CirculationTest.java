@@ -57,7 +57,7 @@ public class CirculationTest {
             .contentType(ContentType.JSON)
             .body(Map.of(
                 "barcode", "BARCODE-001",
-                "memberRef", "2410512136"
+                "memberRef", "member-001"
             ))
         .when()
             .post("/loans")
@@ -65,7 +65,7 @@ public class CirculationTest {
             .statusCode(201)
             .body("loanId", notNullValue())
             .body("barcode", equalTo("BARCODE-001"))
-            .body("memberRef", equalTo("2410512136"))
+            .body("memberRef", equalTo("member-001"))
             .body("dueAt", notNullValue());
     }
 
@@ -78,7 +78,7 @@ public class CirculationTest {
             .contentType(ContentType.JSON)
             .body(Map.of(
                 "barcode", "BARCODE-001",
-                "memberRef", "2410512136"
+                "memberRef", "member-001"
             ))
         .when()
             .post("/loans")
@@ -91,7 +91,7 @@ public class CirculationTest {
             .contentType(ContentType.JSON)
             .body(Map.of(
                 "barcode", "BARCODE-001",
-                "memberRef", "2410512088"
+                "memberRef", "member-002"
             ))
         .when()
             .post("/loans")
@@ -109,7 +109,7 @@ public class CirculationTest {
             .contentType(ContentType.JSON)
             .body(Map.of(
                 "barcode", "BARCODE-001",
-                "memberRef", "2410512136"
+                "memberRef", "member-001"
             ))
         .when()
             .post("/loans")

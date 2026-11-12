@@ -70,7 +70,8 @@ public class ComputerResource {
             return error(400, "computerId, memberRef, dan slotStart wajib diisi");
         }
 
-        Computer computer = Computer.find("id = ?1 and tenantId = ?2", req.computerId(), tenant.id).firstResult();
+        Computer computer = Computer.find("id = ?1 and tenantId = ?2", req.computerId(), tenant.id)
+                .withLock(LockModeType.PESSIMISTIC_WRITE).firstResult();
         if (computer == null) return error(404, "komputer tidak ditemukan pada tenant ini");
 
         Instant slot;
@@ -80,7 +81,7 @@ public class ComputerResource {
             return error(400, "format slotStart tidak valid, gunakan format ISO-8601 (misal: 2026-11-13T09:00:00Z)");
         }
 
-        // Lock computer row or check existing reservation on the exact slot to prevent double-booking (QS02)
+        // Serialize reservations for this computer before checking the requested slot (QS02).
         long existing = ComputerReservation.count("computerId = ?1 and slotStart = ?2", computer.id, slot);
         if (existing > 0) {
             return error(409, "slot komputer ini sudah terisi (double booking dicegah)");

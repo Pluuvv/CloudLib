@@ -8,9 +8,17 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @QuarkusTest
@@ -46,7 +54,7 @@ public class ComputerReservationTest {
             .contentType(ContentType.JSON)
             .body(Map.of(
                 "computerId", computerId,
-                "memberRef", "2410512136",
+                "memberRef", "member-001",
                 "slotStart", "2026-11-20T09:00:00Z"
             ))
         .when()
@@ -55,7 +63,7 @@ public class ComputerReservationTest {
             .statusCode(201)
             .body("reservationId", notNullValue())
             .body("label", equalTo("PC-TEST-01"))
-            .body("memberRef", equalTo("2410512136"));
+            .body("memberRef", equalTo("member-001"));
     }
 
     @Test
@@ -67,7 +75,7 @@ public class ComputerReservationTest {
             .contentType(ContentType.JSON)
             .body(Map.of(
                 "computerId", computerId,
-                "memberRef", "2410512136",
+                "memberRef", "member-001",
                 "slotStart", "2026-11-20T10:00:00Z"
             ))
         .when()
@@ -81,7 +89,7 @@ public class ComputerReservationTest {
             .contentType(ContentType.JSON)
             .body(Map.of(
                 "computerId", computerId,
-                "memberRef", "2410512088",
+                "memberRef", "member-002",
                 "slotStart", "2026-11-20T10:00:00Z"
             ))
         .when()
@@ -89,5 +97,42 @@ public class ComputerReservationTest {
         .then()
             .statusCode(409)
             .body("error", containsString("double booking"));
+    }
+
+    @Test
+    @DisplayName("Reservasi paralel pada komputer dan slot yang sama hanya boleh berhasil sekali")
+    public void testConcurrentDoubleBookingConflict() throws Exception {
+        CountDownLatch start = new CountDownLatch(1);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        try {
+            Callable<Integer> reserve = () -> {
+                start.await();
+                return given()
+                    .header("X-Tenant", "upnvj")
+                    .contentType(ContentType.JSON)
+                    .body(Map.of(
+                        "computerId", computerId,
+                        "memberRef", "member-001",
+                        "slotStart", "2026-11-20T11:00:00Z"
+                    ))
+                .when()
+                    .post("/computers/reservations")
+                .then()
+                    .extract()
+                    .statusCode();
+            };
+
+            Future<Integer> first = executor.submit(reserve);
+            Future<Integer> second = executor.submit(reserve);
+            start.countDown();
+
+            assertThat(List.of(
+                    first.get(10, TimeUnit.SECONDS),
+                    second.get(10, TimeUnit.SECONDS)),
+                    containsInAnyOrder(201, 409));
+        } finally {
+            executor.shutdownNow();
+        }
     }
 }

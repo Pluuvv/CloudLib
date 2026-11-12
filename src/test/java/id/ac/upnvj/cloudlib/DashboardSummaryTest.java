@@ -49,7 +49,7 @@ public class DashboardSummaryTest {
 
         VisitorLog log = new VisitorLog();
         log.tenantId = tenant.id;
-        log.memberRef = "2410512136";
+        log.memberRef = "member-001";
         log.checkInAt = java.time.Instant.now();
         log.persist();
     }
