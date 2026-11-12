@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudlib-config
+  namespace: cloudlib
+data:
+  QUARKUS_HTTP_PORT: "8080"
+  QUARKUS_DATASOURCE_DB_KIND: "postgresql"
+  QUARKUS_DATASOURCE_JDBC_URL: "jdbc:postgresql://postgres-service.cloudlib.svc.cluster.local:5432/cloudlib"
+  QUARKUS_DATASOURCE_USERNAME: "cloudlib"
+  QUARKUS_FLYWAY_MIGRATE_AT_START: "true"
+  QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: "none"
+  QUARKUS_OIDC_ENABLED: "false"

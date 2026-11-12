@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cloudlib
+  labels:
+    app.kubernetes.io/name: cloudlib
+    app.kubernetes.io/part-of: campus-services
