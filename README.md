@@ -30,7 +30,13 @@ docker build -t cloudlib:1.0.0 .
 
 The image uses a multi-stage Java 21 build and runs as the non-root UID 185.
 
-## Deploy to Kubernetes
+## CI and lab delivery
+
+GitHub Actions runs Maven `verify` with Java 21 for pull requests targeting `main` and pushes to `main`. To deploy in the course lab, push the reviewed application commit to `main` in the local Gitea `capstone-app` repository. Gitea Actions tests and builds the image, scans it with Trivy, and stops before publishing if it finds any `CRITICAL` vulnerabilities.
+
+After the scan passes, Gitea publishes the image tagged with the application commit SHA and updates `overlays/dev/kustomization.yaml` in `capstone-gitops`. Verify that Argo CD reports `Synced` and `Healthy` for the GitOps revision and that the [lab readiness endpoint](http://cloudlib.localhost:8088/q/health/ready) returns `UP`.
+
+## Standalone Kubernetes deployment
 
 Create the namespace and runtime Secret before applying the Kustomize resources. Supply the same database password to the application and PostgreSQL; do not commit it or put it in a manifest.
 For a k3d cluster, import the built image with `k3d image import cloudlib:1.0.0 -c <cluster-name>` before deploying. Docker Desktop Kubernetes can use the local Docker image directly.
