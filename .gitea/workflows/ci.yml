@@ -8,7 +8,7 @@ jobs:
   build-test-scan-publish:
     runs-on: capstone
     env:
-      PUSH_IMAGE: localhost:5001/student/capstone-app:${{ github.sha }}
+      PUSH_IMAGE: localhost:5001/student/cloudlib-app:${{ github.sha }}
       TRIVY_IMAGE: aquasec/trivy:0.76.0
     steps:
       - name: Checkout

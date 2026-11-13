@@ -32,7 +32,7 @@ The image uses a multi-stage Java 21 build and runs as the non-root UID 185.
 
 ## CI and lab delivery
 
-GitHub Actions runs Maven `verify` with Java 21 for pull requests targeting `main` and pushes to `main`. To deploy in the course lab, push the reviewed application commit to `main` in the local Gitea `capstone-app` repository. Gitea Actions tests and builds the image, scans it with Trivy, and stops before publishing if it finds any `CRITICAL` vulnerabilities.
+GitHub Actions runs Maven `verify` with Java 21 for pull requests targeting `main` and pushes to `main`. To deploy in the course lab, push the reviewed application commit to `main` in the local Gitea `cloudlib-app` repository. Gitea Actions tests and builds the image, scans it with Trivy, and stops before publishing if it finds any `CRITICAL` vulnerabilities.
 
 After the scan passes, Gitea publishes the image tagged with the application commit SHA and updates `overlays/dev/kustomization.yaml` in `capstone-gitops`. Verify that Argo CD reports `Synced` and `Healthy` for the GitOps revision and that the [lab readiness endpoint](http://cloudlib.localhost:8088/q/health/ready) returns `UP`.
 
