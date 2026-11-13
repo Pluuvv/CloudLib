@@ -1,0 +1,59 @@
+name: CloudLib CI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-test-scan-publish:
+    runs-on: capstone
+    env:
+      PUSH_IMAGE: localhost:5001/student/capstone-app:${{ github.sha }}
+      TRIVY_IMAGE: aquasec/trivy:0.76.0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          github-server-url: http://gitea:3000
+          persist-credentials: false
+
+      - name: Test
+        run: mvn -B test
+
+      - name: Build image
+        run: docker build --label "org.opencontainers.image.revision=$GITHUB_SHA" -t "$PUSH_IMAGE" .
+
+      - name: Scan image and block CRITICAL findings
+        run: |
+          set -eu
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            -v cloudlib-trivy-cache:/root/.cache/trivy "$TRIVY_IMAGE" image \
+            --image-src docker --scanners vuln --severity HIGH,CRITICAL --no-progress "$PUSH_IMAGE"
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            -v cloudlib-trivy-cache:/root/.cache/trivy "$TRIVY_IMAGE" image \
+            --image-src docker --scanners vuln --severity CRITICAL --exit-code 1 --no-progress "$PUSH_IMAGE"
+
+      - name: Publish image
+        run: docker push "$PUSH_IMAGE"
+
+      - name: Update GitOps image tag
+        env:
+          GITOPS_PASSWORD: ${{ secrets.GITOPS_PASSWORD }}
+        run: |
+          set -eu
+          gitops_dir=$(mktemp -d)
+          trap 'rm -rf "$gitops_dir"' EXIT
+          auth=$(printf 'student:%s' "$GITOPS_PASSWORD" | base64 | tr -d '\n')
+          export GITOPS_AUTH="Authorization: Basic $auth"
+          git --config-env=http.extraHeader=GITOPS_AUTH clone \
+            --branch main http://gitea:3000/student/capstone-gitops.git "$gitops_dir"
+          cd "$gitops_dir"
+          sed -i "s/^    newTag: .*/    newTag: $GITHUB_SHA/" overlays/dev/kustomization.yaml
+          grep -Fx "    newTag: $GITHUB_SHA" overlays/dev/kustomization.yaml
+          git add overlays/dev/kustomization.yaml
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git -c user.name='Capstone CI' -c user.email='capstone-ci@example.local' \
+            commit -m "deploy: CloudLib $GITHUB_SHA"
+          git --config-env=http.extraHeader=GITOPS_AUTH push origin main
