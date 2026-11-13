@@ -21,4 +21,4 @@ Prometheus mengambil metrik Micrometer dari `/q/metrics` melalui Traefik. Setela
 
 ![Prometheus menunjukkan target cloudlib-app UP pada endpoint q metrics](./M5-Prometheus-Target-UP.png)
 
-[Arsip bukti M5](M5-Bukti-Mentah.zip) memuat output API, kueri, dan cuplikan metrik dari pengujian awal dengan job `capstone-app`. Handoff ke D mencakup target scrape `k3d-capstone-serverlb:80` dengan path `/q/metrics`, [Prometheus Targets di lab](http://localhost:9090/targets), dan label job `cloudlib-app`. Lihat [catatan migrasi M4](M4-Evidence-CI-CD-GitOps.md#4-migrasi-nama-cloudlib-app) untuk revisi deploy.
+[Arsip bukti M5](M5-Bukti-Mentah.zip) memuat output API, kueri, dan cuplikan metrik dari pengujian awal dengan job `capstone-app`. Handoff ke D mencakup target scrape `k3d-capstone-serverlb:80` dengan path `/q/metrics`, [Prometheus Targets di lab](http://localhost:9090/targets), dan label job `cloudlib-app`. Lihat [catatan migrasi M4](../M4/M4-Evidence-CI-CD-GitOps.md#4-migrasi-nama-cloudlib-app) untuk revisi deploy.
