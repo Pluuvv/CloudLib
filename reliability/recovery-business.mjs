@@ -6,18 +6,18 @@ export async function session(origin) {
  return {origin,staff:await loginAs('petugas',origin+'/'),student:await loginAs('mahasiswa',origin+'/')};
 }
 export async function api(s,path,role='staff',expected=200,body,tenant) {
- const address=new URL(s.origin+path);if(address.hostname==='cloudlib.localhost')address.hostname='127.0.0.1';
+ const address=new URL(s.origin+path);if(['localhost','cloudlib.localhost'].includes(address.hostname))address.hostname='127.0.0.1';
  const response=await fetch(address,{method:body===undefined?'GET':'POST',headers:{Host:new URL(s.origin).host,Authorization:'Bearer '+s[role],...(body===undefined?{}:{'Content-Type':'application/json'}),...(tenant?{'X-Tenant':tenant}:{})},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(15000)});
  if(response.status!==expected){const error=new Error('BUSINESS_HTTP_FAILED');error.status=response.status;throw error;}
  return expected<300?response.json():null;
 }
 export async function appReady(origin){
  if(!['http://localhost:8089','http://cloudlib.localhost:8088'].includes(origin))fail('UNSAFE_APP_ORIGIN');
- const address=new URL(origin+'/q/health/ready');if(address.hostname==='cloudlib.localhost')address.hostname='127.0.0.1';
+ const address=new URL(origin+'/q/health/ready');if(['localhost','cloudlib.localhost'].includes(address.hostname))address.hostname='127.0.0.1';
  return (await fetch(address,{headers:{Host:new URL(origin).host},signal:AbortSignal.timeout(2000)})).ok;
 }
 export async function anonymousDenied(origin){
- const address=new URL(origin+'/books');if(address.hostname==='cloudlib.localhost')address.hostname='127.0.0.1';
+ const address=new URL(origin+'/books');if(['localhost','cloudlib.localhost'].includes(address.hostname))address.hostname='127.0.0.1';
  if((await fetch(address,{headers:{Host:new URL(origin).host},signal:AbortSignal.timeout(5000)})).status!==401)fail('OIDC_NOT_ENFORCED');
 }
 export async function checkRecords(s,cp,postRestore=false) {
