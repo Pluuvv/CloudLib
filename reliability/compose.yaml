@@ -1,0 +1,50 @@
+name: cloudlib-recovery
+
+services:
+  postgres:
+    image: postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
+    container_name: cloudlib-recovery-postgres
+    environment:
+      POSTGRES_DB: cloudlib_recovery
+      POSTGRES_USER: cloudlib_recovery_owner
+      POSTGRES_PASSWORD: ${CLOUDLIB_RECOVERY_OWNER_PASSWORD:?Set the isolated recovery owner password}
+      CLOUDLIB_RECOVERY_APP_PASSWORD: ${CLOUDLIB_RECOVERY_APP_PASSWORD:?Set the isolated recovery app password}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [recovery]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U cloudlib_recovery_owner -d postgres]
+      interval: 3s
+      timeout: 2s
+      retries: 20
+
+  app:
+    image: ${CLOUDLIB_BASELINE_IMAGE:-cloudlib-baseline:unconfigured}
+    container_name: cloudlib-recovery-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - 127.0.0.1:8089:8080
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/cloudlib_recovery
+      DB_USER: cloudlib_recovery_app
+      DB_PASSWORD: ${CLOUDLIB_RECOVERY_APP_PASSWORD:?Set the isolated recovery app password}
+      OIDC_AUTH_SERVER_URL: http://host.docker.internal:8081/realms/cloudlib
+      QUARKUS_OIDC_TOKEN_ISSUER: http://localhost:8081/realms/cloudlib
+      QUARKUS_OIDC_DISCOVERY_ENABLED: "false"
+      QUARKUS_OIDC_JWKS_PATH: /protocol/openid-connect/certs
+    networks: [recovery]
+    healthcheck:
+      test: [CMD, curl, --fail, --silent, --output, /dev/null, 'http://localhost:8080/q/health/ready']
+      interval: 3s
+      timeout: 2s
+      retries: 20
+
+networks:
+  recovery:
+    name: cloudlib-recovery-net
+
+volumes:
+  pgdata:
+    name: cloudlib-recovery-pgdata

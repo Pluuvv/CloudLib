@@ -35,7 +35,7 @@ The image uses a multi-stage Java 21 build and runs as the non-root UID 185.
 
 ## CI and lab delivery
 
-GitHub Actions runs Maven `verify` with Java 21 for pull requests targeting `main` and pushes to `main`. To deploy in the course lab, push the reviewed application commit to `main` in the local Gitea `capstone-app` repository. Gitea Actions tests and builds the image, scans it with Trivy, and stops before publishing if it finds any `CRITICAL` vulnerabilities.
+GitHub Actions runs Maven `verify` with Java 21 for pull requests targeting `main` and pushes to `main`. To deploy in the course lab, push the reviewed application commit to `main` in the local Gitea `cloudlib-app` repository. Gitea Actions tests and builds the image, scans it with Trivy, and stops before publishing if it finds any `CRITICAL` vulnerabilities.
 
 After the scan passes, Gitea publishes the image tagged with the application commit SHA and updates `overlays/dev/kustomization.yaml` in `capstone-gitops`. Verify that Argo CD reports `Synced` and `Healthy` for the GitOps revision and that the [lab readiness endpoint](http://cloudlib.localhost:8088/q/health/ready) returns `UP`.
 
@@ -76,7 +76,7 @@ Configure the Keycloak `cloudlib` realm with:
 
 An importable starting configuration is provided in [`keycloak/cloudlib-realm.json`](keycloak/cloudlib-realm.json). Start the infrastructure workspace's Keycloak service, import this realm from the Keycloak Admin Console, then create the required test users and set their `tenant` and `member_ref` user attributes. The export contains no user passwords. For `cloudlib.local` or another HTTPS origin, update the client's redirect URI and web origin in the realm and the UI issuer meta tag to match the actual deployment.
 
-The local UI issuer and client ID are configured in the `cloudlib-oidc-issuer` and `cloudlib-oidc-client-id` meta tags in `src/main/resources/META-INF/resources/index.html`. The issuer must match Keycloak's canonical realm issuer. The API's `OIDC_AUTH_SERVER_URL` must resolve from the API runtime and identify that same realm; the token issuer must match the canonical issuer in the JWT. For Kubernetes, update the value in `k8s/01-configmap.yaml` and the UI issuer for the actual network. The current `host.docker.internal` value is only a local-lab example and must be verified from the pod and browser. Do not leave a loopback address in a remote cluster.
+The local UI issuer and client ID are configured in the `cloudlib-oidc-issuer` and `cloudlib-oidc-client-id` meta tags in `src/main/resources/META-INF/resources/index.html`. The issuer must match Keycloak's canonical realm issuer. In the team lab, the GitOps ConfigMap pins the browser issuer at `http://localhost:8081/realms/cloudlib` and fetches signing keys through the internal Keycloak address. For standalone Kubernetes, update `k8s/01-configmap.yaml` for the actual network. See the [recovery baseline procedure](reliability/README.md) for the local lab and recovery topology.
 
 The browser requires HTTPS or a localhost origin for Web Crypto and PKCE. Use a localhost port-forward for local HTTP testing, or configure HTTPS for a custom hostname such as `cloudlib.local`.
 
