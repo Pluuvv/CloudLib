@@ -1,0 +1,29 @@
+{
+  "formatVersion": 1,
+  "backupDir": "",
+  "runtimeDir": "",
+  "maxAgeHours": 24,
+  "logicalSource": "cloudlib-business",
+  "app": { "image": "", "commit": "" },
+  "source": {
+    "host": "capstone-postgres", "port": 5432,
+    "database": "capstone", "user": "capstone",
+    "passwordEnv": "CLOUDLIB_SOURCE_PASSWORD"
+  },
+  "recovery": {
+    "host": "postgres", "port": 5432, "user": "cloudlib_recovery_owner",
+    "passwordEnv": "CLOUDLIB_RECOVERY_OWNER_PASSWORD",
+    "systemIdentifier": "",
+    "allowedDatabases": ["cloudlib_recovery_verify"],
+    "appRole": "cloudlib_recovery_app"
+  },
+  "encryption": { "recipient": "", "identityFile": "" },
+  "tools": {
+    "psql": { "command": "psql" },
+    "pg_dump": { "command": "pg_dump" },
+    "pg_restore": { "command": "pg_restore" },
+    "age": { "command": "age" },
+    "age_keygen": { "command": "age-keygen" },
+    "tar": { "command": "tar" }
+  }
+}
