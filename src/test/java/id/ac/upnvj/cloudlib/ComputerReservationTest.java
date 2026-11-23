@@ -1,6 +1,8 @@
 package id.ac.upnvj.cloudlib;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.SecurityAttribute;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +24,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @QuarkusTest
+@TestSecurity(
+        user = "mhs_upn",
+        roles = {"mahasiswa"},
+        attributes = {
+            @SecurityAttribute(key = "tenant", value = "upnvj"),
+            @SecurityAttribute(key = "member_ref", value = "member-001")
+        })
 public class ComputerReservationTest {
 
     private Long computerId;

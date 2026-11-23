@@ -1,5 +1,6 @@
 package id.ac.upnvj.cloudlib;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -15,11 +16,13 @@ public class TenantResource {
     public record CreateTenantRequest(String code, String name) {}
 
     @GET
+    @RolesAllowed("admin")
     public List<Tenant> list() {
         return Tenant.listAll();
     }
 
     @POST
+    @RolesAllowed("admin")
     @Transactional
     public Response create(CreateTenantRequest req) {
         if (req == null || req.code() == null || req.name() == null || req.code().isBlank()) {

@@ -1,6 +1,8 @@
 package id.ac.upnvj.cloudlib;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.SecurityAttribute;
+import io.quarkus.test.security.TestSecurity;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -10,6 +12,10 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 @QuarkusTest
+@TestSecurity(
+        user = "admin_upn",
+        roles = {"admin"},
+        attributes = @SecurityAttribute(key = "tenant", value = "upnvj"))
 public class DashboardSummaryTest {
 
     @BeforeEach

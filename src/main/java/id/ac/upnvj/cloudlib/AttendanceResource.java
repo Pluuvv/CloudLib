@@ -1,5 +1,7 @@
 package id.ac.upnvj.cloudlib;
 
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -13,6 +15,9 @@ import java.util.Map;
 @Produces(MediaType.APPLICATION_JSON)
 public class AttendanceResource {
 
+    @Inject
+    TenantIdentity tenantIdentity;
+
     public record CheckInRequest(String memberRef) {}
 
     private static Response error(int status, String message) {
@@ -20,9 +25,9 @@ public class AttendanceResource {
     }
 
     @GET
+    @RolesAllowed({"petugas", "admin"})
     public Response listAttendance(@HeaderParam("X-Tenant") String tenantCode) {
-        Tenant tenant = Tenant.find("code", tenantCode).firstResult();
-        if (tenant == null) return error(400, "tenant tidak dikenal atau header X-Tenant belum diisi");
+        Tenant tenant = tenantIdentity.requireTenant(tenantCode);
 
         List<VisitorLog> logs = VisitorLog.list("tenantId", tenant.id);
         return Response.ok(logs).build();
@@ -30,17 +35,24 @@ public class AttendanceResource {
 
     @POST
     @Path("/checkin")
+    @RolesAllowed({"mahasiswa", "petugas"})
     @Transactional
     public Response checkIn(@HeaderParam("X-Tenant") String tenantCode, CheckInRequest req) {
-        Tenant tenant = Tenant.find("code", tenantCode).firstResult();
-        if (tenant == null) return error(400, "tenant tidak dikenal");
-        if (req == null || req.memberRef() == null || req.memberRef().isBlank()) {
-            return error(400, "memberRef wajib diisi");
+        Tenant tenant = tenantIdentity.requireTenant(tenantCode);
+        if (req == null) {
+            return error(400, "body permintaan wajib diisi");
+        }
+
+        String memberRef = tenantIdentity.hasRole("mahasiswa")
+                ? tenantIdentity.requireMemberRef()
+                : req.memberRef();
+        if (memberRef == null || memberRef.isBlank()) {
+            return error(400, "memberRef wajib diisi untuk presensi manual");
         }
 
         VisitorLog log = new VisitorLog();
         log.tenantId = tenant.id;
-        log.memberRef = req.memberRef();
+        log.memberRef = memberRef;
         log.checkInAt = Instant.now();
         log.persist();
 

@@ -1,6 +1,8 @@
 package id.ac.upnvj.cloudlib;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.SecurityAttribute;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,6 +67,10 @@ public class TenantIsolationTest {
     }
 
     @Test
+    @TestSecurity(
+            user = "petugas_poltek",
+            roles = {"petugas"},
+            attributes = @SecurityAttribute(key = "tenant", value = "poltek"))
     @DisplayName("Uji Negatif Isolasi QS09: Tenant B tidak boleh dapat meminjam eksemplar milik Tenant A (404 Not Found)")
     public void testCrossTenantBorrowForbidden() {
         given()
@@ -82,6 +88,10 @@ public class TenantIsolationTest {
     }
 
     @Test
+    @TestSecurity(
+            user = "mhs_poltek",
+            roles = {"mahasiswa"},
+            attributes = @SecurityAttribute(key = "tenant", value = "poltek"))
     @DisplayName("Uji Isolasi QS09: Katalog buku yang dikueri Tenant B tidak boleh menampilkan buku milik Tenant A")
     public void testCrossTenantCatalogIsolation() {
         given()
@@ -96,14 +106,18 @@ public class TenantIsolationTest {
     }
 
     @Test
-    @DisplayName("Permintaan tanpa header X-Tenant atau tenant tidak valid harus ditolak (400 Bad Request)")
+    @TestSecurity(
+            user = "mhs_upn",
+            roles = {"mahasiswa"},
+            attributes = @SecurityAttribute(key = "tenant", value = "upnvj"))
+    @DisplayName("Header tenant yang tidak sesuai dengan token harus ditolak (403 Forbidden)")
     public void testMissingOrInvalidTenantHeader() {
         given()
             .header("X-Tenant", "nonexistent-tenant")
         .when()
             .get("/books")
         .then()
-            .statusCode(400)
-            .body("error", containsString("tenant tidak dikenal"));
+            .statusCode(403)
+            .body("error", containsString("tidak sesuai"));
     }
 }

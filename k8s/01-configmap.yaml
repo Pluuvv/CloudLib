@@ -10,4 +10,7 @@ data:
   QUARKUS_DATASOURCE_USERNAME: "cloudlib"
   QUARKUS_FLYWAY_MIGRATE_AT_START: "true"
   QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: "none"
-  QUARKUS_OIDC_ENABLED: "false"
+  QUARKUS_OIDC_ENABLED: "true"
+  OIDC_AUTH_SERVER_URL: "http://host.docker.internal:8081/realms/cloudlib"
+  OIDC_API_CLIENT_ID: "cloudlib-api"
+  OIDC_API_AUDIENCE: "cloudlib-api"

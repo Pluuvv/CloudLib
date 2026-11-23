@@ -1,5 +1,7 @@
 package id.ac.upnvj.cloudlib;
 
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -12,6 +14,9 @@ import java.util.Map;
 @Produces(MediaType.APPLICATION_JSON)
 public class BookResource {
 
+    @Inject
+    TenantIdentity tenantIdentity;
+
     public record CreateBookRequest(String title, String author, String isbn) {}
     public record CreateCopyRequest(Long bookId, String barcode) {}
 
@@ -20,19 +25,19 @@ public class BookResource {
     }
 
     @GET
+    @RolesAllowed({"mahasiswa", "petugas", "admin"})
     public Response listBooks(@HeaderParam("X-Tenant") String tenantCode) {
-        Tenant tenant = Tenant.find("code", tenantCode).firstResult();
-        if (tenant == null) return error(400, "tenant tidak dikenal atau header X-Tenant belum diisi");
+        Tenant tenant = tenantIdentity.requireTenant(tenantCode);
 
         List<Book> books = Book.list("tenantId", tenant.id);
         return Response.ok(books).build();
     }
 
     @POST
+    @RolesAllowed("admin")
     @Transactional
     public Response createBook(@HeaderParam("X-Tenant") String tenantCode, CreateBookRequest req) {
-        Tenant tenant = Tenant.find("code", tenantCode).firstResult();
-        if (tenant == null) return error(400, "tenant tidak dikenal");
+        Tenant tenant = tenantIdentity.requireTenant(tenantCode);
         if (req == null || req.title() == null || req.title().isBlank()) {
             return error(400, "judul buku wajib diisi");
         }
@@ -49,9 +54,9 @@ public class BookResource {
 
     @GET
     @Path("/copies")
+    @RolesAllowed({"mahasiswa", "petugas", "admin"})
     public Response listCopies(@HeaderParam("X-Tenant") String tenantCode) {
-        Tenant tenant = Tenant.find("code", tenantCode).firstResult();
-        if (tenant == null) return error(400, "tenant tidak dikenal");
+        Tenant tenant = tenantIdentity.requireTenant(tenantCode);
 
         List<BookCopy> copies = BookCopy.list("tenantId", tenant.id);
         return Response.ok(copies).build();
@@ -59,10 +64,10 @@ public class BookResource {
 
     @POST
     @Path("/copies")
+    @RolesAllowed({"petugas", "admin"})
     @Transactional
     public Response createCopy(@HeaderParam("X-Tenant") String tenantCode, CreateCopyRequest req) {
-        Tenant tenant = Tenant.find("code", tenantCode).firstResult();
-        if (tenant == null) return error(400, "tenant tidak dikenal");
+        Tenant tenant = tenantIdentity.requireTenant(tenantCode);
         if (req == null || req.bookId() == null || req.barcode() == null || req.barcode().isBlank()) {
             return error(400, "bookId dan barcode wajib diisi");
         }

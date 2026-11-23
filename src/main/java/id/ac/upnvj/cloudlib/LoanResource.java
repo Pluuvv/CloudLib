@@ -1,5 +1,7 @@
 package id.ac.upnvj.cloudlib;
 
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.inject.Inject;
 import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
@@ -15,6 +17,9 @@ import java.util.Map;
 @Produces(MediaType.APPLICATION_JSON)
 public class LoanResource {
 
+    @Inject
+    TenantIdentity tenantIdentity;
+
     public record BorrowRequest(String barcode, String memberRef) {}
     public record ReturnRequest(String barcode) {}
 
@@ -24,29 +29,34 @@ public class LoanResource {
 
     @GET
     @Path("/active")
+    @RolesAllowed({"mahasiswa", "petugas", "admin"})
     public Response listActiveLoans(@HeaderParam("X-Tenant") String tenantCode) {
-        Tenant tenant = Tenant.find("code", tenantCode).firstResult();
-        if (tenant == null) return error(400, "tenant tidak dikenal atau header X-Tenant belum diisi");
+        Tenant tenant = tenantIdentity.requireTenant(tenantCode);
 
-        List<Loan> activeLoans = Loan.list("tenantId = ?1 and returnedAt is null", tenant.id);
+        List<Loan> activeLoans = tenantIdentity.hasRole("mahasiswa")
+                ? Loan.list("tenantId = ?1 and returnedAt is null and memberRef = ?2",
+                        tenant.id, tenantIdentity.requireMemberRef())
+                : Loan.list("tenantId = ?1 and returnedAt is null", tenant.id);
         return Response.ok(activeLoans).build();
     }
 
     @GET
     @Path("/history")
+    @RolesAllowed({"mahasiswa", "petugas", "admin"})
     public Response listLoanHistory(@HeaderParam("X-Tenant") String tenantCode) {
-        Tenant tenant = Tenant.find("code", tenantCode).firstResult();
-        if (tenant == null) return error(400, "tenant tidak dikenal");
+        Tenant tenant = tenantIdentity.requireTenant(tenantCode);
 
-        List<Loan> allLoans = Loan.list("tenantId", tenant.id);
+        List<Loan> allLoans = tenantIdentity.hasRole("mahasiswa")
+                ? Loan.list("tenantId = ?1 and memberRef = ?2", tenant.id, tenantIdentity.requireMemberRef())
+                : Loan.list("tenantId", tenant.id);
         return Response.ok(allLoans).build();
     }
 
     @POST
+    @RolesAllowed("petugas")
     @Transactional
     public Response borrow(@HeaderParam("X-Tenant") String tenantCode, BorrowRequest req) {
-        Tenant tenant = Tenant.find("code", tenantCode).firstResult();
-        if (tenant == null) return error(400, "tenant tidak dikenal");
+        Tenant tenant = tenantIdentity.requireTenant(tenantCode);
         if (req == null || req.barcode() == null || req.memberRef() == null || req.barcode().isBlank()) {
             return error(400, "barcode dan memberRef wajib diisi");
         }
@@ -85,10 +95,10 @@ public class LoanResource {
 
     @POST
     @Path("/return")
+    @RolesAllowed("petugas")
     @Transactional
     public Response giveBack(@HeaderParam("X-Tenant") String tenantCode, ReturnRequest req) {
-        Tenant tenant = Tenant.find("code", tenantCode).firstResult();
-        if (tenant == null) return error(400, "tenant tidak dikenal");
+        Tenant tenant = tenantIdentity.requireTenant(tenantCode);
         if (req == null || req.barcode() == null || req.barcode().isBlank()) {
             return error(400, "barcode wajib diisi");
         }

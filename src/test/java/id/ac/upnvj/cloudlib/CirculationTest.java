@@ -1,6 +1,8 @@
 package id.ac.upnvj.cloudlib;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.SecurityAttribute;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -16,6 +18,10 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 @QuarkusTest
+@TestSecurity(
+        user = "petugas_upn",
+        roles = {"petugas"},
+        attributes = @SecurityAttribute(key = "tenant", value = "upnvj"))
 public class CirculationTest {
 
     @Inject

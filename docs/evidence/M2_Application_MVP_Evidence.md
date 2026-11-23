@@ -3,12 +3,12 @@
 **Track**: Campus Services
 **Kelompok**: 6 (Kelas B, UPN Veteran Jakarta)
 **Timestamp**: 2026-11-12T20:45:00+07:00
-**Status**: Core workflows and persistence implemented; role-aware authorization remains incomplete
+**Status**: M2 scope snapshot; role-aware authorization was not implemented at the time of this report
 
 ---
 
 ## 1. Ringkasan Eksekutif Milestone 2
-Milestone 2 membuktikan bahwa proses bisnis inti perpustakaan telah berhasil diimplementasikan, persisten ke basis data relasional (PostgreSQL), mendukung multi-tenancy dengan isolasi data, dan memiliki proteksi terhadap anomali data (seperti double-borrowing buku dan double-booking fasilitas komputer) sebelum kompleksitas infrastruktur ditambahkan. Sesuai gate M2, authorization berbasis role (3-5 role/grup izin) belum diimplementasikan; karena itu gate M2 belum dapat dinyatakan lulus penuh.
+Milestone 2 membuktikan bahwa proses bisnis inti perpustakaan telah berhasil diimplementasikan, persisten ke basis data relasional (PostgreSQL), mendukung multi-tenancy dengan isolasi data, dan memiliki proteksi terhadap anomali data (seperti double-borrowing buku dan double-booking fasilitas komputer) sebelum kompleksitas infrastruktur ditambahkan. Laporan ini merekam kondisi saat gate M2 diuji; implementasi autentikasi dan authorization berikutnya dicatat terpisah pada [laporan M6](M6_Security_Implementation.md).
 
 ---
 
@@ -27,7 +27,7 @@ Milestone 2 membuktikan bahwa proses bisnis inti perpustakaan telah berhasil dii
 
 ## 3. Gap M2 yang Masih Terbuka
 
-Panduan capstone menetapkan role-aware behavior dan sekitar 3-5 role/permission groups sebagai baseline. Saat ini API hanya melakukan isolasi berdasarkan `X-Tenant`; belum ada autentikasi pengguna maupun authorization role. Jangan menganggap perilaku tenant tersebut sebagai pengganti kontrol akses berbasis role.
+Pada saat M2 diuji, API hanya melakukan isolasi berdasarkan header `X-Tenant`; autentikasi pengguna dan authorization role belum tersedia. Temuan tersebut adalah batasan historis M2 dan tidak menggambarkan implementasi M6 saat ini. Jangan menganggap perilaku tenant M2 sebagai pengganti kontrol akses berbasis role.
 
 ## 4. Hasil Eksekusi Otomatisasi Pengujian (Automated Test Run)
 

@@ -1,5 +1,7 @@
 package id.ac.upnvj.cloudlib;
 
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -9,13 +11,14 @@ import java.util.Map;
 @Produces(MediaType.APPLICATION_JSON)
 public class DashboardResource {
 
+    @Inject
+    TenantIdentity tenantIdentity;
+
     @GET
     @Path("/summary")
+    @RolesAllowed("admin")
     public Response getSummary(@HeaderParam("X-Tenant") String tenantCode) {
-        Tenant tenant = Tenant.find("code", tenantCode).firstResult();
-        if (tenant == null) {
-            return Response.status(400).entity(Map.of("error", "tenant tidak dikenal atau header X-Tenant belum diisi")).build();
-        }
+        Tenant tenant = tenantIdentity.requireTenant(tenantCode);
 
         long totalBooks = Book.count("tenantId", tenant.id);
         long totalCopies = BookCopy.count("tenantId", tenant.id);

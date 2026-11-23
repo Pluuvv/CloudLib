@@ -6,6 +6,8 @@
 **Timestamp**: 2026-11-13T10:00:00+07:00  
 **Status**: Frontend Responsive SPA & Keycloak IAM Specification Completed; API Contract & Transition Plan for Role A Established  
 
+> Catatan: laporan ini merekam spesifikasi dan kondisi integrasi pada tanggal M4. Integrasi OIDC backend dan pengujian authorization lanjutan dicatat dalam [laporan M6](M6_Security_Implementation.md).
+
 ---
 
 ## 1. Ringkasan Eksekutif Role B

@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cloudlib-oidc-issuer" content="http://localhost:8081/realms/cloudlib">
+  <meta name="cloudlib-oidc-client-id" content="cloudlib-frontend">
   <title>CloudLib - Campus Library Information System</title>
   
   <!-- Font Poppins -->
@@ -396,26 +398,16 @@
           <span class="brand-badge">CL</span>
           <span>CloudLib</span>
         </div>
-        <div id="tenantDisplay" class="tenant-badge">
-          <span id="tenantNameLabel">UPN Veteran Jakarta</span>
+        <div id="tenantDisplay" class="tenant-badge" style="display:none;">
+          <span id="tenantNameLabel"></span>
         </div>
       </div>
 
       <div class="user-profile">
-        <label for="userRoleSelector" style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">Sesi Login Keycloak:</label>
-        <select id="userRoleSelector" class="account-picker" onchange="switchUserAccount(this.value)">
-          <optgroup label="Tenant: UPN Veteran Jakarta (upnvj)">
-            <option value="mhs_upn" selected>Mahasiswa - Budi (mhs_upn)</option>
-            <option value="petugas_upn">Petugas - Siti (petugas_upn)</option>
-            <option value="admin_upn">Admin - Dr. Bambang (admin_upn)</option>
-          </optgroup>
-          <optgroup label="Tenant: Kampus Mitra (poltek)">
-            <option value="mhs_poltek">Mahasiswa - Andi (mhs_poltek)</option>
-            <option value="petugas_poltek">Petugas - Eko (petugas_poltek)</option>
-            <option value="admin_poltek">Admin - Ir. Ratna (admin_poltek)</option>
-          </optgroup>
-        </select>
-        <span id="roleBadge" class="role-badge role-mahasiswa">Mahasiswa</span>
+        <span id="userLabel" style="font-size:0.78rem;color:var(--text-muted);font-weight:600;">Belum masuk</span>
+        <span id="roleBadge" class="role-badge" style="display:none;"></span>
+        <button id="loginButton" class="btn btn-primary" onclick="loginWithKeycloak()">Masuk dengan Keycloak</button>
+        <button id="logoutButton" class="btn btn-secondary" onclick="logoutFromKeycloak()" style="display:none;">Keluar</button>
       </div>
     </div>
   </header>
@@ -434,6 +426,13 @@
 
   <!-- Main Container -->
   <main class="container">
+    <section id="loginPanel" class="card" style="max-width:560px;margin:32px auto;text-align:center;">
+      <h2 style="margin-bottom:8px;">Masuk ke CloudLib</h2>
+      <p style="color:var(--text-muted);margin-bottom:16px;">
+        Gunakan akun Keycloak untuk mengakses layanan sesuai tenant dan role akun.
+      </p>
+      <button class="btn btn-primary" onclick="loginWithKeycloak()">Masuk dengan Keycloak</button>
+    </section>
 
     <!-- Desktop Navigation Tabs -->
     <div class="nav-tabs" id="desktopNavTabs">
@@ -479,10 +478,10 @@
         <div class="grid-2">
           <div class="card">
             <div class="card-title">
-              <span>Tiket Presensi QR Mandiri (ADR-010)</span>
+              <span>Simulasi Tiket Presensi QR (ADR-010)</span>
             </div>
             <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">
-              Pindai kode QR dinamis pada pemindai gerbang masuk perpustakaan. Tiket ini memiliki masa berlaku terbatas (30 detik) dan sekali pakai.
+              QR dan penghitung waktu ini hanya simulasi antarmuka. Backend belum memvalidasi token QR server atau mencegah pemakaian ulang.
             </p>
 
             <div class="qr-container">
@@ -505,8 +504,8 @@
             </div>
 
             <div style="margin-top: 10px; display:flex; gap: 6px;">
-              <button class="btn btn-primary btn-block" onclick="generateNewQRToken()">Terbitkan Tiket Baru</button>
-              <button class="btn btn-secondary" onclick="simulateGateScan()">Simulasi Scan Gerbang</button>
+              <button class="btn btn-primary btn-block" onclick="generateNewQRToken()">Perbarui QR Simulasi</button>
+              <button class="btn btn-secondary" onclick="simulateGateScan()">Simulasikan Check-in</button>
             </div>
           </div>
 
@@ -515,9 +514,9 @@
               <span>Prosedur Operasional Standar Presensi</span>
             </div>
             <ul style="padding-left: 10px; font-size: 0.82rem; line-height: 1.6; color: var(--text-muted); list-style-position: inside;">
-              <li>Kode QR diperbarui otomatis setiap 30 detik untuk menjamin validitas tiket.</li>
-              <li>Satu tiket QR hanya berlaku untuk satu kali pemindaian presensi.</li>
-              <li>Hasil tangkapan layar (screenshot) tidak valid pada sistem pemindai gerbang.</li>
+              <li>Kode pada halaman ini dibuat lokal untuk demo visual, bukan tiket presensi yang ditandatangani server.</li>
+              <li>API mencatat check-in berdasarkan identitas mahasiswa yang sudah terautentikasi.</li>
+              <li>Validasi tiket QR server, masa berlaku, dan pencegahan pemakaian ulang belum tersedia.</li>
               <li>Jika perangkat mengalami kendala daya atau kamera, hubungi petugas meja sirkulasi untuk input nomor pokok mahasiswa secara manual.</li>
             </ul>
           </div>
@@ -748,66 +747,16 @@
 
   <script>
     // ==========================================
-    // STATE & MOCK IAM DATA (Keycloak Simulation)
+    // OIDC AUTHORIZATION CODE FLOW WITH PKCE
     // ==========================================
-    const ACCOUNTS = {
-      mhs_upn: {
-        username: "mhs_upn",
-        name: "Budi Santoso",
-        role: "mahasiswa",
-        tenant: "upnvj",
-        tenantName: "UPN Veteran Jakarta",
-        memberRef: "2410511001",
-        token: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTAwMSIsInByZWZlcnJlZF91c2VybmFtZSI6Im1oc191cG4iLCJlbWFpbCI6ImJ1ZGlAdXBudmouYWMuaWQiLCJ0ZW5hbnQiOiJ1cG52aiIsInJvbGVzIjpbIm1haGFzaXN3YSJdfQ"
-      },
-      petugas_upn: {
-        username: "petugas_upn",
-        name: "Siti Rahmawati (Pustakawan)",
-        role: "petugas",
-        tenant: "upnvj",
-        tenantName: "UPN Veteran Jakarta",
-        memberRef: "STF-UPN-01",
-        token: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdGFmZi0wMDEiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJwZXR1Z2FzX3VwbiIsImVtYWlsIjoic2l0aUB1cG52ai5hYy5pZCIsInRlbmFudCI6InVwbnZqIiwicm9sZXMiOlsicGV0dWdhcyJdfQ"
-      },
-      admin_upn: {
-        username: "admin_upn",
-        name: "Dr. Bambang (Kepala Perpustakaan)",
-        role: "admin",
-        tenant: "upnvj",
-        tenantName: "UPN Veteran Jakarta",
-        memberRef: "ADM-UPN-01",
-        token: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbi0wMDEiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhZG1pbl91cG4iLCJlbWFpbCI6ImFkbWluQHVwbnZqLmFjLmlkIiwidGVuYW50IjoidXBudmoiLCJyb2xlcyI6WyJhZG1pbiJdfQ"
-      },
-      mhs_poltek: {
-        username: "mhs_poltek",
-        name: "Andi Wijaya",
-        role: "mahasiswa",
-        tenant: "poltek",
-        tenantName: "Perpustakaan Kampus Mitra",
-        memberRef: "2420511002",
-        token: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTAwMiIsInByZWZlcnJlZF91c2VybmFtZSI6Im1oc19wb2x0ZWsiLCJlbWFpbCI6ImFuZGlAcG9sdGVrLmFjLmlkIiwidGVuYW50IjoicG9sdGVrIiwicm9sZXMiOlsibWFoYXNpc3dhIl19"
-      },
-      petugas_poltek: {
-        username: "petugas_poltek",
-        name: "Eko Prasetyo (Pustakawan)",
-        role: "petugas",
-        tenant: "poltek",
-        tenantName: "Perpustakaan Kampus Mitra",
-        memberRef: "STF-POL-01",
-        token: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdGFmZi0wMDIiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJwZXR1Z2FzX3BvbHRlayIsImVtYWlsIjoiZWtvQHBvbHRlay5hYy5pZCIsInRlbmFudCI6InBvbHRlayIsInJvbGVzIjpbInBldHVnYXMiXX0"
-      },
-      admin_poltek: {
-        username: "admin_poltek",
-        name: "Ir. Ratna (Direktur Mitra)",
-        role: "admin",
-        tenant: "poltek",
-        tenantName: "Perpustakaan Kampus Mitra",
-        memberRef: "ADM-POL-01",
-        token: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbi0wMDIiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhZG1pbl9wb2x0ZWsiLCJlbWFpbCI6InJhdG5hQHBvbHRlay5hYy5pZCIsInRlbmFudCI6InBvbHRlayIsInJvbGVzIjpbImFkbWluIl19"
-      }
-    };
-
-    let currentUser = ACCOUNTS.mhs_upn;
+    const OIDC_ISSUER = document.querySelector('meta[name="cloudlib-oidc-issuer"]').content.replace(/\/$/, "");
+    const OIDC_CLIENT_ID = document.querySelector('meta[name="cloudlib-oidc-client-id"]').content;
+    const OIDC_REDIRECT_URI = `${window.location.origin}${window.location.pathname}`;
+    const OIDC_TRANSACTION_KEY = "cloudlib-oidc-transaction";
+    let oidcMetadata = null;
+    let accessToken = null;
+    let idToken = null;
+    let currentUser = null;
     let qrTimerInterval = null;
     let qrSecondsLeft = 30;
 
@@ -816,25 +765,206 @@
     let cachedComputers = [];
 
     // ==========================================
-    // INITIALIZATION & ROLE SWITCHING
+    // INITIALIZATION & OIDC SESSION
     // ==========================================
-    window.addEventListener("DOMContentLoaded", () => {
+    window.addEventListener("DOMContentLoaded", async () => {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(9, 0, 0, 0);
       const isoLocal = new Date(tomorrow.getTime() - (tomorrow.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
       document.getElementById("slotPicker").value = isoLocal;
 
-      switchUserAccount("mhs_upn");
+      try {
+        await initializeOidcSession();
+      } catch (error) {
+        showLoggedOutApp();
+        showAlert("danger", "Login Keycloak gagal", error.message);
+      }
     });
 
-    function switchUserAccount(key) {
-      currentUser = ACCOUNTS[key];
-      
+    async function getOidcMetadata() {
+      if (oidcMetadata) return oidcMetadata;
+
+      const response = await fetch(`${OIDC_ISSUER}/.well-known/openid-configuration`, {
+        headers: { "Accept": "application/json" }
+      });
+      if (!response.ok) throw new Error(`Metadata OIDC gagal dimuat (HTTP ${response.status}).`);
+
+      const metadata = await response.json();
+      if (metadata.issuer !== OIDC_ISSUER) throw new Error("Issuer pada metadata tidak sesuai konfigurasi.");
+      if (!metadata.authorization_endpoint || !metadata.token_endpoint) {
+        throw new Error("Metadata OIDC tidak menyediakan endpoint authorization dan token.");
+      }
+      oidcMetadata = metadata;
+      return oidcMetadata;
+    }
+
+    function randomUrlSafeValue() {
+      const bytes = crypto.getRandomValues(new Uint8Array(32));
+      return base64UrlEncode(bytes);
+    }
+
+    function base64UrlEncode(bytes) {
+      let binary = "";
+      bytes.forEach(byte => { binary += String.fromCharCode(byte); });
+      return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    }
+
+    async function createCodeChallenge(verifier) {
+      if (!crypto.subtle) throw new Error("PKCE membutuhkan HTTPS atau localhost dengan Web Crypto API.");
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
+      return base64UrlEncode(new Uint8Array(digest));
+    }
+
+    async function loginWithKeycloak() {
+      try {
+        const metadata = await getOidcMetadata();
+        const state = randomUrlSafeValue();
+        const nonce = randomUrlSafeValue();
+        const verifier = randomUrlSafeValue();
+        const challenge = await createCodeChallenge(verifier);
+        sessionStorage.setItem(OIDC_TRANSACTION_KEY, JSON.stringify({ state, nonce, verifier }));
+
+        const authorizationUrl = new URL(metadata.authorization_endpoint);
+        authorizationUrl.search = new URLSearchParams({
+          response_type: "code",
+          client_id: OIDC_CLIENT_ID,
+          redirect_uri: OIDC_REDIRECT_URI,
+          scope: "openid profile email",
+          state,
+          nonce,
+          code_challenge: challenge,
+          code_challenge_method: "S256"
+        }).toString();
+        window.location.assign(authorizationUrl.toString());
+      } catch (error) {
+        showAlert("danger", "Login Keycloak gagal", error.message);
+      }
+    }
+
+    async function initializeOidcSession() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has("error")) {
+        const error = params.get("error_description") || params.get("error");
+        sessionStorage.removeItem(OIDC_TRANSACTION_KEY);
+        window.history.replaceState(null, document.title, OIDC_REDIRECT_URI);
+        showLoggedOutApp();
+        showAlert("danger", "Login Keycloak gagal", error);
+        return;
+      }
+
+      if (params.has("code") || params.has("state")) {
+        await completeOidcLogin(params);
+        return;
+      }
+
+      showLoggedOutApp();
+    }
+
+    async function completeOidcLogin(params) {
+      const transactionText = sessionStorage.getItem(OIDC_TRANSACTION_KEY);
+      sessionStorage.removeItem(OIDC_TRANSACTION_KEY);
+      window.history.replaceState(null, document.title, OIDC_REDIRECT_URI);
+      if (!transactionText) throw new Error("Transaksi login tidak ditemukan atau sudah kedaluwarsa.");
+
+      const transaction = JSON.parse(transactionText);
+      if (!params.get("code") || params.get("state") !== transaction.state) {
+        throw new Error("State OAuth tidak valid; login dibatalkan.");
+      }
+
+      const metadata = await getOidcMetadata();
+      const tokenResponse = await fetch(metadata.token_endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          grant_type: "authorization_code",
+          client_id: OIDC_CLIENT_ID,
+          redirect_uri: OIDC_REDIRECT_URI,
+          code: params.get("code"),
+          code_verifier: transaction.verifier
+        })
+      });
+      if (!tokenResponse.ok) throw new Error(`Penukaran authorization code gagal (HTTP ${tokenResponse.status}).`);
+
+      const tokens = await tokenResponse.json();
+      if (!tokens.access_token || !tokens.id_token) throw new Error("Token OIDC tidak lengkap.");
+      const idClaims = decodeJwtPayload(tokens.id_token);
+      if (idClaims.iss !== OIDC_ISSUER || idClaims.nonce !== transaction.nonce) {
+        throw new Error("Issuer atau nonce pada ID token tidak valid.");
+      }
+      const audiences = Array.isArray(idClaims.aud) ? idClaims.aud : [idClaims.aud];
+      if (!audiences.includes(OIDC_CLIENT_ID) || Number(idClaims.exp) * 1000 <= Date.now()) {
+        throw new Error("Audience atau masa berlaku ID token tidak valid.");
+      }
+
+      const claims = decodeJwtPayload(tokens.access_token);
+      if (claims.iss !== OIDC_ISSUER || Number(claims.exp) * 1000 <= Date.now()) {
+        throw new Error("Issuer atau masa berlaku access token tidak valid.");
+      }
+      const realmRoles = claims.realm_access && Array.isArray(claims.realm_access.roles)
+        ? claims.realm_access.roles
+        : [];
+      const role = ["admin", "petugas", "mahasiswa"].find(value => realmRoles.includes(value));
+      if (!role || typeof claims.tenant !== "string" || !claims.tenant.trim()) {
+        throw new Error("Access token harus memuat role CloudLib dan klaim tenant.");
+      }
+      if (role === "mahasiswa" && (!claims.member_ref || !String(claims.member_ref).trim())) {
+        throw new Error("Access token mahasiswa harus memuat klaim member_ref.");
+      }
+
+      accessToken = tokens.access_token;
+      idToken = tokens.id_token;
+      currentUser = {
+        username: claims.preferred_username || idClaims.preferred_username || idClaims.sub,
+        name: claims.name || idClaims.name || claims.preferred_username || idClaims.sub,
+        role,
+        tenant: claims.tenant,
+        tenantName: claims.tenant_name || claims.tenant,
+        memberRef: claims.member_ref || null,
+        claims
+      };
+      showLoggedInApp();
+    }
+
+    function decodeJwtPayload(token) {
+      const parts = token.split(".");
+      if (parts.length !== 3) throw new Error("Format token JWT tidak valid.");
+      const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+      const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
+      const bytes = Uint8Array.from(atob(padded), character => character.charCodeAt(0));
+      return JSON.parse(new TextDecoder().decode(bytes));
+    }
+
+    function showLoggedOutApp() {
+      currentUser = null;
+      accessToken = null;
+      idToken = null;
+      if (qrTimerInterval) clearInterval(qrTimerInterval);
+      document.getElementById("loginPanel").style.display = "block";
+      document.getElementById("loginButton").style.display = "inline-flex";
+      document.getElementById("logoutButton").style.display = "none";
+      document.getElementById("userLabel").innerText = "Belum masuk";
+      document.getElementById("tenantDisplay").style.display = "none";
+      document.getElementById("roleBadge").style.display = "none";
+      document.getElementById("mahasiswaSection").style.display = "none";
+      document.getElementById("petugasSection").style.display = "none";
+      document.getElementById("adminSection").style.display = "none";
+      document.getElementById("desktopNavTabs").innerHTML = "";
+      document.getElementById("mobileNav").innerHTML = "";
+      document.getElementById("jwtTokenInspector").textContent = "";
+    }
+
+    function showLoggedInApp() {
+      document.getElementById("loginPanel").style.display = "none";
+      document.getElementById("loginButton").style.display = "none";
+      document.getElementById("logoutButton").style.display = "inline-flex";
+      document.getElementById("userLabel").innerText = currentUser.name;
+      document.getElementById("tenantDisplay").style.display = "inline-flex";
       document.getElementById("tenantNameLabel").innerText = currentUser.tenantName;
       const roleBadge = document.getElementById("roleBadge");
       roleBadge.innerText = currentUser.role.toUpperCase();
       roleBadge.className = `role-badge role-${currentUser.role}`;
+      roleBadge.style.display = "inline-flex";
 
       document.getElementById("mahasiswaSection").style.display = currentUser.role === "mahasiswa" ? "block" : "none";
       document.getElementById("petugasSection").style.display = currentUser.role === "petugas" ? "block" : "none";
@@ -854,6 +984,25 @@
       } else if (currentUser.role === "admin") {
         loadDashboard();
       }
+    }
+
+    async function logoutFromKeycloak() {
+      const tokenHint = idToken;
+      let logoutUrl = null;
+      try {
+        const metadata = await getOidcMetadata();
+        if (metadata.end_session_endpoint) {
+          logoutUrl = new URL(metadata.end_session_endpoint);
+          logoutUrl.searchParams.set("client_id", OIDC_CLIENT_ID);
+          logoutUrl.searchParams.set("post_logout_redirect_uri", OIDC_REDIRECT_URI);
+          if (tokenHint) logoutUrl.searchParams.set("id_token_hint", tokenHint);
+        }
+      } catch (error) {
+        showAlert("warning", "Logout Keycloak", error.message);
+      }
+
+      showLoggedOutApp();
+      if (logoutUrl) window.location.assign(logoutUrl.toString());
     }
 
     function renderNavTabs() {
@@ -905,26 +1054,36 @@
     // API CALL HELPER (Complies with ADR-012)
     // ==========================================
     async function apiRequest(endpoint, method = "GET", body = null) {
-      const headers = {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${currentUser.token}`,
-        "X-Tenant": currentUser.tenant
-      };
+      if (!accessToken) {
+        return { status: 401, ok: false, data: { error: "Sesi login tidak tersedia." } };
+      }
 
+      const headers = { "Authorization": `Bearer ${accessToken}` };
+      if (body !== null) headers["Content-Type"] = "application/json";
       const options = { method, headers };
-      if (body) options.body = JSON.stringify(body);
+      if (body !== null) options.body = JSON.stringify(body);
 
+      let res;
       try {
-        const res = await fetch(endpoint, options);
-        const data = await res.json().catch(() => ({}));
-        return { status: res.status, ok: res.ok, data };
+        res = await fetch(endpoint, options);
       } catch (err) {
-        return { 
-          status: 503, 
-          ok: false, 
-          data: { error: "Layanan backend tidak dapat dihubungi. Periksa konektivitas jaringan." } 
+        return {
+          status: 503,
+          ok: false,
+          data: { error: "Layanan backend tidak dapat dihubungi. Periksa konektivitas jaringan." }
         };
       }
+
+      const responseText = await res.text();
+      let data = {};
+      if (responseText) {
+        try {
+          data = JSON.parse(responseText);
+        } catch {
+          data = { error: responseText };
+        }
+      }
+      return { status: res.status, ok: res.ok, data };
     }
 
     // ==========================================
@@ -1058,7 +1217,7 @@
     }
 
     async function simulateGateScan() {
-      const res = await apiRequest("/attendance/checkin", "POST", { memberRef: currentUser.memberRef });
+      const res = await apiRequest("/attendance/checkin", "POST", {});
       if (res.ok) {
         showAlert("success", "Presensi Berhasil", `Presensi tercatat pada tenant ${currentUser.tenantName}. ID: ${res.data.checkInId}`);
         document.getElementById("qrStatusBadge").innerText = "Sudah Dipakai";
@@ -1127,7 +1286,6 @@
 
       const res = await apiRequest("/computers/reservations", "POST", {
         computerId: computerId,
-        memberRef: currentUser.memberRef,
         slotStart: isoSlot
       });
 
@@ -1260,18 +1418,7 @@
 
     function updateTokenInspector() {
       const inspector = document.getElementById("jwtTokenInspector");
-      const decodedPayload = {
-        sub: currentUser.username,
-        preferred_username: currentUser.username,
-        name: currentUser.name,
-        tenant: currentUser.tenant,
-        tenant_name: currentUser.tenantName,
-        roles: [currentUser.role],
-        member_ref: currentUser.memberRef,
-        iss: "http://cloudlib.local/auth/realms/cloudlib",
-        exp: Math.floor(Date.now() / 1000) + 3600
-      };
-      inspector.innerHTML = `<pre>${JSON.stringify(decodedPayload, null, 2)}</pre>`;
+      inspector.textContent = JSON.stringify(currentUser.claims, null, 2);
     }
 
     // ==========================================
@@ -1305,9 +1452,11 @@
       if (res.status === 409) {
         showAlert("warning", "Konflik Data (409 Conflict)", err);
       } else if (res.status === 403) {
-        showAlert("danger", "Akses Ditolak (403 Forbidden)", `Peran '${currentUser.role}' tidak berwenang mengeksekusi operasi ini.`);
+        const role = currentUser ? currentUser.role : "pengguna";
+        showAlert("danger", "Akses Ditolak (403 Forbidden)", `Peran '${role}' tidak berwenang mengeksekusi operasi ini.`);
       } else if (res.status === 401) {
-        showAlert("danger", "Sesi Berakhir (401 Unauthorized)", "Otentikasi telah kadaluarsa. Silakan muat ulang halaman.");
+        showLoggedOutApp();
+        showAlert("danger", "Sesi Berakhir (401 Unauthorized)", "Token tidak berlaku atau telah kedaluwarsa. Silakan masuk kembali.");
       } else if (res.status === 404) {
         showAlert("warning", "Data Tidak Ditemukan (404 Not Found)", `${err} (Isolasi data tenant aktif).`);
       } else if (res.status === 503 || res.status >= 500) {

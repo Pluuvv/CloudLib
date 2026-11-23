@@ -1,5 +1,7 @@
 package id.ac.upnvj.cloudlib;
 
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.inject.Inject;
 import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
@@ -14,6 +16,9 @@ import java.util.Map;
 @Produces(MediaType.APPLICATION_JSON)
 public class ComputerResource {
 
+    @Inject
+    TenantIdentity tenantIdentity;
+
     public record CreateComputerRequest(String label) {}
     public record ReserveRequest(Long computerId, String memberRef, String slotStart) {}
 
@@ -22,19 +27,19 @@ public class ComputerResource {
     }
 
     @GET
+    @RolesAllowed({"mahasiswa", "petugas", "admin"})
     public Response listComputers(@HeaderParam("X-Tenant") String tenantCode) {
-        Tenant tenant = Tenant.find("code", tenantCode).firstResult();
-        if (tenant == null) return error(400, "tenant tidak dikenal atau header X-Tenant belum diisi");
+        Tenant tenant = tenantIdentity.requireTenant(tenantCode);
 
         List<Computer> computers = Computer.list("tenantId", tenant.id);
         return Response.ok(computers).build();
     }
 
     @POST
+    @RolesAllowed("admin")
     @Transactional
     public Response createComputer(@HeaderParam("X-Tenant") String tenantCode, CreateComputerRequest req) {
-        Tenant tenant = Tenant.find("code", tenantCode).firstResult();
-        if (tenant == null) return error(400, "tenant tidak dikenal");
+        Tenant tenant = tenantIdentity.requireTenant(tenantCode);
         if (req == null || req.label() == null || req.label().isBlank()) {
             return error(400, "label komputer wajib diisi");
         }
@@ -52,23 +57,27 @@ public class ComputerResource {
 
     @GET
     @Path("/reservations")
+    @RolesAllowed({"mahasiswa", "petugas", "admin"})
     public Response listReservations(@HeaderParam("X-Tenant") String tenantCode) {
-        Tenant tenant = Tenant.find("code", tenantCode).firstResult();
-        if (tenant == null) return error(400, "tenant tidak dikenal");
+        Tenant tenant = tenantIdentity.requireTenant(tenantCode);
 
-        List<ComputerReservation> list = ComputerReservation.list("tenantId", tenant.id);
+        List<ComputerReservation> list = tenantIdentity.hasRole("mahasiswa")
+                ? ComputerReservation.list("tenantId = ?1 and memberRef = ?2",
+                        tenant.id, tenantIdentity.requireMemberRef())
+                : ComputerReservation.list("tenantId", tenant.id);
         return Response.ok(list).build();
     }
 
     @POST
     @Path("/reservations")
+    @RolesAllowed("mahasiswa")
     @Transactional
     public Response reserveComputer(@HeaderParam("X-Tenant") String tenantCode, ReserveRequest req) {
-        Tenant tenant = Tenant.find("code", tenantCode).firstResult();
-        if (tenant == null) return error(400, "tenant tidak dikenal");
-        if (req == null || req.computerId() == null || req.memberRef() == null || req.slotStart() == null) {
-            return error(400, "computerId, memberRef, dan slotStart wajib diisi");
+        Tenant tenant = tenantIdentity.requireTenant(tenantCode);
+        if (req == null || req.computerId() == null || req.slotStart() == null) {
+            return error(400, "computerId dan slotStart wajib diisi");
         }
+        String memberRef = tenantIdentity.requireMemberRef();
 
         Computer computer = Computer.find("id = ?1 and tenantId = ?2", req.computerId(), tenant.id)
                 .withLock(LockModeType.PESSIMISTIC_WRITE).firstResult();
@@ -90,7 +99,7 @@ public class ComputerResource {
         ComputerReservation res = new ComputerReservation();
         res.tenantId = tenant.id;
         res.computerId = computer.id;
-        res.memberRef = req.memberRef();
+        res.memberRef = memberRef;
         res.slotStart = slot;
         res.persist();
 
