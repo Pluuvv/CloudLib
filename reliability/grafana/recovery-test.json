@@ -45,7 +45,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "Only the explicit drill target is queried. native-sql-fixture cannot pass CloudLib acceptance. Start time identifies the latest observed run; UUID and worker incident ID are in actual event annotations and the [structured result](http://localhost:19090/result). Missing RTO means mandatory validation did not complete. Scrape success is not application or data readiness."
+        "content": "Dashboard follows the latest actual injection: pod-delete / kubernetes = QS05; database-loss / compose = QS06. Dry-run does not replace it. RPO and database restore stages do not apply to QS05. Run identity is in annotations and the [structured result](http://localhost:19090/result). Scrape success alone does not prove application readiness."
       }
     },
     {
@@ -67,7 +67,7 @@
           "refId": "A",
           "expr": "cloudlib_drill_run_started_seconds{job=\"cloudlib-recovery-drill\"} * 1000",
           "instant": true,
-          "legendFormat": "{{check}}{{stage}}{{environment}}"
+          "legendFormat": "{{method}} · {{environment}}"
         }
       ],
       "fieldConfig": {
@@ -85,7 +85,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto",
+        "textMode": "value_and_name",
         "colorMode": "value"
       }
     },
@@ -293,7 +293,8 @@
       "fieldConfig": {
         "defaults": {
           "unit": "s",
-          "noValue": "Unknown / not observed"
+          "noValue": "Unknown / not observed",
+          "decimals": 3
         },
         "overrides": []
       },
@@ -375,7 +376,7 @@
       "fieldConfig": {
         "defaults": {
           "unit": "s",
-          "noValue": "Unknown / not observed"
+          "noValue": "N/A untuk QS05 / belum tersedia"
         },
         "overrides": []
       },
@@ -416,7 +417,7 @@
       "fieldConfig": {
         "defaults": {
           "unit": "s",
-          "noValue": "Unknown / not observed"
+          "noValue": "N/A untuk QS05 / belum tersedia"
         },
         "overrides": []
       },
@@ -458,7 +459,7 @@
       "fieldConfig": {
         "defaults": {
           "unit": "s",
-          "noValue": "Unknown / not observed"
+          "noValue": "N/A untuk QS05 / belum tersedia"
         },
         "overrides": []
       },
@@ -508,7 +509,7 @@
       "fieldConfig": {
         "defaults": {
           "unit": "s",
-          "noValue": "Unknown / not observed"
+          "noValue": "N/A untuk QS05 / belum tersedia"
         },
         "overrides": []
       },

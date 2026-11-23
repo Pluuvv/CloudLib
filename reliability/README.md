@@ -2,6 +2,10 @@
 
 For the verified local demo commands, measured QS05/QS06 results and monitoring, use [the M7 demo runbook](../docs/evidence/M7/M7-Evidence-Reliability-Recovery.md).
 
+For another team member's laptop, start with [M7 setup and scheduled backup installation](SETUP-M7.md) and the shared [private-env template](m7.env.example).
+
+Both drill configs can set the same absolute `latestResultFile` for the observer while retaining separate `resultFile` paths (for example `database-result.json` and `pod-result.json`). Only an actual injected run updates this shared result; dry-run and pre-injection failures preserve it. The dashboard then follows QS05 or QS06 automatically. QS05 has no database RPO or restore stages.
+
 ## M7 injector-only Recovery Test (task06)
 
 `scripts/recovery-test.ps1 -ConfigPath <absolute-drill.json> [-DryRun] [-EnvFile <private-env-file>]` runs the public test. Copy `recovery-test.config.example.json` into private runtime storage and fill every empty path/identity. Config version is 1; output version is 1 with `toolVersion`, `testRunId`, method, target, environment, timestamps, observations, individual checks, timings and limitations. It emits one JSON terminal result and writes `resultFile` atomically when storage is available. `LULUS` is exit0 only after all required checks. Failure, timeout and incomplete validation emit `GAGAL`/nonzero. `-DryRun` performs the same prerequisite gates without injection, returning `PREFLIGHT_OK`; that is not recovery acceptance. Host startup failures emit sanitized `HOST_ENTRY_FAILED`/nonzero even when Node never starts. Storage/config failure can prevent writing a result file; check the current command's stdout and exit code, not a previous result file.
@@ -164,10 +168,12 @@ Incident status now records actual `triggerChannel` (`event` or `reconcile`), `l
 $config = (Resolve-Path reliability/.runtime/backup/config.json).Path
 node reliability/backup.mjs daily --config $config
 node reliability/backup.mjs health --config $config
-powershell.exe -NoProfile -File scripts/Install-CloudLibBackupTask.ps1 -ConfigPath $config -XmlPath "$PWD/reliability/.runtime/backup/task.xml" -EnvFile (Resolve-Path reliability/.runtime/.env).Path
+powershell.exe -NoProfile -File scripts/Install-CloudLibBackupTask.ps1 -ConfigPath $config -EnvFile (Resolve-Path reliability/.runtime/.env).Path
 ```
 
 The installer registers `CloudLib-DailyLocalBackup` for the current Windows interactive user with least privilege and no password storage. It refuses to overwrite any existing task, including a name collision. To reinstall, inspect that exact task's source (`CloudLib.Backup.Task05`) and actions, explicitly unregister that owned task, then rerun the installer. `-DefinitionOnly` writes XML without installation. Optional `-EnvFile <absolute-private-env-file>` uses Node's env-file loading, and `-NodePath` pins an installed Node executable. Private environment values never enter task arguments, XML or logs. Do not rely on a terminal's transient environment: provision private env-file/PGPASSFILE configuration for the scheduled identity. The existing backup runtime/key ACL must permit only that user and SYSTEM; use the same interactive account that can access Docker Desktop and the local backup directory.
+
+`-XmlPath` is optional and defaults to `backup-task.xml` beside the private configuration. When `source.passwordEnv` is configured, `-EnvFile` is required and must contain that non-empty variable. The installer checks the file without printing its values before writing a definition or registering a task; it does not test database connectivity or create a backup.
 
 The fixed UTC daily boundary is `13:00:00Z` = 20:00 Asia/Jakarta/WIB, independent of the host timezone. Settings enable `StartWhenAvailable`, `WakeToRun`, battery operation and `IgnoreNew`. Missed runs may be queued by Windows (typically a ten-minute delay). Wake-to-run cannot turn on a powered-off laptop. InteractiveToken requires the user to be logged in; Docker Desktop, its engine/database, keys and storage must also be available. No Codex chat or worker process is required. The installer does not repair Docker or alter the primary database.
 
@@ -181,7 +187,7 @@ Verify native fixtures using the same PostgreSQL/age environment variables as th
 
 ```powershell
 node --test --test-concurrency=1 reliability/tests/backup.test.mjs reliability/tests/schedule.test.mjs
-powershell.exe -NoProfile -File reliability/tests/schedule-definition.ps1 -ConfigPath $config
+powershell.exe -NoProfile -File reliability/tests/schedule-definition.ps1 -ConfigPath $config -EnvFile (Resolve-Path reliability/.runtime/.env).Path
 ```
 
 The scheduler suite uses real PG17 on loopback port19439, real age/files, unique temporary Task Scheduler registrations, actual successful/failed task executions, a manual/daily process race, aged authenticated archives and junction/incomplete-file boundaries. It removes only its owned temporary tasks. Actual missed-run observation is a separate native fixture: disable a unique one-off time trigger across its due time, include an EndBoundary after the observation window, enable it with StartWhenAvailable, and observe LastRunTime/LastTaskResult without calling Run. Keep that distinct from merely inspecting the configured policy.

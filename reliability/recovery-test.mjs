@@ -29,6 +29,7 @@ async function main() {
  const args=process.argv.slice(2);if(args[0]!=='--config'||!isAbsolute(args[1]??'')||args.length>3||(args[2]&&args[2]!=='--dry-run'))fail('USAGE');
  c=JSON.parse(await readFile(args[1],'utf8'));
  Object.assign(result,{method:c.method,target:c.target,environment:c.environment,appOrigin:c.appOrigin??null});
+ if(c.latestResultFile!==undefined&&!isAbsolute(c.latestResultFile))fail('INVALID_LATEST_RESULT_PATH');
  if(c.method==='pod-delete')return podDrill(args[2]==='--dry-run');
  if(c.formatVersion!==1||c.method!=='database-loss'||c.target!=='cloudlib_recovery'||!['native-sql-fixture','compose'].includes(c.environment)||!['backupConfig','workerConfig','checkpointFile','resultFile'].every(k=>isAbsolute(c[k]??''))||!/^\d+$/.test(c.systemIdentifier??'')||!/^[a-z_][a-z0-9_]*$/.test(c.injectorUser??'')||!Number.isFinite(c.timeoutSeconds)||c.timeoutSeconds<1||c.timeoutSeconds>3600)fail('INVALID_CONFIG');
  b=JSON.parse(await readFile(c.backupConfig,'utf8'));w=JSON.parse(await readFile(c.workerConfig,'utf8'));
@@ -45,8 +46,12 @@ async function main() {
 try {await main();}catch(e){result.code=/^[A-Z_]+$/.test(e.message)?e.message:'OPERATION_FAILED';}
 result.completedAt=now();
 if(c?.resultFile&&isAbsolute(c.resultFile)){
- const outputFile=c.resultFile+(process.argv.includes('--dry-run')?'.preflight.json':'');
- try{const tmp=outputFile+'.'+result.testRunId+'.tmp';await writeFile(tmp,JSON.stringify(result),{mode:0o600});await rename(tmp,outputFile);}catch{result.status='GAGAL';result.code='RESULT_WRITE_FAILED';}
+ const dry=process.argv.includes('--dry-run'),outputFile=c.resultFile+(dry?'.preflight.json':'');
+ const publish=async path=>{const tmp=path+'.'+result.testRunId+'.tmp';await writeFile(tmp,JSON.stringify(result),{mode:0o600});await rename(tmp,path);};
+ try{
+  await publish(outputFile);
+  if(!dry&&result.injectedAt&&isAbsolute(c.latestResultFile??'')&&c.latestResultFile!==outputFile)await publish(c.latestResultFile);
+ }catch{result.status='GAGAL';result.code='RESULT_WRITE_FAILED';try{await publish(outputFile);}catch{}}
 }
 console.log(JSON.stringify(result));process.exitCode=['LULUS','PREFLIGHT_OK'].includes(result.status)?0:1;
 

@@ -1,9 +1,9 @@
-param([Parameter(Mandatory=$true)][string]$ConfigPath)
+param([Parameter(Mandatory=$true)][string]$ConfigPath,[string]$EnvFile)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 $installer = Join-Path $root 'scripts/Install-CloudLibBackupTask.ps1'
 $xmlPath = Join-Path (Split-Path $ConfigPath) 'task-definition.xml'
-& $installer -ConfigPath $ConfigPath -XmlPath $xmlPath -DefinitionOnly
+& $installer -ConfigPath $ConfigPath -XmlPath $xmlPath -EnvFile $EnvFile -DefinitionOnly
 [xml]$xml = Get-Content -LiteralPath $xmlPath
 $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
 $ns.AddNamespace('t','http://schemas.microsoft.com/windows/2004/02/mit/task')
