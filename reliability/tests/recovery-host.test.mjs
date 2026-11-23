@@ -3,6 +3,12 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { mkdirSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+
+test('a missing configuration file reports CONFIG_NOT_FOUND before entering the injector', () => {
+ const r=spawnSync('powershell.exe',['-NoProfile','-File','scripts/recovery-test.ps1','-ConfigPath',resolve('reliability/.runtime/does-not-exist.json'),'-DryRun'],{encoding:'utf8',windowsHide:true});
+ assert.equal(r.status,1);const json=JSON.parse(r.stdout);
+ assert.equal(json.status,'GAGAL');assert.equal(json.code,'CONFIG_NOT_FOUND');assert.equal(r.stderr,'');
+});
 test('PowerShell emits structured failure when Node cannot load its private env file', () => {
  const r=spawnSync('powershell.exe',['-NoProfile','-File','scripts/recovery-test.ps1','-ConfigPath',resolve('reliability/.runtime/does-not-exist.json'),'-EnvFile',resolve('reliability/.runtime/absent-env-file')],{encoding:'utf8',windowsHide:true});
  assert.notEqual(r.status,0);let json;try{json=JSON.parse(r.stdout.trim());}catch{}

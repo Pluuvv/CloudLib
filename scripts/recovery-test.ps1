@@ -8,6 +8,10 @@ $ErrorActionPreference = 'Stop'
 try {
  if (!$NodePath) { $NodePath=(Get-Command node.exe -ErrorAction Stop).Source }
  if ($EnvFile -and !(Test-Path -LiteralPath $EnvFile -PathType Leaf)) { throw 'MISSING_ENV_FILE' }
+ if (!(Test-Path -LiteralPath $ConfigPath -PathType Leaf)) {
+  Write-Output '{"formatVersion":1,"status":"GAGAL","code":"CONFIG_NOT_FOUND"}'
+  exit 1
+ }
  $arguments = @()
  if ($EnvFile) { $arguments += "--env-file=$EnvFile" }
  $arguments += @((Join-Path (Split-Path $PSScriptRoot -Parent) 'reliability/recovery-test.mjs'), '--config', $ConfigPath)
