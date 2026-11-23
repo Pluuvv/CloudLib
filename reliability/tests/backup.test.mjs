@@ -35,6 +35,10 @@ before(() => {
     CREATE TABLE book(id serial PRIMARY KEY, tenant_id integer REFERENCES tenant, title text);
     CREATE TABLE loan(id serial PRIMARY KEY, book_id integer REFERENCES book, returned boolean);
     CREATE TABLE flyway_schema_history(installed_rank integer PRIMARY KEY, version text, success boolean);
+    CREATE SCHEMA pgdata;
+    CREATE TABLE pgdata.audit(id bigserial PRIMARY KEY, note text);
+    INSERT INTO pgdata.audit(note) VALUES('Outside public');
+    SELECT setval('pgdata.audit_id_seq',73,true);
     INSERT INTO tenant VALUES(1,'north'),(2,'south');
     INSERT INTO book(tenant_id,title) VALUES(1,'Before snapshot'),(2,'Other tenant');
     INSERT INTO loan(book_id,returned) VALUES(1,false);
@@ -78,6 +82,12 @@ test('full database encrypted local round-trip preserves both tenants, foreign k
   assert.equal(encrypted.includes(Buffer.from('Before snapshot')), false);
   const restored = cli('restore', '--id', created.json.backup.backupId, '--target', 'cloudlib_recovery_verify');
   assert.equal(restored.status, 0, restored.stderr + restored.stdout);
+  assert.deepEqual(restored.json.verified, { tables: 5, sequences: 3, data: true, schema: true });
+  assert.equal(sql('SELECT note FROM pgdata.audit;', 'cloudlib_recovery_verify'), 'Outside public');
+  assert.equal(sql("SELECT nextval('pgdata.audit_id_seq');", 'cloudlib_recovery_verify'), '74');
+  assert.equal(sql("SELECT pg_get_userbyid(nspowner) FROM pg_namespace WHERE nspname='pgdata';", 'cloudlib_recovery_verify'), 'fixture_app');
+  assert.equal(sql("SELECT pg_get_userbyid(relowner) FROM pg_class WHERE oid='pgdata.audit'::regclass;", 'cloudlib_recovery_verify'), 'fixture_app');
+  assert.equal(sql("SELECT pg_get_userbyid(relowner) FROM pg_class WHERE oid='pgdata.audit_id_seq'::regclass;", 'cloudlib_recovery_verify'), 'fixture_app');
   assert.equal(sql('SELECT count(*) FROM tenant;', 'cloudlib_recovery_verify'), '2');
   assert.equal(sql('SELECT string_agg(title,\'|\' ORDER BY id) FROM book;', 'cloudlib_recovery_verify'), 'Before snapshot|Other tenant');
   assert.equal(sql('SELECT nextval(\'book_id_seq\');', 'cloudlib_recovery_verify'), '43');

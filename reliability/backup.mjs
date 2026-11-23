@@ -92,11 +92,11 @@ const tableInventory = `SELECT format(
   'SELECT json_build_object(''schema'',%L,''table'',%L,''rows'',count(*),''fingerprint'',md5(coalesce(string_agg(to_jsonb(t)::text,E''\\n'' ORDER BY to_jsonb(t)::text),''''))) FROM %I.%I t;',
   n.nspname,c.relname,n.nspname,c.relname)
   FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
-  WHERE c.relkind IN ('r','p') AND n.nspname NOT LIKE 'pg_%' AND n.nspname <> 'information_schema'
+  WHERE c.relkind IN ('r','p') AND left(n.nspname,3) <> 'pg_' AND n.nspname <> 'information_schema'
   ORDER BY n.nspname,c.relname \\gexec`;
 const sequenceInventory = `SELECT format('SELECT json_build_object(''schema'',%L,''sequence'',%L,''lastValue'',last_value::text,''isCalled'',is_called) FROM %I.%I;',
   schemaname,sequencename,schemaname,sequencename) FROM pg_sequences
-  WHERE schemaname NOT LIKE 'pg_%' AND schemaname <> 'information_schema' ORDER BY schemaname,sequencename \\gexec`;
+  WHERE left(schemaname,3) <> 'pg_' AND schemaname <> 'information_schema' ORDER BY schemaname,sequencename \\gexec`;
 async function inventory(config, database, name, snapshot) {
   const begin = 'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;\n' + (snapshot ? 'SET TRANSACTION SNAPSHOT ' + literal(snapshot) + ';\n' : '');
   const tables = await sql(config, database, begin + tableInventory + '\nCOMMIT;', name);
@@ -210,7 +210,7 @@ async function restore(config, id, target, directory) {
   if (roleExists !== '1') fail('MISSING_APP_ROLE');
   // CREATE DATABASE is atomic; a concurrent restore loses here rather than overwriting.
   await sql(config, recovery, 'CREATE DATABASE ' + quote(target) + ' OWNER ' + quote(recovery.user) + ' TEMPLATE template0 ALLOW_CONNECTIONS false;\nREVOKE CONNECT ON DATABASE ' + quote(target) + ' FROM PUBLIC;\nALTER DATABASE ' + quote(target) + ' ALLOW_CONNECTIONS true;', 'postgres', false);
-  await sql(config, recovery, 'GRANT CREATE ON SCHEMA public TO ' + quote(recovery.appRole) + ';', target, false);
+  await sql(config, recovery, 'GRANT CREATE ON DATABASE ' + quote(target) + ' TO ' + quote(recovery.appRole) + ';\nGRANT CREATE ON SCHEMA public TO ' + quote(recovery.appRole) + ';', target, false);
   await execute(recovery.tools?.pg_restore ?? config.tools.pg_restore, [...connection(recovery, target), '--single-transaction', '--exit-on-error', '--no-owner', '--no-privileges', '--role=' + recovery.appRole], {
     inputFile: join(directory, 'db.dump'), env: pgEnvironment(recovery),
   });
