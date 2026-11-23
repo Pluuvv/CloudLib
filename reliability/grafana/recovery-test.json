@@ -10,7 +10,7 @@
     "recovery",
     "cloudlib-task06"
   ],
-  "timezone": "utc",
+  "timezone": "Asia/Jakarta",
   "refresh": "10s",
   "time": {
     "from": "now-1h",
@@ -236,7 +236,8 @@
           "refId": "A",
           "expr": "cloudlib_drill_check{job=\"cloudlib-recovery-drill\"}",
           "instant": true,
-          "legendFormat": "{{check}}{{stage}}{{environment}}"
+          "legendFormat": "{{check}}{{stage}}{{environment}}",
+          "format": "table"
         }
       ],
       "fieldConfig": {
@@ -246,7 +247,26 @@
         },
         "overrides": []
       },
-      "options": {}
+      "options": {},
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "environment": true,
+              "instance": true,
+              "job": true,
+              "method": true,
+              "target": true
+            },
+            "renameByName": {
+              "Value": "Status"
+            }
+          }
+        }
+      ]
     },
     {
       "id": 7,
@@ -431,7 +451,8 @@
           "refId": "A",
           "expr": "cloudlib_drill_stage_seconds{job=\"cloudlib-recovery-drill\"}",
           "instant": true,
-          "legendFormat": "{{check}}{{stage}}{{environment}}"
+          "legendFormat": "{{check}}{{stage}}{{environment}}",
+          "format": "table"
         }
       ],
       "fieldConfig": {
@@ -441,7 +462,26 @@
         },
         "overrides": []
       },
-      "options": {}
+      "options": {},
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "environment": true,
+              "instance": true,
+              "job": true,
+              "method": true,
+              "target": true
+            },
+            "renameByName": {
+              "Value": "Seconds"
+            }
+          }
+        }
+      ]
     },
     {
       "id": 12,

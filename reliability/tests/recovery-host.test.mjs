@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
-import { mkdirSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 
 test('a missing configuration file reports CONFIG_NOT_FOUND before entering the injector', () => {
  const r=spawnSync('powershell.exe',['-NoProfile','-File','scripts/recovery-test.ps1','-ConfigPath',resolve('reliability/.runtime/does-not-exist.json'),'-DryRun'],{encoding:'utf8',windowsHide:true});
@@ -19,7 +19,10 @@ test('unverified Kubernetes baseline is rejected before any cluster operation', 
  const dir=mkdtempSync(resolve('reliability/.runtime/drill/tests/host-'));
  try{
   const path=resolve(dir,'config.json');writeFileSync(path,JSON.stringify({formatVersion:1,method:'pod-delete',target:'capstone/cloudlib-app',environment:'kubernetes',appOrigin:'http://cloudlib.localhost:8088',resultFile:resolve(dir,'result.json'),checkpointFile:resolve(dir,'checkpoint.json'),kubernetes:{context:'k3d-capstone',namespace:'capstone',deployment:'cloudlib-app',expectedImage:'unverified-config-image-id'}}));
+  const previous='{"sentinel":"previous actual run must survive dry-run"}';writeFileSync(resolve(dir,'result.json'),previous);
   const r=spawnSync('powershell.exe',['-NoProfile','-File','scripts/recovery-test.ps1','-ConfigPath',path,'-DryRun'],{encoding:'utf8',windowsHide:true});
   assert.equal(r.status,1);const json=JSON.parse(r.stdout);assert.equal(json.status,'GAGAL');assert.equal(json.code,'INVALID_KUBERNETES_TARGET');assert.equal(json.injectedAt,null);
+  assert.equal(readFileSync(resolve(dir,'result.json'),'utf8'),previous);
+  assert.equal(JSON.parse(readFileSync(resolve(dir,'result.json.preflight.json'))).code,'INVALID_KUBERNETES_TARGET');
  }finally{rmSync(dir,{recursive:true,force:true});}
 });

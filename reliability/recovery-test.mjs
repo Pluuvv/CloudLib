@@ -45,7 +45,8 @@ async function main() {
 try {await main();}catch(e){result.code=/^[A-Z_]+$/.test(e.message)?e.message:'OPERATION_FAILED';}
 result.completedAt=now();
 if(c?.resultFile&&isAbsolute(c.resultFile)){
- try{const tmp=c.resultFile+'.'+result.testRunId+'.tmp';await writeFile(tmp,JSON.stringify(result),{mode:0o600});await rename(tmp,c.resultFile);}catch{result.status='GAGAL';result.code='RESULT_WRITE_FAILED';}
+ const outputFile=c.resultFile+(process.argv.includes('--dry-run')?'.preflight.json':'');
+ try{const tmp=outputFile+'.'+result.testRunId+'.tmp';await writeFile(tmp,JSON.stringify(result),{mode:0o600});await rename(tmp,outputFile);}catch{result.status='GAGAL';result.code='RESULT_WRITE_FAILED';}
 }
 console.log(JSON.stringify(result));process.exitCode=['LULUS','PREFLIGHT_OK'].includes(result.status)?0:1;
 
@@ -175,7 +176,7 @@ async function podDrill(dry) {
  if(cp.formatVersion!==1||cp.appImage!==k.expectedImage||!Number.isSafeInteger(cp.loanA?.id))fail('INVALID_CHECKPOINT');
  const auth=await session(c.appOrigin);
  await anonymousDenied(c.appOrigin);
- const before=(await api(auth,'/loans/history','student')).find(x=>x.id===cp.loanA.id);
+ const before=(await api(auth,'/loans/history','staff')).find(x=>x.id===cp.loanA.id);
  if(!before)fail('DURABLE_TRANSACTION_MISSING');
  const podList=()=>kubectl('-n','capstone','get','pods','-l',Object.entries(deployment.spec.selector.matchLabels).map(([a,z])=>a+'='+z).join(','),'-o','json').then(JSON.parse);
  const owned=async()=>{const sets=JSON.parse(await kubectl('-n','capstone','get','replicasets','-o','json'));return new Set(sets.items.filter(x=>x.metadata.ownerReferences?.some(o=>o.uid===deployment.metadata.uid&&o.controller)).map(x=>x.metadata.uid));};
@@ -194,7 +195,7 @@ async function podDrill(dry) {
  let replacement;
  while(Date.now()<deadline){
   replacement=(await podList()).items.find(x=>x.metadata.uid!==old.metadata.uid&&!pods.some(p=>p.metadata.uid===x.metadata.uid)&&x.metadata.ownerReferences?.some(o=>sets.has(o.uid))&&!x.metadata.deletionTimestamp&&x.spec.containers.some(y=>y.image===k.expectedImage)&&x.status.conditions?.some(y=>y.type==='Ready'&&y.status==='True'));
-  if(replacement){try{if(await appReady(c.appOrigin)){const after=(await api(await session(c.appOrigin),'/loans/history','student')).find(x=>x.id===cp.loanA.id);if(JSON.stringify(after)===JSON.stringify(before))break;}}catch{}}
+  if(replacement){try{if(await appReady(c.appOrigin)){const after=(await api(await session(c.appOrigin),'/loans/history','staff')).find(x=>x.id===cp.loanA.id);if(JSON.stringify(after)===JSON.stringify(before))break;}}catch{}}
   replacement=null;await new Promise(r=>setTimeout(r,500));
  }
  if(!replacement)fail('POD_RECOVERY_TIMEOUT');
