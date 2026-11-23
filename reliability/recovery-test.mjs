@@ -29,6 +29,7 @@ async function main() {
  const args=process.argv.slice(2);if(args[0]!=='--config'||!isAbsolute(args[1]??'')||args.length>3||(args[2]&&args[2]!=='--dry-run'))fail('USAGE');
  c=JSON.parse(await readFile(args[1],'utf8'));
  Object.assign(result,{method:c.method,target:c.target,environment:c.environment,appOrigin:c.appOrigin??null});
+ if(c.latestResultFile!==undefined&&!isAbsolute(c.latestResultFile))fail('INVALID_LATEST_RESULT_PATH');
  if(c.method==='pod-delete')return podDrill(args[2]==='--dry-run');
  if(c.formatVersion!==1||c.method!=='database-loss'||c.target!=='cloudlib_recovery'||!['native-sql-fixture','compose'].includes(c.environment)||!['backupConfig','workerConfig','checkpointFile','resultFile'].every(k=>isAbsolute(c[k]??''))||!/^\d+$/.test(c.systemIdentifier??'')||!/^[a-z_][a-z0-9_]*$/.test(c.injectorUser??'')||!Number.isFinite(c.timeoutSeconds)||c.timeoutSeconds<1||c.timeoutSeconds>3600)fail('INVALID_CONFIG');
  b=JSON.parse(await readFile(c.backupConfig,'utf8'));w=JSON.parse(await readFile(c.workerConfig,'utf8'));
@@ -45,7 +46,12 @@ async function main() {
 try {await main();}catch(e){result.code=/^[A-Z_]+$/.test(e.message)?e.message:'OPERATION_FAILED';}
 result.completedAt=now();
 if(c?.resultFile&&isAbsolute(c.resultFile)){
- try{const tmp=c.resultFile+'.'+result.testRunId+'.tmp';await writeFile(tmp,JSON.stringify(result),{mode:0o600});await rename(tmp,c.resultFile);}catch{result.status='GAGAL';result.code='RESULT_WRITE_FAILED';}
+ const dry=process.argv.includes('--dry-run'),outputFile=c.resultFile+(dry?'.preflight.json':'');
+ const publish=async path=>{const tmp=path+'.'+result.testRunId+'.tmp';await writeFile(tmp,JSON.stringify(result),{mode:0o600});await rename(tmp,path);};
+ try{
+  await publish(outputFile);
+  if(!dry&&result.injectedAt&&isAbsolute(c.latestResultFile??'')&&c.latestResultFile!==outputFile)await publish(c.latestResultFile);
+ }catch{result.status='GAGAL';result.code='RESULT_WRITE_FAILED';try{await publish(outputFile);}catch{}}
 }
 console.log(JSON.stringify(result));process.exitCode=['LULUS','PREFLIGHT_OK'].includes(result.status)?0:1;
 
@@ -175,7 +181,7 @@ async function podDrill(dry) {
  if(cp.formatVersion!==1||cp.appImage!==k.expectedImage||!Number.isSafeInteger(cp.loanA?.id))fail('INVALID_CHECKPOINT');
  const auth=await session(c.appOrigin);
  await anonymousDenied(c.appOrigin);
- const before=(await api(auth,'/loans/history','student')).find(x=>x.id===cp.loanA.id);
+ const before=(await api(auth,'/loans/history','staff')).find(x=>x.id===cp.loanA.id);
  if(!before)fail('DURABLE_TRANSACTION_MISSING');
  const podList=()=>kubectl('-n','capstone','get','pods','-l',Object.entries(deployment.spec.selector.matchLabels).map(([a,z])=>a+'='+z).join(','),'-o','json').then(JSON.parse);
  const owned=async()=>{const sets=JSON.parse(await kubectl('-n','capstone','get','replicasets','-o','json'));return new Set(sets.items.filter(x=>x.metadata.ownerReferences?.some(o=>o.uid===deployment.metadata.uid&&o.controller)).map(x=>x.metadata.uid));};
@@ -194,7 +200,7 @@ async function podDrill(dry) {
  let replacement;
  while(Date.now()<deadline){
   replacement=(await podList()).items.find(x=>x.metadata.uid!==old.metadata.uid&&!pods.some(p=>p.metadata.uid===x.metadata.uid)&&x.metadata.ownerReferences?.some(o=>sets.has(o.uid))&&!x.metadata.deletionTimestamp&&x.spec.containers.some(y=>y.image===k.expectedImage)&&x.status.conditions?.some(y=>y.type==='Ready'&&y.status==='True'));
-  if(replacement){try{if(await appReady(c.appOrigin)){const after=(await api(await session(c.appOrigin),'/loans/history','student')).find(x=>x.id===cp.loanA.id);if(JSON.stringify(after)===JSON.stringify(before))break;}}catch{}}
+  if(replacement){try{if(await appReady(c.appOrigin)){const after=(await api(await session(c.appOrigin),'/loans/history','staff')).find(x=>x.id===cp.loanA.id);if(JSON.stringify(after)===JSON.stringify(before))break;}}catch{}}
   replacement=null;await new Promise(r=>setTimeout(r,500));
  }
  if(!replacement)fail('POD_RECOVERY_TIMEOUT');

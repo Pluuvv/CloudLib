@@ -21,9 +21,13 @@ try {
  $body=@{dashboard=$dashboard;overwrite=$overwrite;message='M7 source-backed drill dashboard'}|ConvertTo-Json -Depth 30 -Compress
  $import=Invoke-RestMethod -Uri ($GrafanaOrigin+'/api/dashboards/db') -Method Post -Headers $headers -ContentType application/json -Body $body
  if ($import.status -ne 'success') { throw 'IMPORT_FAILED' }
+ $from=[DateTimeOffset]::Parse($result.injectedAt).ToUnixTimeMilliseconds()
+ $to=[DateTimeOffset]::Parse($result.completedAt).ToUnixTimeMilliseconds()
+ $annotations=@(Invoke-RestMethod -Uri ($GrafanaOrigin+'/api/annotations?dashboardUID=m7-recovery-test&from='+$from+'&to='+($to+1)+'&limit=1000') -Headers $headers)
  foreach($event in @('injectedAt','completedAt')) {
   $time=[DateTimeOffset]::Parse($result.$event).ToUnixTimeMilliseconds()
   $text='runId='+$result.testRunId+'; incidentId='+$result.workerIncidentId+'; target='+$result.target+'; method='+$result.method+'; environment='+$result.environment+'; status='+$result.status+'; event='+$event
+  if (@($annotations | Where-Object { $_.time -eq $time -and $_.text -eq $text }).Count) { continue }
   $annotation=@{dashboardUID='m7-recovery-test';time=$time;tags=@('m7-recovery-drill',$result.environment);text=$text}|ConvertTo-Json -Compress
   $null=Invoke-RestMethod -Uri ($GrafanaOrigin+'/api/annotations') -Method Post -Headers $headers -ContentType application/json -Body $annotation
  }

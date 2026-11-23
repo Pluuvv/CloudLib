@@ -47,12 +47,13 @@ test('injector observes already-running automatic recovery but SQL-only fixture 
  writeFileSync(join(dir,'checkpoint.json'),JSON.stringify(checkpoint));
  worker=spawn(process.execPath,['reliability/worker.mjs','--config',wp],{windowsHide:true,stdio:'ignore'});
  await until(()=>existsSync(join(dir,'state','status.json'))&&JSON.parse(readFileSync(join(dir,'state','status.json'))).phase==='healthy');
- const current=JSON.parse(readFileSync(cp));current.systemIdentifier=config.recovery.systemIdentifier;writeFileSync(cp,JSON.stringify(current));
+ const current=JSON.parse(readFileSync(cp));current.systemIdentifier=config.recovery.systemIdentifier;current.latestResultFile=join(dir,'latest.json');writeFileSync(cp,JSON.stringify(current));
  const r=drill();assert.equal(r.status,1,r.stdout+r.stderr);assert.equal(r.json.status,'GAGAL');assert.equal(r.json.code,'BUSINESS_VALIDATION_INCOMPLETE');
  assert.equal(r.json.checks.snapshotData.status,'passed');assert.equal(r.json.checks.expectedLoss.status,'passed');assert.equal(r.json.checks.authenticatedRead.status,'unavailable');
  assert.ok(r.json.workerIncidentId);assert.notEqual(r.json.workerIncidentId,r.json.testRunId);assert.ok(r.json.timings.decryptSeconds>0);assert.ok(r.json.timings.restoreSeconds>0);assert.ok(r.json.timings.snapshotValidationSeconds>0);assert.ok(r.json.timings.sqlRecoverySeconds>0);assert.equal(r.json.timings.rtoSeconds,null);assert.ok(r.json.timings.rpoSeconds>=0);
  assert.equal(sql('SELECT count(*) FROM loan;','cloudlib_recovery'),'1');assert.equal(sql('SELECT count(*) FROM loan WHERE id=11;','cloudlib_recovery'),'0');
  assert.equal(JSON.parse(readFileSync(join(dir,'result.json'))).testRunId,r.json.testRunId);
+ assert.equal(JSON.parse(readFileSync(join(dir,'latest.json'))).testRunId,r.json.testRunId);
 });
 
 test('metrics bridge serves actual failed fixture identity and never invents application RTO', {skip:!enabled},async()=>{

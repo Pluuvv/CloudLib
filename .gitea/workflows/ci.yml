@@ -41,6 +41,9 @@ jobs:
           GITOPS_PASSWORD: ${{ secrets.GITOPS_PASSWORD }}
         run: |
           set -eu
+          image_digest=$(docker image inspect --format '{{index .RepoDigests 0}}' "$PUSH_IMAGE")
+          image_digest=${image_digest##*@}
+          printf '%s\n' "$image_digest" | grep -Eq '^sha256:[a-f0-9]{64}$'
           gitops_dir=$(mktemp -d)
           trap 'rm -rf "$gitops_dir"' EXIT
           auth=$(printf 'student:%s' "$GITOPS_PASSWORD" | base64 | tr -d '\n')
@@ -49,7 +52,10 @@ jobs:
             --branch main http://gitea:3000/student/capstone-gitops.git "$gitops_dir"
           cd "$gitops_dir"
           sed -i "s/^    newTag: .*/    newTag: $GITHUB_SHA/" overlays/dev/kustomization.yaml
+          sed -i '/^    digest: /d' overlays/dev/kustomization.yaml
+          sed -i "/^    newTag: /a\\    digest: $image_digest" overlays/dev/kustomization.yaml
           grep -Fx "    newTag: $GITHUB_SHA" overlays/dev/kustomization.yaml
+          grep -Fx "    digest: $image_digest" overlays/dev/kustomization.yaml
           git add overlays/dev/kustomization.yaml
           if git diff --cached --quiet; then
             exit 0

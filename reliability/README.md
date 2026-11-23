@@ -1,5 +1,11 @@
 # CloudLib recovery baseline
 
+For the verified local demo commands, measured QS05/QS06 results and monitoring, use [the M7 demo runbook](../docs/evidence/M7/M7-Evidence-Reliability-Recovery.md).
+
+For another team member's laptop, start with [M7 setup and scheduled backup installation](SETUP-M7.md) and the shared [private-env template](m7.env.example).
+
+Both drill configs can set the same absolute `latestResultFile` for the observer while retaining separate `resultFile` paths (for example `database-result.json` and `pod-result.json`). Only an actual injected run updates this shared result; dry-run and pre-injection failures preserve it. The dashboard then follows QS05 or QS06 automatically. QS05 has no database RPO or restore stages.
+
 ## M7 injector-only Recovery Test (task06)
 
 `scripts/recovery-test.ps1 -ConfigPath <absolute-drill.json> [-DryRun] [-EnvFile <private-env-file>]` runs the public test. Copy `recovery-test.config.example.json` into private runtime storage and fill every empty path/identity. Config version is 1; output version is 1 with `toolVersion`, `testRunId`, method, target, environment, timestamps, observations, individual checks, timings and limitations. It emits one JSON terminal result and writes `resultFile` atomically when storage is available. `LULUS` is exit0 only after all required checks. Failure, timeout and incomplete validation emit `GAGAL`/nonzero. `-DryRun` performs the same prerequisite gates without injection, returning `PREFLIGHT_OK`; that is not recovery acceptance. Host startup failures emit sanitized `HOST_ENTRY_FAILED`/nonzero even when Node never starts. Storage/config failure can prevent writing a result file; check the current command's stdout and exit code, not a previous result file.
@@ -8,7 +14,7 @@ The injector never starts the worker, calls restore, starts a recovery task, cre
 
 ### Prepare real A / snapshot / B outside the injector
 
-Use only the isolated recovery app at `http://localhost:8089`; never write these synthetic transactions to the primary. First verify the latest approved M6 application **published manifest digest**, OIDC realm/accounts and recovery clone. A local image/config ID is not proof of an approved published digest. The current old OIDC-disabled primary is not a valid QS05 baseline. Do not inject while the baseline/runtime prerequisites are unavailable.
+Use only the isolated recovery app at `http://localhost:8089`; never write these synthetic transactions to the primary. First verify the latest approved M6 application **published manifest digest**, OIDC realm/accounts and recovery clone. A local image/config ID is not proof of an approved published digest. An OIDC-disabled primary is not a valid QS05 baseline. Do not inject while the baseline/runtime prerequisites are unavailable.
 
 Maintain two private backup configs with the same local backupDir, key, logicalSource lineage and actual recovery image/commit. The **producer** source points at the actual isolated `cloudlib_recovery` database. The **restore-only consumer** used by the worker/driver retains the original upstream source name (e.g. `capstone`) solely as the existing restore-safety exclusion; the worker never reads that source connection. Do not claim the consumer dumped primary transactions A/B. This preserves the worker's refusal of a source named `cloudlib_recovery` without allowing primary writes. The logical archive metadata must identify the real isolated app image/commit and honest clone lineage. Keep producer/consumer configs in restricted runtime storage; neither changes archive ownership or grants permission to remove an existing archive. Preserve unrelated, corrupt or incomplete entries for inspection. Test fixtures own only their unique backup subdirectory; never clean the shared backup folder to prepare a drill.
 
@@ -44,7 +50,7 @@ The dashboard JSON is `grafana/recovery-test.json`, title **M7 - Recovery Test**
 
 Metric labels are bounded target/method/environment/check/stage values; run UUIDs never become persistent time-series labels. `up` means observer scrape only. `cloudlib_drill_app_ready` probes only the named tested target and is absent for SQL fixtures. `cloudlib_drill_check` is1 passed,0 failed,-1 unavailable. Full RTO is absent when incomplete, while SQL timing has a separate metric. RTO/RPO goal and injection/completion timestamps are explicit. Native fixture results always remain labeled `native-sql-fixture` and GAGAL for full business acceptance. The existing healthy primary job is never substituted for a failed recovery target.
 
-Native public coverage uses real loopback PG17 at20439, real age, an already-running independent worker and the public PowerShell process; use the existing backup-tool environment variables and run `node --test --test-concurrency=1 reliability/tests/recovery-test.test.mjs reliability/tests/recovery-host.test.mjs`. Missing tools visibly skip the PG suite and are not acceptance. Live Compose/Keycloak, current-baseline pod deletion, actual Prometheus scrape and rendered Grafana acceptance remain separate gates. Current Docker storage failure, unavailable isolated app, unapproved latest baseline and Grafana HTTP500 keep live acceptance OPEN; no host repair or invented PASS is authorized.
+Native public coverage uses real loopback PG17 at20439, real age, an already-running independent worker and the public PowerShell process; use the existing backup-tool environment variables and run `node --test --test-concurrency=1 reliability/tests/recovery-test.test.mjs reliability/tests/recovery-host.test.mjs`. Missing tools visibly skip the PG suite and are not acceptance. Live Compose/Keycloak, current-baseline pod deletion, actual Prometheus scrape and rendered Grafana are verified separately in the linked M7 runbook. Dry-run results use `<resultFile>.preflight.json` and preserve the latest actual injection result used by monitoring.
 
 Run from the CloudLib application checkout on the Windows lab host. The lab image is promoted by Gitea Actions and Argo CD. The recovery app uses the same registry digest and runs on a dedicated Docker Compose project.
 
@@ -162,10 +168,12 @@ Incident status now records actual `triggerChannel` (`event` or `reconcile`), `l
 $config = (Resolve-Path reliability/.runtime/backup/config.json).Path
 node reliability/backup.mjs daily --config $config
 node reliability/backup.mjs health --config $config
-powershell.exe -NoProfile -File scripts/Install-CloudLibBackupTask.ps1 -ConfigPath $config -XmlPath "$PWD/reliability/.runtime/backup/task.xml"
+powershell.exe -NoProfile -File scripts/Install-CloudLibBackupTask.ps1 -ConfigPath $config -EnvFile (Resolve-Path reliability/.runtime/.env).Path
 ```
 
 The installer registers `CloudLib-DailyLocalBackup` for the current Windows interactive user with least privilege and no password storage. It refuses to overwrite any existing task, including a name collision. To reinstall, inspect that exact task's source (`CloudLib.Backup.Task05`) and actions, explicitly unregister that owned task, then rerun the installer. `-DefinitionOnly` writes XML without installation. Optional `-EnvFile <absolute-private-env-file>` uses Node's env-file loading, and `-NodePath` pins an installed Node executable. Private environment values never enter task arguments, XML or logs. Do not rely on a terminal's transient environment: provision private env-file/PGPASSFILE configuration for the scheduled identity. The existing backup runtime/key ACL must permit only that user and SYSTEM; use the same interactive account that can access Docker Desktop and the local backup directory.
+
+`-XmlPath` is optional and defaults to `backup-task.xml` beside the private configuration. When `source.passwordEnv` is configured, `-EnvFile` is required and must contain that non-empty variable. The installer checks the file without printing its values before writing a definition or registering a task; it does not test database connectivity or create a backup.
 
 The fixed UTC daily boundary is `13:00:00Z` = 20:00 Asia/Jakarta/WIB, independent of the host timezone. Settings enable `StartWhenAvailable`, `WakeToRun`, battery operation and `IgnoreNew`. Missed runs may be queued by Windows (typically a ten-minute delay). Wake-to-run cannot turn on a powered-off laptop. InteractiveToken requires the user to be logged in; Docker Desktop, its engine/database, keys and storage must also be available. No Codex chat or worker process is required. The installer does not repair Docker or alter the primary database.
 
@@ -179,7 +187,7 @@ Verify native fixtures using the same PostgreSQL/age environment variables as th
 
 ```powershell
 node --test --test-concurrency=1 reliability/tests/backup.test.mjs reliability/tests/schedule.test.mjs
-powershell.exe -NoProfile -File reliability/tests/schedule-definition.ps1 -ConfigPath $config
+powershell.exe -NoProfile -File reliability/tests/schedule-definition.ps1 -ConfigPath $config -EnvFile (Resolve-Path reliability/.runtime/.env).Path
 ```
 
 The scheduler suite uses real PG17 on loopback port19439, real age/files, unique temporary Task Scheduler registrations, actual successful/failed task executions, a manual/daily process race, aged authenticated archives and junction/incomplete-file boundaries. It removes only its owned temporary tasks. Actual missed-run observation is a separate native fixture: disable a unique one-off time trigger across its due time, include an EndBoundary after the observation window, enable it with StartWhenAvailable, and observe LastRunTime/LastTaskResult without calling Run. Keep that distinct from merely inspecting the configured policy.
