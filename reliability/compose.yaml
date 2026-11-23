@@ -4,6 +4,14 @@ services:
   postgres:
     image: postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
     container_name: cloudlib-recovery-postgres
+    command:
+      - sh
+      - -ec
+      - |
+        mkdir -p /var/log/cloudlib
+        chown postgres:postgres /var/log/cloudlib
+        chmod 0750 /var/log/cloudlib
+        exec docker-entrypoint.sh postgres -c logging_collector=on -c log_destination=jsonlog -c log_statement=ddl -c log_directory=/var/log/cloudlib -c log_file_mode=0640 -c log_timezone=UTC -c log_filename=postgresql-%H.log -c log_rotation_age=1h -c log_rotation_size=0 -c log_truncate_on_rotation=on
     environment:
       POSTGRES_DB: cloudlib_recovery
       POSTGRES_USER: cloudlib_recovery_owner
@@ -11,6 +19,7 @@ services:
       CLOUDLIB_RECOVERY_APP_PASSWORD: ${CLOUDLIB_RECOVERY_APP_PASSWORD:?Set the isolated recovery app password}
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - pglogs:/var/log/cloudlib
     networks: [recovery]
     healthcheck:
       test: [CMD-SHELL, pg_isready -U cloudlib_recovery_owner -d postgres]
@@ -48,6 +57,8 @@ services:
       context: ..
       dockerfile: reliability/worker.Dockerfile
     container_name: cloudlib-recovery-worker
+    # The pinned Alpine PostgreSQL image writes logs with postgres GID 70.
+    group_add: ["70"]
     restart: unless-stopped
     depends_on:
       postgres:
@@ -58,6 +69,7 @@ services:
       - ../backups:/backups:ro
       - ./.runtime/worker/container:/run/cloudlib:ro
       - workerstate:/var/lib/cloudlib-worker
+      - pglogs:/var/log/cloudlib:ro
     networks: [recovery]
 
 networks:
@@ -65,6 +77,7 @@ networks:
     name: cloudlib-recovery-net
 
 volumes:
+  pglogs:
   workerstate:
   pgdata:
     name: cloudlib-recovery-pgdata
