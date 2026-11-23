@@ -1,0 +1,9 @@
+{
+  "formatVersion": 1,
+  "backupConfig": "/run/cloudlib/backup.json",
+  "stateDir": "/var/lib/cloudlib-worker",
+  "target": "cloudlib_recovery",
+  "candidate": "cloudlib_recovery_verify",
+  "intervalMs": 10000,
+  "maxAttempts": 1
+}

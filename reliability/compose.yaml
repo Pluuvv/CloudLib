@@ -21,6 +21,7 @@ services:
   app:
     image: ${CLOUDLIB_BASELINE_IMAGE:-cloudlib-baseline:unconfigured}
     container_name: cloudlib-recovery-app
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
@@ -41,10 +42,29 @@ services:
       timeout: 2s
       retries: 20
 
+
+  worker:
+    build:
+      context: ..
+      dockerfile: reliability/worker.Dockerfile
+    container_name: cloudlib-recovery-worker
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      CLOUDLIB_RECOVERY_WORKER_PASSWORD: ${CLOUDLIB_RECOVERY_WORKER_PASSWORD:?Set the isolated worker password}
+    volumes:
+      - ../backups:/backups:ro
+      - ./.runtime/worker/container:/run/cloudlib:ro
+      - workerstate:/var/lib/cloudlib-worker
+    networks: [recovery]
+
 networks:
   recovery:
     name: cloudlib-recovery-net
 
 volumes:
+  workerstate:
   pgdata:
     name: cloudlib-recovery-pgdata
