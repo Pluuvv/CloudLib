@@ -46,3 +46,8 @@ docs/screenshots/
 .certs/
 
 .env
+/reliability/.runtime/
+
+# Local database backups; share instructions, not database archives.
+/backups/*
+!/backups/README.md
