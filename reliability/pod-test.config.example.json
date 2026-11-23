@@ -1,0 +1,17 @@
+{
+  "formatVersion": 1,
+  "method": "pod-delete",
+  "environment": "kubernetes",
+  "target": "capstone/cloudlib-app",
+  "appOrigin": "http://cloudlib.localhost:8088",
+  "checkpointFile": "",
+  "resultFile": "",
+  "kubernetes": {
+    "context": "k3d-capstone",
+    "namespace": "capstone",
+    "deployment": "cloudlib-app",
+    "server": "",
+    "namespaceUid": "",
+    "expectedImage": ""
+  }
+}

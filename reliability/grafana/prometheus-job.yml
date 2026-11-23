@@ -1,0 +1,7 @@
+# Merge this job into the existing scrape_configs; retain its other jobs.
+# Prove host.docker.internal reaches the default loopback observer before any network change.
+- job_name: cloudlib-recovery-drill
+  scrape_interval: 5s
+  scrape_timeout: 3s
+  static_configs:
+    - targets: ['host.docker.internal:19090']

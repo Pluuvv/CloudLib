@@ -1,0 +1,15 @@
+{
+  "formatVersion": 1,
+  "method": "database-loss",
+  "environment": "compose",
+  "target": "cloudlib_recovery",
+  "systemIdentifier": "",
+  "injectorUser": "cloudlib_recovery_owner",
+  "injectorPasswordEnv": "CLOUDLIB_RECOVERY_OWNER_PASSWORD",
+  "backupConfig": "",
+  "workerConfig": "",
+  "checkpointFile": "",
+  "resultFile": "",
+  "appOrigin": "http://localhost:8089",
+  "timeoutSeconds": 3600
+}

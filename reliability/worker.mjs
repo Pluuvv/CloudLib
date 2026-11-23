@@ -164,7 +164,15 @@ async function main() {
     console.log(JSON.stringify(status));
     await metrics(phase === 'open');
   }
+  let maintenanceObservedAt = null;
   async function metrics(ready) {
+    const heartbeat = join(c.stateDir, 'heartbeat.json');
+    const temporary = heartbeat + '.' + randomUUID() + '.tmp';
+    await writeFile(temporary, JSON.stringify({ formatVersion: 1, pid: process.pid, target: c.target,
+      systemIdentifier: b.recovery.systemIdentifier, logicalSource: b.logicalSource,
+      appImage: b.app.image, appCommit: b.app.commit, candidate: c.candidate, intervalMs: c.intervalMs,
+      maintenanceObservedAt, observedAt: now() }), { mode: 0o600 });
+    await rename(temporary, heartbeat);
     await writeFile(
       join(c.stateDir, 'metrics.prom'),
       'cloudlib_recovery_data_ready ' +
@@ -343,6 +351,7 @@ async function main() {
         continue;
       }
       locked = true;
+      maintenanceObservedAt = now();
       const old = await load();
       if (old) status = old;
       if (old?.incidentId && !['open', 'failed'].includes(old.phase)) {
@@ -422,7 +431,7 @@ async function main() {
           result.verified?.schema !== true
         )
           fail('UNVERIFIED_RESTORE');
-        await publish('validated', { basicValidationAt: now(), restoreCompletedAt: result.restoredAt });
+        await publish('validated', { basicValidationAt: now(), restoreCompletedAt: result.restoredAt, stages: result.stages });
         // Same live lock session: loss of lock prevents promotion/reopening.
         if (
           (await session.sql('SELECT count(*) FROM pg_database WHERE datname=' + lit(c.target) + ';')) !== '0'

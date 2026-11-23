@@ -112,9 +112,11 @@ async function hashFile(path) {
   for await (const data of createReadStream(path)) hash.update(data);
   return hash.digest('hex');
 }
-async function decrypt(config, encrypted, directory) {
+async function decrypt(config, encrypted, directory, timing) {
   const tar = join(directory, 'payload.tar');
+  if (timing) timing.decryptStartedAt = now();
   await execute(config.tools.age, ['--decrypt', '--identity', config.encryption.identityFile, '--output', tar, encrypted]);
+  if (timing) timing.decryptCompletedAt = now();
   const members = await execute(config.tools.tar, ['-tf', tar]);
   if (members.replaceAll('\r', '') !== 'db.dump\ninventory.json') fail('INVALID_PAYLOAD');
   // Extract bytes to our own files: archive links can never create/follow filesystem links.
@@ -134,7 +136,7 @@ function validateMetadata(config, metadata, id, retained = false) {
   const age = Date.now() - Date.parse(metadata.snapshotAt);
   if (!Number.isFinite(age) || age < -60000 || (!retained && age > config.maxAgeHours * 3600000)) fail('STALE_BACKUP');
 }
-async function readBackup(config, id, directory, retained = false) {
+async function readBackup(config, id, directory, retained = false, timing) {
   for (const suffix of ['.json', '.age']) {
     if (!(await lstat(join(config.backupDir, id + suffix))).isFile()) fail('UNSAFE_BACKUP_FILE');
   }
@@ -145,7 +147,7 @@ async function readBackup(config, id, directory, retained = false) {
   const encrypted = join(directory, 'readback.age');
   await copyFile(join(config.backupDir, metadata.archiveName), encrypted, constants.COPYFILE_EXCL);
   if ((await stat(encrypted)).size !== metadata.sizeBytes || await hashFile(encrypted) !== metadata.sha256) fail('CHECKSUM_MISMATCH');
-  const payload = await decrypt(config, encrypted, directory);
+  const payload = await decrypt(config, encrypted, directory, timing);
   if (payload.backupId !== id || payload.logicalSource !== metadata.logicalSource || payload.snapshotAt !== metadata.snapshotAt ||
       payload.schemaFingerprint !== metadata.schemaFingerprint || payload.appImage !== metadata.appImage ||
       payload.appCommit !== metadata.appCommit || payload.pgMajor !== metadata.pgMajor) fail('INVALID_PAYLOAD');
@@ -203,7 +205,8 @@ async function restore(config, id, target, directory) {
   if (!config.recovery.allowedDatabases.includes(target) || !identifier.test(target) ||
       target === 'capstone' || target === config.source.database) fail('UNSAFE_TARGET');
   // Authenticate the entire local payload before any recovery database mutation.
-  const { metadata, payload } = await readBackup(config, id, directory);
+  const stages = {};
+  const { metadata, payload } = await readBackup(config, id, directory, false, stages);
   const recovery = config.recovery;
   const identity = await sql(config, recovery, "SELECT system_identifier::text || '|' || (current_setting('server_version_num')::int/10000)::text FROM pg_control_system();", 'postgres');
   if (identity !== recovery.systemIdentifier + '|17') fail('WRONG_SERVER');
@@ -214,14 +217,18 @@ async function restore(config, id, target, directory) {
   // CREATE DATABASE is atomic; a concurrent restore loses here rather than overwriting.
   await sql(config, recovery, 'CREATE DATABASE ' + quote(target) + ' OWNER ' + quote(recovery.user) + ' TEMPLATE template0 ALLOW_CONNECTIONS false;\nREVOKE CONNECT ON DATABASE ' + quote(target) + ' FROM PUBLIC;\nALTER DATABASE ' + quote(target) + ' ALLOW_CONNECTIONS true;', 'postgres', false);
   await sql(config, recovery, 'GRANT CREATE ON DATABASE ' + quote(target) + ' TO ' + quote(recovery.appRole) + ';\nGRANT CREATE ON SCHEMA public TO ' + quote(recovery.appRole) + ';', target, false);
+  stages.restoreStartedAt = now();
   await execute(recovery.tools?.pg_restore ?? config.tools.pg_restore, [...connection(recovery, target), '--single-transaction', '--exit-on-error', '--no-owner', '--no-privileges', '--role=' + recovery.appRole], {
     inputFile: join(directory, 'db.dump'), env: pgEnvironment(recovery),
   });
+  stages.restoreCompletedAt = now();
+  stages.validationStartedAt = now();
   const actual = await inventory(config, recovery, target);
   if (JSON.stringify(actual.tables) !== JSON.stringify(payload.tables) || JSON.stringify(actual.sequences) !== JSON.stringify(payload.sequences) ||
       await schemaFingerprint(config, recovery, target) !== payload.schemaFingerprint) fail('RESTORED_DATA_MISMATCH');
+  stages.validationCompletedAt = now();
   await sql(config, recovery, 'GRANT CONNECT ON DATABASE ' + quote(target) + ' TO ' + quote(recovery.appRole) + ';', 'postgres', false);
-  return { backup: metadata, target, verified: { tables: actual.tables.length, sequences: actual.sequences.length, data: true, schema: true }, restoredAt: now() };
+  return { backup: metadata, target, verified: { tables: actual.tables.length, sequences: actual.sequences.length, data: true, schema: true }, stages, restoredAt: now() };
 }
 
 async function list(config, directory) {
@@ -240,6 +247,23 @@ async function list(config, directory) {
   }
   backups.sort((a, b) => b.snapshotAt.localeCompare(a.snapshotAt));
   return { backups };
+}
+
+// Observer only: authenticate the selected snapshot and compare an existing isolated target.
+async function verify(config, id, target, directory) {
+  if (target !== 'cloudlib_recovery') fail('UNSAFE_TARGET');
+  const identity = await sql(config, config.recovery, "SELECT system_identifier::text || '|' || (current_setting('server_version_num')::int/10000)::text FROM pg_control_system();", 'postgres');
+  if (identity !== config.recovery.systemIdentifier + '|17') fail('WRONG_SERVER');
+  const { metadata, payload } = await readBackup(config, id, directory);
+  const actual = await inventory(config, config.recovery, target);
+  if (JSON.stringify(actual.tables) !== JSON.stringify(payload.tables) || JSON.stringify(actual.sequences) !== JSON.stringify(payload.sequences) ||
+      await schemaFingerprint(config, config.recovery, target) !== payload.schemaFingerprint) fail('RESTORED_DATA_MISMATCH');
+  return { backup: metadata, target, verified: { tables: actual.tables.length, sequences: actual.sequences.length, data: true, schema: true }, checkedAt: now() };
+}
+
+async function inspect(config, id, directory) {
+  const { metadata, payload } = await readBackup(config, id, directory);
+  return { backup: metadata, inventory: { tables: payload.tables, sequences: payload.sequences, schemaFingerprint: payload.schemaFingerprint } };
 }
 
 async function scanRetained(config, directory) {
@@ -297,13 +321,13 @@ async function daily(config, directory) {
 
 async function main() {
   const [command, ...args] = process.argv.slice(2);
-  if (!['create', 'restore', 'list', 'daily', 'health'].includes(command) || args.length % 2) fail('USAGE');
+  if (!['create', 'restore', 'verify', 'inspect', 'list', 'daily', 'health'].includes(command) || args.length % 2) fail('USAGE');
   const options = {};
   for (let i = 0; i < args.length; i += 2) {
     if (!['--config', '--id', '--target'].includes(args[i]) || options[args[i]]) fail('USAGE');
     options[args[i]] = args[i + 1];
   }
-  if (!isAbsolute(options['--config'] ?? '') || (command === 'restore' ? !backupPattern.test(options['--id'] ?? '') || !options['--target'] : options['--id'] || options['--target'])) fail('USAGE');
+  if (!isAbsolute(options['--config'] ?? '') || (['restore', 'verify'].includes(command) ? !backupPattern.test(options['--id'] ?? '') || !options['--target'] : command === 'inspect' ? !backupPattern.test(options['--id'] ?? '') || options['--target'] : options['--id'] || options['--target'])) fail('USAGE');
   const config = JSON.parse(await readFile(options['--config'], 'utf8'));
   if (config.formatVersion !== 1 || !isAbsolute(config.runtimeDir ?? '') || !config.logicalSource || !config.app?.image || !config.app?.commit ||
       !isAbsolute(config.backupDir ?? '') || !config.encryption?.recipient || !isAbsolute(config.encryption?.identityFile ?? '') ||
@@ -330,7 +354,7 @@ async function main() {
     // shortcut: abrupt shutdown retains the lock; inspect owner/process before operator removal.
     if (exclusive) await writeFile(join(lock, 'owner.json'), JSON.stringify({ pid: process.pid, startedAt: now(), command }), { mode: 0o600, flag: 'wx' });
     directory = await mkdtemp(join(config.runtimeDir, 'transient-'));
-    const result = command === 'health' ? await health(config, directory) : command === 'daily' ? await daily(config, directory) : command === 'create' ? await create(config, directory) : command === 'restore' ? await restore(config, options['--id'], options['--target'], directory) : await list(config, directory);
+    const result = command === 'inspect' ? await inspect(config, options['--id'], directory) : command === 'verify' ? await verify(config, options['--id'], options['--target'], directory) : command === 'health' ? await health(config, directory) : command === 'daily' ? await daily(config, directory) : command === 'create' ? await create(config, directory) : command === 'restore' ? await restore(config, options['--id'], options['--target'], directory) : await list(config, directory);
     return { formatVersion: 1, status: 'ok', command, ...result };
   } finally {
     // Only this invocation's private plaintext working directory is removed.
