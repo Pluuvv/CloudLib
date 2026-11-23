@@ -7,7 +7,7 @@ COPY src src
 RUN mvn -B package -DskipTests quarkus:build
 
 # Stage 2: Minimal Production Runtime
-FROM registry.access.redhat.com/ubi9/openjdk-21-runtime:1.24
+FROM registry.access.redhat.com/ubi9/openjdk-21-runtime:1.24@sha256:80663340693d8863d518116b9382f758364c5394a41cf549eef6240ebd9e67af
 ENV LANGUAGE='en_US:en'
 
 COPY --from=build --chown=185 /workspace/target/quarkus-app/lib/ /deployments/lib/
