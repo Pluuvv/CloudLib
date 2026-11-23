@@ -1,8 +1,8 @@
 import { spawn } from 'node:child_process';
 import { createReadStream, createWriteStream } from 'node:fs';
-import { mkdir, mkdtemp, readFile, writeFile, rename, rm, stat, copyFile, readdir, chmod } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, writeFile, rename, rm, stat, copyFile, readdir, chmod, lstat, realpath, unlink } from 'node:fs/promises';
 import { constants } from 'node:fs';
-import { join, isAbsolute } from 'node:path';
+import { join, isAbsolute, resolve } from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import { pipeline } from 'node:stream/promises';
 
@@ -126,19 +126,22 @@ async function decrypt(config, encrypted, directory) {
   await execute(config.tools.pg_restore, ['--list'], { inputFile: join(directory, 'db.dump') });
   return payload;
 }
-function validateMetadata(config, metadata, id) {
+function validateMetadata(config, metadata, id, retained = false) {
   if (metadata.formatVersion !== 1 || metadata.backupId !== id || metadata.logicalSource !== config.logicalSource ||
       metadata.archiveName !== id + '.age' || metadata.pgMajor !== 17 || !Number.isFinite(Date.parse(metadata.localVerifiedAt)) ||
       !Number.isFinite(Date.parse(metadata.localPublishedAt)) || !/^[a-f0-9]{64}$/.test(metadata.sha256) ||
       !Number.isSafeInteger(metadata.sizeBytes) || metadata.sizeBytes <= 0) fail('INVALID_METADATA');
   const age = Date.now() - Date.parse(metadata.snapshotAt);
-  if (!Number.isFinite(age) || age < -60000 || age > config.maxAgeHours * 3600000) fail('STALE_BACKUP');
+  if (!Number.isFinite(age) || age < -60000 || (!retained && age > config.maxAgeHours * 3600000)) fail('STALE_BACKUP');
 }
-async function readBackup(config, id, directory) {
+async function readBackup(config, id, directory, retained = false) {
+  for (const suffix of ['.json', '.age']) {
+    if (!(await lstat(join(config.backupDir, id + suffix))).isFile()) fail('UNSAFE_BACKUP_FILE');
+  }
   const metadataFile = join(directory, 'metadata.json');
   await copyFile(join(config.backupDir, id + '.json'), metadataFile, constants.COPYFILE_EXCL);
   const metadata = JSON.parse(await readFile(metadataFile, 'utf8'));
-  validateMetadata(config, metadata, id);
+  validateMetadata(config, metadata, id, retained);
   const encrypted = join(directory, 'readback.age');
   await copyFile(join(config.backupDir, metadata.archiveName), encrypted, constants.COPYFILE_EXCL);
   if ((await stat(encrypted)).size !== metadata.sizeBytes || await hashFile(encrypted) !== metadata.sha256) fail('CHECKSUM_MISMATCH');
@@ -239,9 +242,62 @@ async function list(config, directory) {
   return { backups };
 }
 
+async function scanRetained(config, directory) {
+  const backups = [], rejected = [];
+  for (const file of await readdir(config.backupDir)) {
+    const id = file.endsWith('.json') ? file.slice(0, -5) : '';
+    if (!backupPattern.test(id)) continue;
+    const temporary = await mkdtemp(join(directory, 'retained-'));
+    try { backups.push((await readBackup(config, id, temporary, true)).metadata); }
+    catch { rejected.push(id); }
+    finally { await rm(temporary, { recursive: true, force: true }); }
+  }
+  backups.sort((a, b) => Date.parse(b.snapshotAt) - Date.parse(a.snapshotAt));
+  return { backups, rejected };
+}
+
+async function writeStatus(config, lastAttempt, scan) {
+  const backup = scan.backups[0] ?? null;
+  const ageHours = backup ? (Date.now() - Date.parse(backup.snapshotAt)) / 3600000 : null;
+  const status = { formatVersion: 1, checkedAt: now(), lastAttempt, lastValid: backup, ageHours,
+    rpoMet: ageHours !== null && ageHours >= -1/60 && ageHours <= 24, rejected: scan.rejected };
+  const temporary = join(config.backupDir, '.backup-status-' + randomUUID() + '.partial');
+  await writeFile(temporary, JSON.stringify(status), { mode: 0o600, flag: 'wx' });
+  await rename(temporary, join(config.backupDir, 'backup-status.json'));
+  return status;
+}
+
+async function health(config, directory) {
+  let lastAttempt = null;
+  try { lastAttempt = JSON.parse(await readFile(join(config.backupDir, 'backup-status.json'), 'utf8')).lastAttempt ?? null; } catch {}
+  return { health: await writeStatus(config, lastAttempt, await scanRetained(config, directory)) };
+}
+
+async function daily(config, directory) {
+  let result, failure;
+  try { result = await create(config, directory); } catch (error) { failure = error; }
+  const scan = await scanRetained(config, directory);
+  const deleted = [];
+  if (!failure) {
+    for (const backup of scan.backups.slice(1)) {
+      if (Date.now() - Date.parse(backup.snapshotAt) <= 7 * 24 * 3600000) continue;
+      // Only authenticated owned regular pairs are removed; never the newest valid copy.
+      for (const suffix of ['.json', '.age']) {
+        if (!(await lstat(join(config.backupDir, backup.backupId + suffix))).isFile()) fail('UNSAFE_BACKUP_FILE');
+      }
+      await unlink(join(config.backupDir, backup.backupId + '.json'));
+      await unlink(join(config.backupDir, backup.archiveName));
+      deleted.push(backup.backupId);
+    }
+  }
+  await writeStatus(config, { status: failure ? 'error' : 'ok', at: now(), ...(failure ? { code: /^[A-Z_]+$/.test(failure.message) ? failure.message : 'OPERATION_FAILED' } : {}) }, scan);
+  if (failure) throw failure;
+  return { ...result, retention: { days: 7, deleted } };
+}
+
 async function main() {
   const [command, ...args] = process.argv.slice(2);
-  if (!['create', 'restore', 'list'].includes(command) || args.length % 2) fail('USAGE');
+  if (!['create', 'restore', 'list', 'daily', 'health'].includes(command) || args.length % 2) fail('USAGE');
   const options = {};
   for (let i = 0; i < args.length; i += 2) {
     if (!['--config', '--id', '--target'].includes(args[i]) || options[args[i]]) fail('USAGE');
@@ -258,14 +314,28 @@ async function main() {
   config.maxAgeHours ??= 24;
   config.tools.age_keygen ??= { command: 'age-keygen' };
   if (!Number.isFinite(config.maxAgeHours) || config.maxAgeHours <= 0 || config.maxAgeHours > 24) fail('INVALID_CONFIG');
+  await mkdir(config.backupDir, { recursive: true, mode: 0o700 });
+  const canonical = await realpath(config.backupDir);
+  const samePath = (a, b) => process.platform === 'win32' ? a.toLowerCase() === b.toLowerCase() : a === b;
+  if (!samePath(canonical, resolve(config.backupDir))) fail('UNSAFE_BACKUP_DIR');
+  config.backupDir = canonical;
   await mkdir(config.runtimeDir, { recursive: true, mode: 0o700 });
-  const directory = await mkdtemp(join(config.runtimeDir, 'transient-'));
+  const lock = join(config.backupDir, '.cloudlib-backup.lock');
+  const exclusive = ['create', 'daily', 'health'].includes(command);
+  if (exclusive) {
+    try { await mkdir(lock); } catch (error) { if (error.code === 'EEXIST') fail('BACKUP_BUSY'); throw error; }
+  }
+  let directory;
   try {
-    const result = command === 'create' ? await create(config, directory) : command === 'restore' ? await restore(config, options['--id'], options['--target'], directory) : await list(config, directory);
+    // shortcut: abrupt shutdown retains the lock; inspect owner/process before operator removal.
+    if (exclusive) await writeFile(join(lock, 'owner.json'), JSON.stringify({ pid: process.pid, startedAt: now(), command }), { mode: 0o600, flag: 'wx' });
+    directory = await mkdtemp(join(config.runtimeDir, 'transient-'));
+    const result = command === 'health' ? await health(config, directory) : command === 'daily' ? await daily(config, directory) : command === 'create' ? await create(config, directory) : command === 'restore' ? await restore(config, options['--id'], options['--target'], directory) : await list(config, directory);
     return { formatVersion: 1, status: 'ok', command, ...result };
   } finally {
     // Only this invocation's private plaintext working directory is removed.
-    await rm(directory, { recursive: true, force: true });
+    if (directory) await rm(directory, { recursive: true, force: true });
+    if (exclusive) await rm(lock, { recursive: true });
   }
 }
 try { console.log(JSON.stringify(await main())); }
