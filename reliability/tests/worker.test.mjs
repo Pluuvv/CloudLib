@@ -368,3 +368,65 @@ test(
     writeFileSync(bp, JSON.stringify(config));
   }
 );
+
+test(
+  'interrupted promoted state disconnects an already authenticated application session before terminal failure',
+  { skip: !enabled },
+  async () => {
+    await stopWorker();
+    if (sql("SELECT count(*) FROM pg_database WHERE datname='cloudlib_recovery';") === '0')
+      sql('CREATE DATABASE cloudlib_recovery;');
+    sql('ALTER ROLE fixture_app LOGIN;');
+    const app = spawn(
+      tool('psql'),
+      [
+        '-XqAt',
+        '-v',
+        'ON_ERROR_STOP=1',
+        '-h',
+        '127.0.0.1',
+        '-p',
+        '17439',
+        '-U',
+        'fixture_app',
+        '-d',
+        'cloudlib_recovery'
+      ],
+      { windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] }
+    );
+    let output = '';
+    app.stdout.on('data', (d) => (output += d));
+    app.stdin.on('error', () => {});
+    app.stdin.write('SELECT pg_backend_pid();\n');
+    try {
+      await until(() => /^\d+\s*$/.test(output));
+      const pid = Number(output.trim());
+      assert.equal(sql('SELECT count(*) FROM pg_stat_activity WHERE pid=' + pid + ';'), '1');
+      mkdirSync(join(dir, 'state'), { recursive: true });
+      writeFileSync(
+        join(dir, 'state', 'status.json'),
+        JSON.stringify({
+          formatVersion: 1,
+          target: 'cloudlib_recovery',
+          phase: 'promoted',
+          incidentId: 'reopening-window-fixture',
+          attempt: 1
+        })
+      );
+      logs = '';
+      worker = start();
+      await until(() => JSON.parse(readFileSync(join(dir, 'state', 'status.json'))).code === 'INTERRUPTED');
+      assert.equal(sql('SELECT count(*) FROM pg_stat_activity WHERE pid=' + pid + ';'), '0');
+      const rejected = run(
+        tool('psql'),
+        ['-XqAt', '-h', '127.0.0.1', '-p', '17439', '-U', 'fixture_app', '-d', 'cloudlib_recovery'],
+        'SELECT 1;'
+      );
+      assert.notEqual(rejected.status, 0);
+      assert.equal(sql("SELECT rolcanlogin FROM pg_roles WHERE rolname='fixture_app';"), 'f');
+    } finally {
+      app.kill();
+      await stopWorker();
+    }
+  }
+);

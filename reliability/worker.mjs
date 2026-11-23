@@ -215,7 +215,13 @@ async function main() {
       const old = await load();
       if (old) status = old;
       if (old?.incidentId && !['open', 'failed'].includes(old.phase)) {
-        await session.sql('ALTER ROLE ' + q(b.recovery.appRole) + ' NOLOGIN;');
+        await session.sql(
+          'ALTER ROLE ' +
+            q(b.recovery.appRole) +
+            ' NOLOGIN; SELECT pg_terminate_backend(pid,5000) FROM pg_stat_activity WHERE usename=' +
+            lit(b.recovery.appRole) +
+            ' AND pid<>pg_backend_pid();'
+        );
         await publish('failed', { code: 'INTERRUPTED', failedAt: now(), requiresOperator: true });
       } else if ((await session.sql('SELECT count(*) FROM pg_database WHERE datname=' + lit(c.target) + ';')) !== '0') {
         if (!status.incidentId) await publish('healthy');
