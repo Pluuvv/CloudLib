@@ -106,7 +106,7 @@ the same usernames. Passwords are supplied through `CLOUDLIB_MAHASISWA_PASSWORD`
 environment; they are not stored in Git. Renaming an existing lab account keeps
 its password, role, tenant and member identity so existing records remain accessible.
 
-Tenant scope comes from the verified token's `tenant` claim. If a request includes `X-Tenant`, the API only accepts it when it matches the token claim; it is never used to select another tenant. Student loan/reservation/check-in ownership is taken from `member_ref`, not from a request body. Staff-entered member references remain available only on staff-authorized workflows. The attendance QR display remains a UI simulation and is not server-validated.
+Tenant scope comes from the verified token's `tenant` claim. If a request includes `X-Tenant`, the API only accepts it when it matches the token claim; it is never used to select another tenant. Student loan/reservation/check-in ownership is taken from `member_ref`, not from a request body. Staff-entered member references remain available only on staff-authorized workflows. The student UI records check-in directly using the authenticated identity; server-issued QR tickets and single-use QR validation are not implemented.
 
 ## Evidence and milestone scope
 

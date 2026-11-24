@@ -5,39 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="cloudlib-oidc-issuer" content="http://localhost:8081/realms/cloudlib">
   <meta name="cloudlib-oidc-client-id" content="cloudlib-frontend">
-  <title>CloudLib - Campus Library Information System</title>
+  <title>CloudLib | Perpustakaan Digital Kampus</title>
   
-  <!-- Font Poppins -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
   <style>
     :root {
-      --primary: #1e40af;
-      --primary-hover: #1d4ed8;
-      --primary-light: #dbeafe;
-      --secondary: #0f766e;
-      --bg: #f8fafc;
+      --primary: #2456a6;
+      --primary-hover: #194784;
+      --primary-light: #e8f0fc;
+      --secondary: #16766e;
+      --bg: #f4f7fb;
       --surface: #ffffff;
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --danger: #ef4444;
+      --text: #172b4d;
+      --text-muted: #61728a;
+      --border: #dce4ef;
+      --danger: #c83d4d;
       --danger-light: #fee2e2;
-      --warning: #f59e0b;
+      --warning: #a9680b;
       --warning-light: #fef3c7;
-      --success: #10b981;
+      --success: #16835d;
       --success-light: #d1fae5;
-      --radius: 8px;
-      --shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      --radius: 14px;
+      --shadow: 0 4px 16px rgba(23, 43, 77, 0.06);
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
     }
 
     body {
@@ -292,45 +287,6 @@
     .dot-success { background-color: var(--success); }
     .dot-danger { background-color: var(--danger); }
 
-    /* QR Code Display Container */
-    .qr-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 10px;
-      background: #ffffff;
-      border: 1px dashed #cbd5e1;
-      border-radius: 8px;
-      text-align: center;
-    }
-    .qr-box {
-      width: 190px;
-      height: 190px;
-      background: #f1f5f9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 6px;
-      margin-bottom: 8px;
-      position: relative;
-      overflow: hidden;
-    }
-    .timer-bar-wrap {
-      width: 100%;
-      height: 6px;
-      background: #e2e8f0;
-      border-radius: 999px;
-      overflow: hidden;
-      margin: 8px 0;
-    }
-    .timer-bar {
-      height: 100%;
-      width: 100%;
-      background: var(--primary);
-      transition: width 1s linear;
-    }
-
     /* Stat Cards */
     .stat-card {
       background: var(--surface);
@@ -386,6 +342,260 @@
       .header-inner { flex-direction: column; align-items: flex-start; gap: 8px; }
       .user-profile { width: 100%; justify-content: space-between; }
     }
+
+    [hidden] { display: none !important; }
+
+    .header-inner {
+      max-width: 1280px;
+      min-height: 72px;
+      padding: 12px 24px;
+    }
+
+    .brand {
+      gap: 12px;
+      font-size: 1.25rem;
+      letter-spacing: -0.03em;
+    }
+
+    .brand-badge {
+      width: 38px;
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 11px;
+      background: #193d73;
+      letter-spacing: 0;
+    }
+
+    .tenant-badge {
+      margin-left: 8px;
+      padding: 5px 10px;
+      background: #eef4fb;
+      color: #526882;
+      font-weight: 500;
+    }
+
+    .user-profile { gap: 12px; }
+    .user-profile #userLabel { color: var(--text) !important; font-size: 0.9rem !important; }
+    .role-badge { border-radius: 999px; padding: 5px 10px; }
+
+    .container {
+      max-width: 1280px;
+      padding: 30px 24px 84px;
+    }
+
+    .workspace-intro {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 4px 0 24px;
+    }
+
+    .member-identity {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      min-width: 190px;
+      padding: 14px 18px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .member-identity span {
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .member-identity strong {
+      color: var(--text);
+      font-size: 1.05rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .eyebrow {
+      color: var(--primary);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .workspace-intro h1, .login-copy h1 {
+      color: var(--text);
+      font-size: clamp(1.6rem, 3vw, 2.15rem);
+      letter-spacing: -0.04em;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .workspace-intro p:last-child {
+      color: var(--text-muted);
+      max-width: 680px;
+      line-height: 1.6;
+    }
+
+    .nav-tabs {
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom-width: 1px;
+    }
+
+    .tab-btn {
+      padding: 12px 14px;
+      border-radius: 10px 10px 0 0;
+    }
+
+    .tab-btn.active { border-bottom-width: 3px; }
+
+    .card, .stat-card {
+      border-color: var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .card { padding: 22px; }
+    .card-title { font-size: 1.05rem; margin-bottom: 10px; }
+    .grid-2, .grid-4 { gap: 16px; }
+
+    .form-label { color: var(--text); font-size: 0.84rem; }
+    .form-input, .form-select {
+      min-height: 44px;
+      border-radius: 9px;
+      background: #fff;
+    }
+
+    .btn {
+      min-height: 42px;
+      padding: 10px 16px;
+      border-radius: 9px;
+    }
+
+    .btn:focus-visible, .form-input:focus-visible, .form-select:focus-visible,
+    .tab-btn:focus-visible, .mobile-nav-btn:focus-visible {
+      outline: 3px solid rgba(36, 86, 166, 0.28);
+      outline-offset: 2px;
+    }
+
+    .table-responsive { border: 1px solid var(--border); border-radius: 10px; }
+    table { font-size: 0.88rem; }
+    th { background: #f2f5f9; color: #52627a; padding: 12px 14px; }
+    td { padding: 13px 14px; }
+    tr:last-child td { border-bottom: 0; }
+
+    .stat-card { padding: 20px; }
+    .stat-label { color: var(--text-muted); letter-spacing: 0.02em; }
+    .stat-num { font-size: 2rem; }
+
+    .login-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(250px, 0.7fr);
+      gap: 36px;
+      align-items: center;
+      max-width: 900px;
+      margin: 56px auto;
+      padding: 40px;
+      border-radius: 18px;
+      box-shadow: 0 16px 40px rgba(23, 43, 77, 0.08);
+    }
+
+    .login-copy p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1.7;
+      max-width: 530px;
+    }
+
+    .login-features {
+      display: grid;
+      gap: 12px;
+      list-style: none;
+      margin-top: 24px;
+    }
+
+    .login-features li {
+      color: #41536d;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+    }
+
+    .login-features li::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--secondary);
+      flex: 0 0 auto;
+    }
+
+    .login-actions {
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #f8fafd;
+    }
+
+    .login-actions h2 { font-size: 1.05rem; margin-bottom: 8px; }
+    .login-actions p { color: var(--text-muted); font-size: 0.86rem; line-height: 1.55; margin-bottom: 18px; }
+    .login-actions .btn { width: 100%; }
+    .login-actions small { display: block; color: var(--text-muted); margin-top: 12px; line-height: 1.5; }
+
+    .scope-card {
+      background: #f8fafd;
+      box-shadow: none;
+    }
+
+    .scope-tenant {
+      color: var(--primary);
+      display: inline-block;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 8px 0;
+    }
+
+    .scope-card p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.6; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 768px) {
+      .header-inner { flex-direction: row; align-items: center; padding: 12px 16px; }
+      .user-profile { width: auto; }
+      .container { padding: 24px 16px 96px; }
+      .workspace-intro { align-items: stretch; flex-direction: column; margin-bottom: 18px; }
+      .login-panel { grid-template-columns: 1fr; gap: 24px; margin: 24px auto; padding: 24px; }
+      .card { padding: 18px; }
+      .mobile-nav:not([hidden]) { display: flex; padding: 10px 4px calc(10px + env(safe-area-inset-bottom)); }
+      .mobile-nav-btn { min-width: 64px; gap: 4px; }
+      .member-identity { min-width: 0; }
+    }
+
+    @media (max-width: 480px) {
+      .tenant-badge { display: none !important; }
+      .user-profile { gap: 6px; }
+      .user-profile #userLabel { max-width: 108px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .role-badge { font-size: 0.65rem; }
+      .login-panel { padding: 20px; }
+      .login-actions { padding: 18px; }
+    }
   </style>
 </head>
 <body>
@@ -403,10 +613,9 @@
         </div>
       </div>
 
-      <div class="user-profile">
-        <span id="userLabel" style="font-size:0.78rem;color:var(--text-muted);font-weight:600;">Belum masuk</span>
+      <div class="user-profile" id="userProfile" style="display:none;">
+        <span id="userLabel" style="font-size:0.78rem;color:var(--text-muted);font-weight:600;"></span>
         <span id="roleBadge" class="role-badge" style="display:none;"></span>
-        <button id="loginButton" class="btn btn-primary" onclick="loginWithKeycloak()">Masuk dengan Keycloak</button>
         <button id="logoutButton" class="btn btn-secondary" onclick="logoutFromKeycloak()" style="display:none;">Keluar</button>
       </div>
     </div>
@@ -426,34 +635,58 @@
 
   <!-- Main Container -->
   <main class="container">
-    <section id="loginPanel" class="card" style="max-width:560px;margin:32px auto;text-align:center;">
-      <h2 style="margin-bottom:8px;">Masuk ke CloudLib</h2>
-      <p style="color:var(--text-muted);margin-bottom:16px;">
-        Gunakan akun Keycloak untuk mengakses layanan sesuai tenant dan role akun.
-      </p>
-      <button class="btn btn-primary" onclick="loginWithKeycloak()">Masuk dengan Keycloak</button>
+    <section id="loginPanel" class="card login-panel">
+      <div class="login-copy">
+        <p class="eyebrow">Perpustakaan digital kampus</p>
+        <h1>Semua layanan perpustakaan, dalam satu tempat.</h1>
+        <p>Temukan koleksi, kelola pinjaman, dan gunakan fasilitas kampus dengan akses yang sesuai akun Anda.</p>
+        <ul class="login-features">
+          <li>Cari buku dan cek ketersediaan koleksi</li>
+          <li>Lihat pinjaman dan reservasi fasilitas</li>
+          <li>Akses dipisahkan berdasarkan peran dan perpustakaan</li>
+        </ul>
+      </div>
+      <div class="login-actions">
+        <h2>Masuk untuk melanjutkan</h2>
+        <p>Gunakan akun yang telah diberikan oleh pengelola perpustakaan.</p>
+        <button class="btn btn-primary" onclick="loginWithKeycloak()">Masuk dengan akun kampus</button>
+        <small>Autentikasi dilakukan melalui Keycloak CloudLib.</small>
+      </div>
+    </section>
+
+    <section id="workspaceIntro" class="workspace-intro" hidden>
+      <div>
+        <p class="eyebrow">CloudLib · ruang kerja</p>
+        <h1 id="workspaceTitle"></h1>
+        <p id="workspaceDescription"></p>
+      </div>
+      <div id="memberIdentity" class="member-identity" hidden>
+        <span>NIM / NPM mahasiswa</span>
+        <strong id="memberRefLabel"></strong>
+      </div>
     </section>
 
     <!-- Desktop Navigation Tabs -->
-    <div class="nav-tabs" id="desktopNavTabs">
+    <div class="nav-tabs" id="desktopNavTabs" hidden>
       <!-- Injected dynamically based on role -->
     </div>
 
     <!-- VIEW 1: MAHASISWA -->
-    <section id="mahasiswaSection">
+    <section id="mahasiswaSection" style="display:none;">
       
       <!-- Tab 1.1: Katalog Buku & Ketersediaan -->
       <div id="mhs-tab-katalog" class="tab-content">
         <div class="card">
           <div class="card-title">
-            <span>Katalog Koleksi dan Status Ketersediaan</span>
+            <span>Koleksi buku</span>
             <button class="btn btn-secondary" onclick="loadBooks()">Perbarui</button>
           </div>
-          <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">
-            Pencarian koleksi buku referensi perpustakaan. Status eksemplar terverifikasi otomatis.
+          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:16px;">
+            Cari berdasarkan judul, penulis, atau ISBN. Periksa jumlah eksemplar yang tersedia.
           </p>
-          <div class="form-group" style="display:flex; gap:6px;">
-            <input type="text" id="bookSearchInput" class="form-input" placeholder="Cari judul buku, penulis, atau ISBN..." onkeyup="filterBooks()">
+          <div class="form-group" style="display:flex; gap:6px; max-width:620px;">
+            <label class="sr-only" for="bookSearchInput">Cari buku</label>
+            <input type="search" id="bookSearchInput" class="form-input" placeholder="Contoh: Cloud Computing" oninput="filterBooks()">
           </div>
           <div class="table-responsive">
             <table>
@@ -473,53 +706,14 @@
         </div>
       </div>
 
-      <!-- Tab 1.2: Check-in Kehadiran (Short-Lived Dynamic QR ADR-010) -->
+      <!-- Tab 1.2: Presensi -->
       <div id="mhs-tab-checkin" class="tab-content" style="display:none;">
-        <div class="grid-2">
-          <div class="card">
-            <div class="card-title">
-              <span>Simulasi Tiket Presensi QR (ADR-010)</span>
-            </div>
-            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">
-              QR dan penghitung waktu ini hanya simulasi antarmuka. Backend belum memvalidasi token QR server atau mencegah pemakaian ulang.
-            </p>
-
-            <div class="qr-container">
-              <div class="qr-box" id="qrCanvasBox">
-                <div id="qrCodeGraphic"></div>
-              </div>
-              
-              <div style="font-family: monospace; font-size: 1rem; font-weight: 700; letter-spacing: 2px;" id="qrTokenString">
-                CL-8F92-K4
-              </div>
-
-              <div class="timer-bar-wrap">
-                <div class="timer-bar" id="qrTimerBar"></div>
-              </div>
-
-              <div style="font-size: 0.75rem; color: var(--text-muted); display:flex; justify-content:space-between; width:100%;">
-                <span>Kadaluarsa dalam: <strong id="qrCountdownText">30</strong> detik</span>
-                <span id="qrStatusBadge" class="badge badge-available">Aktif</span>
-              </div>
-            </div>
-
-            <div style="margin-top: 10px; display:flex; gap: 6px;">
-              <button class="btn btn-primary btn-block" onclick="generateNewQRToken()">Perbarui QR Simulasi</button>
-              <button class="btn btn-secondary" onclick="simulateGateScan()">Simulasikan Check-in</button>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-title">
-              <span>Prosedur Operasional Standar Presensi</span>
-            </div>
-            <ul style="padding-left: 10px; font-size: 0.82rem; line-height: 1.6; color: var(--text-muted); list-style-position: inside;">
-              <li>Kode pada halaman ini dibuat lokal untuk demo visual, bukan tiket presensi yang ditandatangani server.</li>
-              <li>API mencatat check-in berdasarkan identitas mahasiswa yang sudah terautentikasi.</li>
-              <li>Validasi tiket QR server, masa berlaku, dan pencegahan pemakaian ulang belum tersedia.</li>
-              <li>Jika perangkat mengalami kendala daya atau kamera, hubungi petugas meja sirkulasi untuk input nomor pokok mahasiswa secara manual.</li>
-            </ul>
-          </div>
+        <div class="card">
+          <div class="card-title"><span>Catat kehadiran</span></div>
+          <p style="color:var(--text-muted); line-height:1.6; margin-bottom:18px;">
+            Kehadiran dicatat atas nama akun mahasiswa yang sedang masuk. QR presensi belum tersedia; tombol ini mengirim check-in langsung ke layanan.
+          </p>
+          <button class="btn btn-primary" onclick="submitStudentCheckIn()">Catat kehadiran</button>
         </div>
       </div>
 
@@ -528,10 +722,10 @@
         <div class="grid-2">
           <div class="card">
             <div class="card-title">
-              <span>Formulir Pemesanan Slot Komputer</span>
+              <span>Reservasi komputer</span>
             </div>
-            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">
-              Pencegahan bentrok jadwal (QS02): Sistem menolak reservasi pada unit dan slot waktu yang telah terisi.
+            <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:16px;">
+              Pilih komputer dan waktu yang tersedia. Sistem akan menolak jadwal yang sudah dipesan.
             </p>
             <div class="form-group">
               <label class="form-label">Pilih Perangkat Komputer</label>
@@ -550,7 +744,7 @@
 
           <div class="card">
             <div class="card-title">
-              <span>Daftar Unit dan Jadwal Reservasi Aktif</span>
+              <span>Jadwal reservasi</span>
               <button class="btn btn-secondary" onclick="loadComputers()">Perbarui</button>
             </div>
             <div class="table-responsive">
@@ -575,7 +769,7 @@
       <div id="mhs-tab-pinjaman" class="tab-content" style="display:none;">
         <div class="card">
           <div class="card-title">
-            <span>Daftar Pinjaman Aktif dan Riwayat Anggota</span>
+            <span>Pinjaman aktif</span>
             <button class="btn btn-secondary" onclick="loadMyLoans()">Perbarui</button>
           </div>
           <div class="table-responsive">
@@ -583,9 +777,9 @@
               <thead>
                 <tr>
                   <th>Nomor Transaksi</th>
-                  <th>Barcode Eksemplar</th>
-                  <th>Tanggal Pinjam</th>
-                  <th>Batas Pengembalian (14 Hari)</th>
+                  <th>Kode eksemplar</th>
+                  <th>Tanggal pinjam</th>
+                  <th>Batas pengembalian</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -606,67 +800,51 @@
         <!-- Form Peminjaman Buku -->
         <div class="card">
           <div class="card-title">
-            <span>Formulir Peminjaman Koleksi</span>
+            <span>Catat peminjaman</span>
           </div>
-          <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">
-            Perekaman sirkulasi keluar dengan mencatat barcode buku dan nomor identitas anggota.
+          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:16px;">
+            Masukkan kode eksemplar dan nomor anggota. Masa peminjaman adalah 14 hari.
           </p>
           <div class="form-group">
-            <label class="form-label">Barcode Eksemplar Buku</label>
+            <label class="form-label">Kode eksemplar</label>
             <input type="text" id="borrowBarcode" class="form-input" placeholder="Contoh: UPN-CC-001">
           </div>
           <div class="form-group">
-            <label class="form-label">Nomor Induk / NPM Mahasiswa</label>
+            <label class="form-label">Nomor anggota (NPM)</label>
             <input type="text" id="borrowMemberRef" class="form-input" placeholder="Contoh: 2410511001">
           </div>
-          <button class="btn btn-primary btn-block" onclick="submitBorrow()">
-            Simpan Peminjaman (Masa Pinjam 14 Hari)
-          </button>
+          <button class="btn btn-primary btn-block" onclick="submitBorrow()">Catat peminjaman</button>
         </div>
 
         <!-- Form Pengembalian Buku & Kondisi Fisik -->
         <div class="card">
           <div class="card-title">
-            <span>Formulir Pengembalian dan Verifikasi Fisik</span>
+            <span>Catat pengembalian</span>
           </div>
-          <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">
-            Verifikasi fisik buku saat pengembalian untuk pembaruan inventaris koleksi.
+          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:16px;">
+            Masukkan barcode eksemplar untuk menyelesaikan pengembalian.
           </p>
           <div class="form-group">
-            <label class="form-label">Barcode Eksemplar Buku</label>
+            <label class="form-label">Kode eksemplar</label>
             <input type="text" id="returnBarcode" class="form-input" placeholder="Contoh: UPN-CC-001">
           </div>
-          <div class="form-group">
-            <label class="form-label">Kondisi Fisik Koleksi</label>
-            <select id="bookCondition" class="form-select">
-              <option value="BAIK">Kondisi Baik / Utuh</option>
-              <option value="RUSAK_RINGAN">Rusak Ringan (Lipatan / Coretan)</option>
-              <option value="RUSAK_BERAT">Rusak Berat (Robek / Jilid Lepas)</option>
-              <option value="HILANG">Hilang (Tidak Dapat Diserahkan)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Keterangan Tambahan Petugas</label>
-            <input type="text" id="returnNotes" class="form-input" placeholder="Keterangan opsional petugas">
-          </div>
-          <button class="btn btn-primary btn-block" style="background:#0f766e;" onclick="submitReturn()">
-            Simpan Pengembalian Koleksi
+          <button class="btn btn-primary btn-block" style="background:#16766e;" onclick="submitReturn()">
+            Selesaikan pengembalian
           </button>
         </div>
 
         <!-- Input NPM Cadangan Check-in (Fallback) -->
         <div class="card" style="grid-column: 1 / -1;">
           <div class="card-title">
-            <span>Input Cadangan Presensi Kehadiran (Fallback Check-in)</span>
+            <span>Catat presensi manual</span>
           </div>
-          <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">
-            Layanan presensi alternatif bagi mahasiswa yang mengalami kendala teknis pada perangkat ponsel.
+          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:16px;">
+            Catat kehadiran atas nama anggota yang tidak dapat menggunakan aplikasinya.
           </p>
           <div style="display:flex; gap:6px; max-width:550px;">
-            <input type="text" id="fallbackNPM" class="form-input" placeholder="Ketik Nomor Pokok Mahasiswa (NPM)...">
-            <button class="btn btn-secondary" onclick="submitFallbackCheckIn()">
-              Catat Kehadiran
-            </button>
+            <label class="sr-only" for="fallbackNPM">Nomor anggota mahasiswa</label>
+            <input type="text" id="fallbackNPM" class="form-input" placeholder="Nomor anggota mahasiswa">
+            <button class="btn btn-secondary" onclick="submitFallbackCheckIn()">Catat presensi</button>
           </div>
         </div>
 
@@ -675,28 +853,26 @@
 
     <!-- VIEW 3: ADMIN & PENGELOLA (Executive Dashboard) -->
     <section id="adminSection" style="display:none;">
-      
-      <!-- KPI Metric Summary -->
-      <div class="grid-4" style="margin-bottom:10px;">
+      <div class="grid-4" style="margin-bottom:16px;">
         <div class="stat-card">
-          <span class="stat-label">TOTAL JUDUL BUKU</span>
+          <span class="stat-label">Judul buku</span>
           <span class="stat-num" id="statTotalBooks">-</span>
-          <span style="font-size:0.75rem; color:var(--text-muted);">Koleksi terdaftar</span>
+          <span style="font-size:0.82rem; color:var(--text-muted);">Jumlah judul terdaftar</span>
         </div>
         <div class="stat-card">
-          <span class="stat-label">TOTAL EKSEMPLAR</span>
+          <span class="stat-label">Eksemplar</span>
           <span class="stat-num" id="statTotalCopies">-</span>
-          <span style="font-size:0.75rem; color:var(--success);">Tersedia: <strong id="statAvailCopies">-</strong></span>
+          <span style="font-size:0.82rem; color:var(--success);">Tersedia: <strong id="statAvailCopies">-</strong></span>
         </div>
         <div class="stat-card">
-          <span class="stat-label">PINJAMAN AKTIF</span>
+          <span class="stat-label">Pinjaman aktif</span>
           <span class="stat-num" id="statActiveLoans">-</span>
-          <span style="font-size:0.75rem; color:var(--warning);">Beredar di anggota</span>
+          <span style="font-size:0.82rem; color:var(--warning);">Sedang dipinjam anggota</span>
         </div>
         <div class="stat-card">
-          <span class="stat-label">TOTAL KUNJUNGAN</span>
+          <span class="stat-label">Kunjungan</span>
           <span class="stat-num" id="statTotalVisitors">-</span>
-          <span style="font-size:0.75rem; color:var(--text-muted);">Reservasi PC: <strong id="statReservations">-</strong></span>
+          <span style="font-size:0.82rem; color:var(--text-muted);">Reservasi komputer: <strong id="statReservations">-</strong></span>
         </div>
       </div>
 
@@ -704,13 +880,13 @@
         <!-- Visual Bar Utilisasi -->
         <div class="card">
           <div class="card-title">
-            <span>Rasio Ketersediaan Koleksi</span>
+            <span>Ketersediaan koleksi</span>
             <button class="btn btn-secondary" onclick="loadDashboard()">Perbarui</button>
           </div>
           <div style="margin: 10px 0;">
             <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:600; margin-bottom:4px;">
-              <span>Rasio Buku Tersedia vs Dipinjam</span>
-              <span id="availRatioLabel">0% Tersedia</span>
+              <span>Eksemplar yang tersedia</span>
+              <span id="availRatioLabel">Memuat...</span>
             </div>
             <div style="height:12px; background:#fee2e2; border-radius:999px; overflow:hidden; display:flex;">
               <div id="availProgressBar" style="background:#10b981; width:50%; transition:width 0.5s;"></div>
@@ -722,17 +898,11 @@
           </div>
         </div>
 
-        <!-- Multi-Tenancy Info & Token Inspector -->
-        <div class="card">
-          <div class="card-title">
-            <span>Identitas Sesi Keycloak (ADR-012)</span>
-          </div>
-          <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">
-            Sesuai ADR-012, frontend tidak mengirim parameter <code style="background:#f1f5f9;padding:2px 4px;border-radius:4px;">tenant_id</code>. Tenant diekstraksi dari klaim token identitas berikut:
-          </p>
-          <div style="background:#0f172a; color:#38bdf8; padding:10px; border-radius:6px; font-family:monospace; font-size:0.75rem; overflow-x:auto;" id="jwtTokenInspector">
-            <!-- Simulated JWT claim -->
-          </div>
+        <div class="card scope-card">
+          <div class="card-title"><span>Lingkup data</span></div>
+          <p>Ringkasan ini hanya menampilkan data perpustakaan yang terkait dengan akun Anda.</p>
+          <strong id="activeTenantLabel" class="scope-tenant"></strong>
+          <p>Data dari perpustakaan lain tidak ditampilkan di ruang kerja ini.</p>
         </div>
       </div>
 
@@ -741,7 +911,7 @@
   </main>
 
   <!-- Mobile Bottom Navigation Bar -->
-  <nav class="mobile-nav" id="mobileNav">
+  <nav class="mobile-nav" id="mobileNav" hidden aria-label="Navigasi mahasiswa">
     <!-- Populated based on role -->
   </nav>
 
@@ -757,8 +927,6 @@
     let accessToken = null;
     let idToken = null;
     let currentUser = null;
-    let qrTimerInterval = null;
-    let qrSecondsLeft = 30;
 
     let cachedBooks = [];
     let cachedCopies = [];
@@ -920,8 +1088,7 @@
         role,
         tenant: claims.tenant,
         tenantName: claims.tenant_name || claims.tenant,
-        memberRef: claims.member_ref || null,
-        claims
+        memberRef: claims.member_ref || null
       };
       showLoggedInApp();
     }
@@ -939,48 +1106,62 @@
       currentUser = null;
       accessToken = null;
       idToken = null;
-      if (qrTimerInterval) clearInterval(qrTimerInterval);
-      document.getElementById("loginPanel").style.display = "block";
-      document.getElementById("loginButton").style.display = "inline-flex";
+      document.getElementById("loginPanel").hidden = false;
+      document.getElementById("workspaceIntro").hidden = true;
+      document.getElementById("memberIdentity").hidden = true;
+      document.getElementById("memberRefLabel").textContent = "";
+      document.getElementById("userProfile").style.display = "none";
       document.getElementById("logoutButton").style.display = "none";
-      document.getElementById("userLabel").innerText = "Belum masuk";
       document.getElementById("tenantDisplay").style.display = "none";
       document.getElementById("roleBadge").style.display = "none";
       document.getElementById("mahasiswaSection").style.display = "none";
       document.getElementById("petugasSection").style.display = "none";
       document.getElementById("adminSection").style.display = "none";
       document.getElementById("desktopNavTabs").innerHTML = "";
+      document.getElementById("desktopNavTabs").hidden = true;
       document.getElementById("mobileNav").innerHTML = "";
-      document.getElementById("jwtTokenInspector").textContent = "";
+      document.getElementById("mobileNav").hidden = true;
     }
 
     function showLoggedInApp() {
-      document.getElementById("loginPanel").style.display = "none";
-      document.getElementById("loginButton").style.display = "none";
+      document.getElementById("loginPanel").hidden = true;
+      document.getElementById("workspaceIntro").hidden = false;
+      document.getElementById("userProfile").style.display = "flex";
       document.getElementById("logoutButton").style.display = "inline-flex";
       document.getElementById("userLabel").innerText = currentUser.name;
       document.getElementById("tenantDisplay").style.display = "inline-flex";
       document.getElementById("tenantNameLabel").innerText = currentUser.tenantName;
       const roleBadge = document.getElementById("roleBadge");
-      roleBadge.innerText = currentUser.role.toUpperCase();
+      const roleLabels = { mahasiswa: "Mahasiswa", petugas: "Petugas", admin: "Admin" };
+      roleBadge.innerText = roleLabels[currentUser.role];
       roleBadge.className = `role-badge role-${currentUser.role}`;
       roleBadge.style.display = "inline-flex";
+
+      const workspaceCopy = {
+        mahasiswa: ["Layanan mahasiswa", "Cari buku, pantau pinjaman, dan pesan fasilitas perpustakaan."],
+        petugas: ["Meja sirkulasi", "Catat peminjaman, pengembalian, dan presensi anggota."],
+        admin: ["Ringkasan perpustakaan", "Pantau koleksi dan aktivitas pada perpustakaan Anda."]
+      }[currentUser.role];
+      document.getElementById("workspaceTitle").innerText = workspaceCopy[0];
+      document.getElementById("workspaceDescription").innerText = workspaceCopy[1];
+      document.getElementById("activeTenantLabel").innerText = currentUser.tenantName;
+      const memberIdentity = document.getElementById("memberIdentity");
+      memberIdentity.hidden = currentUser.role !== "mahasiswa";
+      if (currentUser.role === "mahasiswa") {
+        document.getElementById("memberRefLabel").textContent = currentUser.memberRef;
+      }
 
       document.getElementById("mahasiswaSection").style.display = currentUser.role === "mahasiswa" ? "block" : "none";
       document.getElementById("petugasSection").style.display = currentUser.role === "petugas" ? "block" : "none";
       document.getElementById("adminSection").style.display = currentUser.role === "admin" ? "block" : "none";
 
       renderNavTabs();
-      updateTokenInspector();
 
       if (currentUser.role === "mahasiswa") {
         showMhsTab("katalog");
         loadBooks();
         loadComputers();
         loadMyLoans();
-        startQRTimer();
-      } else if (currentUser.role === "petugas") {
-        showAlert("info", "Akses Meja Sirkulasi", `Sesi aktif: ${currentUser.name}. Anda dapat memproses peminjaman dan pengembalian.`);
       } else if (currentUser.role === "admin") {
         loadDashboard();
       }
@@ -1010,13 +1191,16 @@
       const mobileNav = document.getElementById("mobileNav");
       desktopTabs.innerHTML = "";
       mobileNav.innerHTML = "";
+      const hasStudentNavigation = currentUser.role === "mahasiswa";
+      desktopTabs.hidden = !hasStudentNavigation;
+      mobileNav.hidden = !hasStudentNavigation;
 
-      if (currentUser.role === "mahasiswa") {
+      if (hasStudentNavigation) {
         const tabs = [
-          { id: "katalog", label: "Katalog dan Koleksi" },
-          { id: "checkin", label: "Presensi QR (ADR-010)" },
-          { id: "komputer", label: "Reservasi Komputer (QS02)" },
-          { id: "pinjaman", label: "Pinjaman Saya" }
+          { id: "katalog", label: "Koleksi buku", mobileLabel: "Koleksi" },
+          { id: "checkin", label: "Presensi ke perpustakaan", mobileLabel: "Presensi" },
+          { id: "komputer", label: "Reservasi komputer", mobileLabel: "Komputer" },
+          { id: "pinjaman", label: "Pinjaman saya", mobileLabel: "Pinjaman" }
         ];
 
         tabs.forEach((t, i) => {
@@ -1032,7 +1216,7 @@
           const mBtn = document.createElement("button");
           mBtn.className = `mobile-nav-btn ${i === 0 ? 'active' : ''}`;
           mBtn.id = `mob-tab-${t.id}`;
-          mBtn.innerText = t.label.split(' ')[0];
+          mBtn.innerText = t.mobileLabel;
           mBtn.onclick = () => showMhsTab(t.id);
           mobileNav.appendChild(mBtn);
         });
@@ -1112,7 +1296,11 @@
       tbody.innerHTML = "";
 
       if (books.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:10px;">Tidak ada koleksi buku yang ditemukan untuk tenant ${currentUser.tenantName}.</td></tr>`;
+        const query = document.getElementById("bookSearchInput").value.trim();
+        const emptyMessage = query
+          ? "Tidak ada buku yang cocok dengan pencarian."
+          : `Belum ada koleksi buku untuk ${escapeHtml(currentUser.tenantName)}.`;
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:18px;">${emptyMessage}</td></tr>`;
         return;
       }
 
@@ -1158,72 +1346,14 @@
     }
 
     // ==========================================
-    // 2. CHECK-IN QR DINAMIS (ADR-010)
+    // 2. PRESENSI MAHASISWA
     // ==========================================
-    function startQRTimer() {
-      if (qrTimerInterval) clearInterval(qrTimerInterval);
-      generateNewQRToken();
-
-      qrTimerInterval = setInterval(() => {
-        qrSecondsLeft--;
-        document.getElementById("qrCountdownText").innerText = qrSecondsLeft;
-        const pct = (qrSecondsLeft / 30) * 100;
-        document.getElementById("qrTimerBar").style.width = `${pct}%`;
-
-        if (qrSecondsLeft <= 0) {
-          generateNewQRToken();
-        }
-      }, 1000);
-    }
-
-    function generateNewQRToken() {
-      qrSecondsLeft = 30;
-      document.getElementById("qrCountdownText").innerText = "30";
-      document.getElementById("qrTimerBar").style.width = "100%";
-      document.getElementById("qrStatusBadge").innerText = "Aktif";
-      document.getElementById("qrStatusBadge").className = "badge badge-available";
-
-      const nonce = Math.random().toString(36).substring(2, 7).toUpperCase();
-      const token = `QR-${currentUser.tenant.toUpperCase()}-${currentUser.memberRef}-${nonce}`;
-
-      document.getElementById("qrTokenString").innerText = token;
-      drawMockQRGraphic(token);
-    }
-
-    function drawMockQRGraphic(text) {
-      const box = document.getElementById("qrCodeGraphic");
-      let pattern = `<svg width="170" height="170" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
-      pattern += `<rect width="100" height="100" fill="#ffffff" />`;
-      // Position markers
-      pattern += `<rect x="5" y="5" width="25" height="25" fill="#0f172a" rx="2" />`;
-      pattern += `<rect x="9" y="9" width="17" height="17" fill="#ffffff" rx="1" />`;
-      pattern += `<rect x="13" y="13" width="9" height="9" fill="#0f172a" />`;
-
-      pattern += `<rect x="70" y="5" width="25" height="25" fill="#0f172a" rx="2" />`;
-      pattern += `<rect x="74" y="9" width="17" height="17" fill="#ffffff" rx="1" />`;
-      pattern += `<rect x="78" y="13" width="9" height="9" fill="#0f172a" />`;
-
-      pattern += `<rect x="5" y="70" width="25" height="25" fill="#0f172a" rx="2" />`;
-      pattern += `<rect x="9" y="74" width="17" height="17" fill="#ffffff" rx="1" />`;
-      pattern += `<rect x="13" y="78" width="9" height="9" fill="#0f172a" />`;
-
-      for (let i = 0; i < 50; i++) {
-        const x = 10 + (Math.sin(text.charCodeAt(i % text.length) * (i + 1)) * 40 + 40);
-        const y = 10 + (Math.cos(text.charCodeAt(i % text.length) * (i + 2)) * 40 + 40);
-        pattern += `<rect x="${Math.floor(x)}" y="${Math.floor(y)}" width="5" height="5" fill="#1e40af" rx="1" />`;
-      }
-      pattern += `</svg>`;
-      box.innerHTML = pattern;
-    }
-
-    async function simulateGateScan() {
+    async function submitStudentCheckIn() {
       const res = await apiRequest("/attendance/checkin", "POST", {});
       if (res.ok) {
-        showAlert("success", "Presensi Berhasil", `Presensi tercatat pada tenant ${currentUser.tenantName}. ID: ${res.data.checkInId}`);
-        document.getElementById("qrStatusBadge").innerText = "Sudah Dipakai";
-        document.getElementById("qrStatusBadge").className = "badge badge-unavailable";
+        showAlert("success", "Kehadiran tercatat", `Check-in berhasil disimpan untuk ${currentUser.name}.`);
       } else {
-        handleApiError(res, "Gagal memproses presensi gerbang");
+        handleApiError(res, "Gagal mencatat kehadiran");
       }
     }
 
@@ -1357,19 +1487,16 @@
 
     async function submitReturn() {
       const barcode = document.getElementById("returnBarcode").value.trim();
-      const condition = document.getElementById("bookCondition").value;
-      const notes = document.getElementById("returnNotes").value.trim();
 
       if (!barcode) {
-        showAlert("warning", "Barcode Kosong", "Isi atau scan barcode buku yang akan dikembalikan.");
+        showAlert("warning", "Kode eksemplar diperlukan", "Masukkan kode eksemplar yang akan dikembalikan.");
         return;
       }
 
       const res = await apiRequest("/loans/return", "POST", { barcode });
       if (res.ok) {
-        showAlert("success", "Pengembalian Berhasil", `Koleksi ${barcode} telah dikembalikan. Kondisi: ${condition}. ${notes ? 'Catatan: ' + notes : ''}`);
+        showAlert("success", "Pengembalian tercatat", `Eksemplar ${barcode} berhasil dikembalikan.`);
         document.getElementById("returnBarcode").value = "";
-        document.getElementById("returnNotes").value = "";
       } else {
         handleApiError(res, "Pengembalian Gagal");
       }
@@ -1409,16 +1536,13 @@
       document.getElementById("statTotalVisitors").innerText = d.totalVisitors;
       document.getElementById("statReservations").innerText = d.totalReservations;
 
-      const totalCopies = d.totalCopies || 1;
+      const totalCopies = d.totalCopies || 0;
       const avail = d.availableCopies || 0;
-      const pct = Math.round((avail / totalCopies) * 100);
+      const pct = totalCopies === 0 ? 0 : Math.round((avail / totalCopies) * 100);
       document.getElementById("availProgressBar").style.width = `${pct}%`;
-      document.getElementById("availRatioLabel").innerText = `${pct}% Tersedia (${avail} dari ${totalCopies})`;
-    }
-
-    function updateTokenInspector() {
-      const inspector = document.getElementById("jwtTokenInspector");
-      inspector.textContent = JSON.stringify(currentUser.claims, null, 2);
+      document.getElementById("availRatioLabel").innerText = totalCopies === 0
+        ? "Belum ada eksemplar"
+        : `${pct}% tersedia (${avail} dari ${totalCopies})`;
     }
 
     // ==========================================
