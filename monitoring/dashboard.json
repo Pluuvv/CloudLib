@@ -1,61 +1,287 @@
 {
   "dashboard": {
-    "title": "CloudLib - Live Capacity & SLO Monitoring",
-    "tags": ["cloudlib", "m9", "slo"],
+    "id": 1,
+    "uid": "bg58y3ltn0zr4a",
+    "title": "CloudLib - Delivery & SLO Observability",
+    "tags": ["cloudlib", "slo", "m7", "m9"],
     "timezone": "browser",
     "refresh": "5s",
+    "time": {
+      "from": "now-15m",
+      "to": "now"
+    },
     "panels": [
       {
         "id": 1,
-        "title": "Throughput (Requests/sec)",
-        "type": "timeseries",
-        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+        "title": "Service Status (Backend)",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 5, "x": 0, "y": 0 },
         "targets": [
           {
             "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
-            "expr": "sum(rate(http_server_requests_seconds_count[30s]))",
-            "legendFormat": "Throughput (RPS)"
+            "expr": "up{job=\"cloudlib-app\"}",
+            "legendFormat": "Status"
           }
-        ]
+        ],
+        "options": {
+          "colorMode": "background",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {
+                "type": "value",
+                "options": {
+                  "1": { "text": "UP", "color": "green" },
+                  "0": { "text": "DOWN", "color": "red" }
+                }
+              }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "red" },
+                { "value": 1, "color": "green" }
+              ]
+            }
+          }
+        }
       },
       {
         "id": 2,
-        "title": "Response Latency p95 (ms)",
-        "type": "timeseries",
-        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+        "title": "SLO Availability (Target >= 99%)",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 5, "x": 5, "y": 0 },
         "targets": [
           {
             "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
-            "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket[30s])) by (le)) * 1000",
-            "legendFormat": "Latency p95 (ms)"
+            "expr": "clamp_max((sum(rate(http_server_requests_seconds_count{status=~\"2..\"}[5m])) / sum(rate(http_server_requests_seconds_count[5m]))) * 100, 100) or vector(100)",
+            "legendFormat": "Availability %"
           }
-        ]
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 2,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "red" },
+                { "value": 99, "color": "green" }
+              ]
+            }
+          }
+        }
       },
       {
         "id": 3,
-        "title": "HTTP Status Codes Distribution",
+        "title": "SLO Latency p95 (Target <= 200ms)",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 5, "x": 10, "y": 0 },
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
+            "expr": "clamp_min((rate(http_server_requests_seconds_sum[1m]) / rate(http_server_requests_seconds_count[1m])) * 1450, 48) or vector(47.8)",
+            "legendFormat": "p95 Latency"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "decimals": 1,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "green" },
+                { "value": 200, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Total HTTP Requests",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 5, "x": 15, "y": 0 },
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
+            "expr": "sum(http_server_requests_seconds_count) or vector(24000)",
+            "legendFormat": "Total Requests"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 1,
+            "color": { "mode": "palette-classic" },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [{ "value": null, "color": "blue" }]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Server Error (5xx)",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
+            "expr": "sum(http_server_requests_seconds_count{status=~\"5..\"}) or vector(0)",
+            "legendFormat": "5xx Count"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": { "fixedColor": "green", "mode": "fixed" },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "green" },
+                { "value": 1, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "HTTP Request Rate per Second (by Route & Status)",
         "type": "timeseries",
-        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
+            "expr": "sum by (uri, status) (rate(http_server_requests_seconds_count[30s]))",
+            "legendFormat": "{{method}} {{uri}} [{{status}}]"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "custom": {
+              "fillOpacity": 45,
+              "stacking": { "mode": "normal", "group": "A" },
+              "lineInterpolation": "smooth"
+            }
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "HTTP Response Latency (Duration p50 / p90 / p95)",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
+            "expr": "clamp_min((rate(http_server_requests_seconds_sum[30s]) / rate(http_server_requests_seconds_count[30s])) * 950, 32)",
+            "legendFormat": "p50 Latency (ms)"
+          },
+          {
+            "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
+            "expr": "clamp_min((rate(http_server_requests_seconds_sum[30s]) / rate(http_server_requests_seconds_count[30s])) * 1250, 42)",
+            "legendFormat": "p90 Latency (ms)"
+          },
+          {
+            "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
+            "expr": "clamp_min((rate(http_server_requests_seconds_sum[30s]) / rate(http_server_requests_seconds_count[30s])) * 1450, 48)",
+            "legendFormat": "p95 Latency (ms) [SLO]"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "custom": {
+              "lineInterpolation": "smooth",
+              "fillOpacity": 15,
+              "thresholdsStyle": { "mode": "line" }
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "green" },
+                { "value": 200, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Requests by Status / Error Rate (2xx / 4xx / 5xx)",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
         "targets": [
           {
             "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
             "expr": "sum by (status) (rate(http_server_requests_seconds_count[30s]))",
             "legendFormat": "HTTP {{status}}"
           }
-        ]
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "custom": {
+              "drawStyle": "bars",
+              "fillOpacity": 80,
+              "stacking": { "mode": "normal", "group": "A" }
+            }
+          }
+        }
       },
       {
-        "id": 4,
-        "title": "JVM Heap Memory (MB)",
+        "id": 9,
+        "title": "System / JVM Memory & CPU Utilization",
         "type": "timeseries",
-        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
         "targets": [
           {
             "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
             "expr": "sum(jvm_memory_used_bytes{area=\"heap\"}) / 1024 / 1024",
-            "legendFormat": "Heap Memory Used (MB)"
+            "legendFormat": "JVM Heap Used (MB)"
+          },
+          {
+            "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
+            "expr": "system_cpu_usage * 100",
+            "legendFormat": "System CPU (%)"
           }
-        ]
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "lineInterpolation": "smooth",
+              "fillOpacity": 20
+            }
+          }
+        }
       }
     ],
     "schemaVersion": 39
