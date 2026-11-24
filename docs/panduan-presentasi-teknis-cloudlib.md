@@ -8,9 +8,49 @@ live sebelum presentasi.
 
 ## Panduan praktis: yang ditampilkan, diketik, dan dijelaskan
 
-Bagian ini adalah naskah demo yang diikuti saat presentasi. Bagian-bagian
-bernomor setelahnya menjadi catatan teori dan jawaban teknis jika dosen bertanya
-lebih dalam.
+Bagian ini mengikuti dokumen dosen
+`Cloud_Computing_Final_Capstone_Project_Guideline.pdf`.
+Guideline menyarankan presentasi/demo **20-25 menit per tim** dan menetapkan
+milestone `M0` sampai `M8`, lalu `FINAL — Demo & Defense`.
+
+**Jangan samakan ID milestone dengan nomor folder evidence.** Folder
+`01-business` sampai `11-demo-defense` adalah struktur portfolio, bukan sebelas
+milestone. Contoh yang paling penting:
+
+| Isi | Milestone pada PDF | Folder portfolio |
+| --- | --- | --- |
+| Security / IAM | M6 | `06-security` |
+| Reliability & Recovery | M7 | `08-reliability-recovery` |
+| Capacity & FinOps | M8 | `09-capacity-finops` |
+| ADR | Utamanya bagian M1 Architecture Baseline; keputusan juga dirujuk lintas milestone | `10-decisions-adr` |
+| Demo dan technical defense | FINAL | `11-demo-defense` |
+
+Artinya, **M9 dan M10 bukan milestone pada PDF ini**. Jika laporan lokal
+capacity bernama M9, presentasikan isinya sebagai domain Capacity & FinOps
+(M8 pada guideline), sambil menyatakan nama laporan yang sekarang tersimpan.
+ADR adalah portfolio folder `10-decisions-adr`, bukan M10. M7 recovery tetap
+M7; simpan/salin evidence-nya ke folder submission bernomor 08 sesuai struktur
+portfolio. Jangan mengubah identitas atau timestamp hasil pengujian demi
+menyamakan nama.
+
+### Cara membawakan setiap milestone
+
+| Urutan | Milestone guideline | Yang ditunjukkan | Yang dijelaskan dan bukti yang dicari |
+| --- | --- | --- | --- |
+| 1 | **M0 — Case Proposal** (`01-business`) | Slide/README problem statement, persona pengguna, workflow perpustakaan, batasan lab | Siapa pengguna dan masalah operasionalnya; kenapa cloud relevan; apa indikator suksesnya. Bedakan kebutuhan bisnis dari fitur yang baru diusulkan. |
+| 2 | **M1 — Architecture Baseline** (`02-architecture`, ADR di `10-decisions-adr`) | Diagram GitDiagram lalu diagram runtime; data flow dan trust/failure boundary | Jelaskan browser → Keycloak → Quarkus API → PostgreSQL, serta Kubernetes/monitoring. Sebut trade-off modular monolith, multi-tenancy, dan keputusan desain; tunjukkan ADR berstatus accepted, bukan sekadar proposal. |
+| 3 | **M2 — Application MVP** (`03-application-data`) | UI dan satu workflow lengkap; buktikan record tersimpan dengan UI/API/database evidence yang sudah disiapkan | Jelaskan transaksi bisnis dan persistence. Tunjukkan peran yang tepat dan hasil yang bisa diamati. Jangan menambah data demo secara improvisasi. |
+| 4 | **M3 — Cloud-Native Platform** (`04-platform-kubernetes`) | Dockerfile, Deployment/Service/Ingress, probes, resource requests/limits; jalankan `kubectl get pods,svc -n cloudlib` | Terangkan container sebagai unit deployment dan peran Kubernetes. Pod `Running` saja belum membuktikan health, delivery, security, atau recovery. |
+| 5 | **M4 — Delivery Automation** (`05-ci-cd-gitops`) | CI run, image tag/digest immutable, GitOps revision, rollout/rollback evidence; cek `kubectl get applications -n argocd` | Ikuti perubahan source → test/scan → image → GitOps → cluster. Jelaskan apakah output Argo saat ini benar-benar `Synced/Healthy`; bila tidak, tunjukkan error dan evidence historis secara terpisah. |
+| 6 | **M5 — Operations & SLO** (`07-observability-slo`) | Health endpoint, Prometheus target/dashboard atau screenshot, satu definisi dan pengukuran SLI/SLO | Terangkan apa yang diukur, targetnya, dan batas sinyal. Target `UP` hanya membuktikan scrape berhasil, bukan seluruh SLO terpenuhi. |
+| 7 | **M6 — Security** (`06-security`) | Login role berbeda, penolakan akses negatif yang aman, kode `@RolesAllowed`/tenant scoping, hasil scan | Bedakan authentication, authorization, tenant isolation, secrets, dan vulnerability scan. Sebut terang bagian evidence live yang pending; jangan klaim QR anti-replay. |
+| 8 | **M7 — Reliability & Recovery** (`08-reliability-recovery`) | Laporan controlled failure, backup artifact yang disanitasi, hasil restore/validasi, RTO/RPO | Jelaskan failure yang diinjeksi, apa yang pulih, data yang hilang/selamat, dan apakah target tercapai. Untuk demo ini, gunakan bukti QS05/QS06 yang sudah ada; jangan hapus database live. |
+| 9 | **M8 — Capacity & FinOps** (`09-capacity-finops`) | Hasil load test, p95/error/throughput, CPU/memory baseline, worksheet biaya dan asumsi | Jelaskan profil beban dan keterbatasan benchmark lokal. Cost model adalah estimasi, bukan invoice; optimasi tidak boleh menghapus kontrol security/reliability. |
+| 10 | **FINAL — Demo & Defense** (`11-demo-defense`) | Jalankan skenario end-to-end, lalu jawab pertanyaan teknis lintas bagian | Setiap anggota harus bisa menjelaskan arsitektur, kontribusi, evidence, batasan, dan keputusan—bukan hanya membaca slide. |
+
+**ADR dibahas saat M1**, karena PDF menempatkan ADR dan trade-off di Architecture
+Baseline. Di akhir presentasi tunjukkan portfolio `10-decisions-adr` untuk
+menelusuri keputusan yang berlaku dan kaitannya dengan evidence lain.
 
 ### Sebelum mulai presentasi
 
@@ -37,19 +77,21 @@ curl.exe -i http://localhost:8080/q/health/ready
 
 Jangan start Quarkus kedua jika readiness sudah HTTP 200.
 
-### Naskah demo 12-15 menit
+### Run of show FINAL 20-25 menit
 
 | Waktu | Yang ditampilkan | Yang dilakukan / diketik | Yang dijelaskan |
 | --- | --- | --- | --- |
-| 0:00-1:00 | Diagram GitDiagram lalu diagram alur runtime di bagian Arsitektur | Tidak perlu command | “Ini gambaran komponen repository; diagram runtime menjelaskan interaksi pengguna, Keycloak, API, database, dan platform.” |
-| 1:00-3:00 | UI CloudLib di browser | Login mahasiswa, tunjukkan NIM/NPM, katalog, pinjaman/reservasi, dan check-in langsung jika data demo siap | “Mahasiswa memakai fitur sesuai identitasnya. Check-in saat ini memakai sesi login, bukan QR dinamis.” |
-| 3:00-4:30 | UI petugas lalu admin | Logout/login dengan akun petugas; tunjukkan workflow yang tersedia. Lalu tunjukkan dashboard dengan akun admin. | “Role menentukan fitur. Aksi penting tetap diperiksa backend, bukan hanya tombol yang disembunyikan UI.” |
-| 4:30-6:30 | Source OIDC, `TenantIdentity`, `BookResource` | Ketik pemeriksaan API anonim dari Terminal 1; buka file kode yang disebut di bawah. | “Keycloak menerbitkan identitas. API memvalidasi bearer token, membatasi role, lalu mengambil tenant/member dari claim tepercaya.” |
-| 6:30-7:30 | `LoanResource` dan migration SQL | Buka bagian peminjaman serta unique index; jangan membuat transaksi baru saat demo. | “Lock dan constraint database mencegah dua request paralel meminjam eksemplar yang sama.” |
-| 7:30-9:00 | Status pod, service, dan HPA | Jalankan perintah Kubernetes read-only dari Terminal 2. | “Deployment menjaga pod; probe mengatur readiness/liveness. HPA repo ada, tetapi status aktif harus dibuktikan dari output cluster.” |
-| 9:00-10:00 | Argo CD; Prometheus hanya jika tersedia, selain itu screenshot M5 | Cek Application Argo dan target Prometheus. | “GitOps adalah desired state dari Git. Kondisi Argo lokal terakhir bermasalah, jadi saya tampilkan status sebenarnya dan evidence historis secara terpisah.” |
-| 10:00-12:00 | Laporan recovery dan M9 | Buka laporan M7/recovery dan M9; jangan jalankan injeksi recovery atau load test panjang. | “Recovery menjelaskan RTO/RPO. Benchmark M9 menunjukkan hasil satu workload lokal, bukan jaminan kapasitas produksi.” |
-| 12:00-13:00 | Ringkasan status M6, M8, M9, M10 | Tidak perlu command | Sebutkan gap bukti M6, pemetaan M7 ke M8, asumsi M9, dan ADR M10 yang perlu dilengkapi. |
+| 0:00-2:00 | M0: problem, persona, workflow bisnis | Slide/README `01-business`; tidak perlu command | Masalah, stakeholder, kendala, cloud fit, dan indikator sukses. |
+| 2:00-4:00 | M1: GitDiagram + runtime/data-flow diagram; ADR | Buka diagram dan portfolio `10-decisions-adr` | Komponen, trust/failure boundary, tenancy, trade-off, dan alasan memilih arsitektur. |
+| 4:00-7:00 | M2: aplikasi dan data | Demo UI browser; tunjukkan satu workflow dan bukti persistence | Mulai dari login mahasiswa, katalog/pinjaman/reservasi; sebut apa yang benar-benar tersimpan. |
+| 7:00-9:00 | M3: container dan Kubernetes | Buka Dockerfile/manifests; `kubectl get pods,svc -n cloudlib` | Image, Deployment, Service, Ingress, probe, resource requests/limits. |
+| 9:00-11:00 | M4: CI/CD dan GitOps | Tunjukkan CI run, image digest/tag, GitOps revision, rollout; `kubectl get applications -n argocd` | Traceability source-to-runtime dan kondisi sync aktual, termasuk kegagalan jika ada. |
+| 11:00-13:00 | M5: operations & SLO | Health endpoint dan screenshot/dashboard Prometheus | Pilih satu SLI/SLO, terangkan pengukuran serta apa yang tidak dibuktikan oleh target `UP`. |
+| 13:00-16:00 | M6: security | Login/role, request anonim ditolak, kode backend, bukti scan yang tersedia | Authentication vs authorization, isolasi tenant, secrets, hasil dan gap bukti live. |
+| 16:00-19:00 | M7: reliability & recovery | Buka laporan QS05/QS06, restore proof dan dashboard | Failure, recovery, RTO/RPO, data yang selamat/hilang, limitasi backup. Jangan jalankan injeksi destruktif. |
+| 19:00-21:00 | M8: capacity & FinOps | Buka benchmark/worksheet capacity dan cost | Workload, p95/error/throughput, headroom dan asumsi estimasi biaya. Tegaskan report file lokal masih bernama M9. |
+| 21:00-23:00 | Final scenario + roadmap | Rangkai alur yang sudah didemokan; tunjukkan dua risiko prioritas | Ceritakan ulang dari user sampai data/platform, residual risks, dan next steps. |
+| 23:00-25:00 | Tanya jawab / individual defense | Tidak perlu command | Tiap anggota menjawab bagian yang ia kerjakan dan pertanyaan lintas arsitektur. |
 
 ### Command yang dipakai saat demo
 
@@ -328,7 +370,8 @@ Bedakan istilah berikut:
 
 - **Metric/SLI**: ukuran teramati, misalnya latency, error rate, throughput,
   penggunaan CPU, atau readiness.
-- **SLO**: target internal. M9 menggunakan latency p95 maksimum 200 ms dan
+- **SLO**: target internal. Laporan capacity (bernama M9 di repo, dipetakan ke
+  M8 pada guideline) menggunakan latency p95 maksimum 200 ms dan
   error rate yang diharapkan di bawah 1%.
 - **SLA**: komitmen formal kepada pengguna/pelanggan; hasil benchmark lokal
   saja tidak membentuk SLA.
@@ -364,16 +407,21 @@ QS06 bersifat destruktif terhadap database recovery yang dipin. **Jangan
 menjalankan ulang injeksi kehilangan database saat presentasi.** Tunjukkan
 laporan, dashboard, dan artefak yang sudah disanitasi.
 
-Ada mismatch administrasi milestone: evidence recovery berada dalam folder dan
-judul M7, sedangkan struktur yang diminta dosen menempatkan reliability/recovery
-di M8. Selaraskan folder, judul, dan evidence register sebelum pengumpulan;
-jangan mengubah tanggal atau menyebut laporan berlabel M7 sebagai folder M8
-tanpa rekonsiliasi.
+Milestone reliability/recovery pada guideline adalah **M7**, sedangkan folder
+portfolio submission adalah **`08-reliability-recovery`**. Laporan saat ini
+berjudul/tersimpan di folder `M7`; saat menyiapkan portfolio, letakkan salinan
+atau tautannya di folder evidence 08 dan jelaskan bahwa M7 adalah ID milestone,
+sedangkan 08 adalah nomor domain evidence. Jangan mengubah tanggal atau
+identitas run.
 
-## 7. Capacity planning dan FinOps
+## 7. M8 — Capacity planning dan FinOps
 
-Laporan M9 mencatat benchmark backend dengan 25 virtual users selama sekitar
-30 detik pada lima skenario berbobot:
+Evidence capacity yang saat ini tersimpan pada
+`docs/evidence/M9/M9-Evidence-Capacity-FinOps.md` mencatat benchmark backend
+dengan 25 virtual users selama sekitar 30 detik pada lima skenario berbobot.
+**Isi ini memenuhi topik M8 — Capacity & FinOps di guideline; nama file/folder
+repo saat ini masih M9.** Untuk submission, petakan ke folder `09-capacity-finops`
+tanpa mengubah fakta hasil pengujiannya.
 
 - 22.760 request;
 - throughput terukur 757,05 RPS;
@@ -400,7 +448,7 @@ Biaya per mahasiswa aktif per bulan = estimasi biaya bulanan / mahasiswa aktif
 Biaya per transaksi                = estimasi biaya bulanan / transaksi bulanan
 ```
 
-Model M9 mengestimasi biaya on-demand sekitar **US$407,58/bulan** atau
+Model pada laporan capacity mengestimasi biaya on-demand sekitar **US$407,58/bulan** atau
 **US$4.890,96/tahun**, dengan asumsi jumlah mahasiswa, volume transaksi,
 komponen cloud, dan region Jakarta yang disebut di laporan. Ini adalah model
 harga, bukan invoice cloud aktual. Penghematan committed-use juga bergantung
@@ -408,10 +456,13 @@ pada asumsi masa komitmen dan pemakaian. Ada selisih aritmetika kecil yang
 perlu dibereskan sebelum mengutip angka tahunan teroptimasi: `US$305,76 x 12`
 adalah `US$3.669,12`, sementara tabel laporan menulis `US$3.669,16`.
 
-## 8. Keputusan arsitektur dan status M10 ADR
+## 8. ADR dan keputusan arsitektur (`10-decisions-adr`)
 
 ADR (Architecture Decision Record) mencatat **mengapa** keputusan dibuat,
 alternatif yang dipertimbangkan, dan konsekuensi yang diterima. Format minimum:
+Guideline membahas ADR sebagai bagian dari **M1 — Architecture Baseline**;
+folder portfolio `10-decisions-adr` mengumpulkan keputusan yang dirujuk lintas
+milestone. Folder 10 bukan milestone M10.
 
 ```text
 Judul dan ID:
@@ -425,24 +476,62 @@ Evidence / cara verifikasi:
 ```
 
 Beberapa laporan M2/M4 menyebut nomor ADR untuk tenant scoping, konsistensi
-transaksi, dan rancangan QR. Namun, belum ditemukan paket evidence M10 yang
-terstruktur di `docs`. Sebelum menyatakan M10 selesai:
+transaksi, dan rancangan QR. Namun, belum ditemukan paket ADR/evidence yang
+terstruktur di `docs`. Sebelum menyatakan portfolio ADR lengkap:
 
 1. kumpulkan ADR yang benar-benar disepakati tim dan cek nomor duplikat;
 2. tandai keputusan lama yang hanya berupa proposal;
 3. catat konsekuensi dan bukti implementasi aktual;
 4. tandai rancangan QR sebagai belum diimplementasikan atau superseded, bukan
    keputusan fitur yang sudah delivered;
-5. tautkan ADR ke evidence M6/M8/M9 dan tanggal pengujiannya.
+5. tautkan ADR ke evidence M6/M7/M8 dan tanggal pengujiannya.
 
 Topik yang layak dicatat jika memang disepakati tim: strategi isolasi tenant,
 OIDC/PKCE dan sumber identitas tenant, constraint transaksi, promosi image
 immutable melalui GitOps, batas HPA, serta backup lokal versus backup off-site.
 Daftar ini adalah usulan topik, bukan keputusan yang telah disetujui.
 
-## 9. Runbook startup lokal
+## 9. Checklist FINAL sesuai PDF (13 langkah)
 
-### 9.1 Periksa layanan yang sudah berjalan
+Guideline meminta live, evidence-driven demo, bukan presentasi slide saja.
+Gunakan daftar ini sebagai checklist persiapan. Untuk langkah yang tidak aman
+atau tidak tersedia live, tunjukkan bukti pengujian tersimpan dan nyatakan
+batasannya.
+
+| # | Permintaan guideline | Yang ditunjukkan untuk CloudLib | Status/catatan demo |
+| --- | --- | --- | --- |
+| 1 | Jelaskan masalah bisnis dan alasan cloud relevan | Problem perpustakaan multi-tenant, workflow pengguna, batasan tim/lab, dan tujuan terukur | Pakai proposal/README; jangan sekadar menyebut “karena pakai Kubernetes”. |
+| 2 | Login dan selesaikan transaksi bisnis inti | Login sebagai mahasiswa/petugas dan jalankan satu workflow yang sudah dilatih | Pilih workflow dengan data demo yang sudah tersedia. |
+| 3 | Buktikan data tersimpan | Tunjukkan hasil dari UI/API dan bukti persistence setelah request | Siapkan bukti read-back; jangan tampilkan kredensial atau data personal sensitif. |
+| 4 | Tunjukkan workload Kubernetes dan endpoint service | `kubectl get pods,svc -n cloudlib`, readiness endpoint | Jelaskan apa yang live saat itu; jangan menyamakan pod Running dengan seluruh sistem sehat. |
+| 5 | Tunjukkan CI run dan versi immutable artifact | Buka CI run serta cocokkan commit SHA/tag/digest image ke manifest/runtime | Jika bukti hanya historis, katakan tanggal dan versi run. |
+| 6 | Tunjukkan controlled deployment/GitOps dan hasil rollout | Buka Argo Application, revision, status sync, rollout/readiness | Status lokal terakhir bermasalah dan belum mendaftarkan CloudLib sebagai Argo Application; cek lagi sebelum demo. |
+| 7 | Demonstrasikan satu aksi ditolak | Request anonim `curl.exe -i http://localhost:8080/books` atau uji role negatif yang sudah disiapkan | Anonim diharapkan `401`; role yang salah biasanya `403`. Jangan menaruh bearer token di terminal/rekaman. |
+| 8 | Tunjukkan security scan dan jelaskan finding prioritas tertinggi | Buka report Trivy yang sesuai image digest dan remediation/prioritasnya | M6 report mengatakan bukti scan masih pending; jangan klaim gate live lengkap tanpa artefak scan yang cocok dengan image. |
+| 9 | Tunjukkan health/metrics/dashboard dan jelaskan satu SLI/SLO | `/q/health/ready`, screenshot/target Prometheus, p95 SLO M8 | `UP` hanya scrape; jelaskan p95 ≤200 ms serta konteks benchmark lokal. |
+| 10 | Hentikan/gagalkan komponen terkontrol dan tunjukkan recovery | Tunjukkan laporan QS05 pod replacement dan observasi pemulihan | Jangan hapus pod live spontan; jika tidak diulang, jelas sebut ini bukti run sebelumnya. |
+| 11 | Tunjukkan backup/restore proof | Laporan QS06, validasi restore, hasil RTO/RPO | Backup ada saja bukan bukti restore; tunjukkan hasil pemulihan dan validasinya. Jangan jalankan injeksi database saat presentasi. |
+| 12 | Jelaskan resource/capacity serta asumsi FinOps | Requests/limits, benchmark 25 VU, p95/error, model biaya | Harga adalah estimasi; sebut asumsi, bukan invoice atau jaminan kapasitas. |
+| 13 | Nyatakan dua residual risks dan roadmap prioritas | Slide penutup: evidence M6/Trivy, off-site backup, Argo/GitOps live, QR belum tersedia; pilih dua prioritas | Beri owner dan langkah berikutnya yang realistis; jangan menutupi gap. |
+
+### Contoh dua risiko dan roadmap penutup
+
+Pilih dua risiko yang masih sesuai keadaan tim saat presentasi, misalnya:
+
+1. **Backup masih lokal** — prioritas: siapkan salinan off-site terenkripsi dan
+   lakukan restore drill terukur.
+2. **Status GitOps CloudLib belum terverifikasi live** — prioritas:
+   daftarkan Application pada repo/path yang benar, pulihkan Gitea bridge, lalu
+   buktikan `Synced`, `Healthy`, dan rollout.
+
+Risiko tambahan yang boleh disebut jika ditanya: QR server-issued/anti-replay
+belum ada; hasil capacity berasal dari workload lokal singkat; live Keycloak
+dan Trivy evidence perlu direkonsiliasi; serta portfolio ADR perlu dirapikan.
+Jangan menyebut semuanya sebagai sudah selesai.
+
+## 10. Runbook startup lokal
+
+### 10.1 Periksa layanan yang sudah berjalan
 
 Buka PowerShell. Gunakan path lokal berikut untuk setup laptop yang sudah
 diverifikasi sebelumnya:
@@ -470,7 +559,7 @@ Database khusus CloudLib pada laptop ini menggunakan port `55432`, terpisah
 dari PostgreSQL lab lain. Jika container atau port berbeda di laptop lain,
 sesuaikan `DB_URL`; jangan menebak password.
 
-### 9.2 Start Quarkus jika belum berjalan
+### 10.2 Start Quarkus jika belum berjalan
 
 Jalankan hanya jika app belum merespons di `localhost:8080`. Perintah ini
 mengambil password dari environment container database lokal tanpa mencetak
@@ -511,7 +600,7 @@ ke dokumen, terminal yang direkam, screenshot, atau repository. Jangan
 menjalankan `scripts/setup-keycloak-users.mjs` sebagai jalan pintas: skrip lama
 memuat kredensial hard-coded yang tidak aman untuk demo.
 
-### 9.3 Periksa Kubernetes dan Argo CD
+### 10.3 Periksa Kubernetes dan Argo CD
 
 Gunakan perintah read-only ini saat demo:
 
@@ -537,72 +626,22 @@ jangan mencetak secret ke transcript atau slide. Perintah status di atas adalah
 cara mengonfirmasi keadaan live. Jangan melakukan `apply`, mengubah replica,
 atau memicu recovery hanya untuk membuat demo tampak berhasil.
 
-## 10. Urutan demo yang disarankan
-
-### Bagian A — Produk dan data (2 menit)
-
-**Narasi:** “CloudLib mendukung katalog dan eksemplar buku, sirkulasi,
-reservasi komputer, check-in, dan ringkasan operasional per tenant.”
-
-Tunjukkan UI aktual:
-
-1. login sebagai mahasiswa dan tunjukkan NIM/NPM;
-2. cari katalog, lihat pinjaman sendiri, atau reservasi komputer;
-3. login sebagai petugas untuk workflow sirkulasi/check-in yang didukung;
-4. tunjukkan dashboard admin hanya dengan akun ber-role admin.
-
-Jangan menjanjikan kondisi buku yang tidak tersimpan atau QR anti-replay;
-presentasikan hanya field dan flow yang benar-benar didukung API.
-
-### Bagian B — Security dan tenant (2 menit)
-
-**Narasi:** “Identitas dikeluarkan Keycloak; API memvalidasi bearer token.
-Role menentukan aksi, tenant claim membatasi kumpulan data, dan `member_ref`
-membatasi data milik mahasiswa.”
-
-Tunjukkan login dan perilaku akses yang tersedia. Jika menunjukkan `401` dari
-request anonim, jelaskan bahwa automated tests juga memeriksa role dan tenant.
-Nyatakan bahwa `@TestSecurity` tests belum sendiri membuktikan seluruh alur
-token live; gunakan bukti Keycloak aktual untuk klaim tersebut.
-
-### Bagian C — Platform dan delivery (2 menit)
-
-**Narasi:** “Container menjadi unit deployment. Kubernetes menjaga pod,
-melakukan health check, dan memisahkan jaringan internal dari akses Ingress.
-GitOps seharusnya membuat perubahan manifest dapat ditinjau dan diulang.”
-
-Tunjukkan status pod, service, readiness, serta status Application Argo CD.
-Jelaskan apakah status yang terlihat live berhasil atau sedang bermasalah.
-Gunakan laporan M3/M4 untuk hasil historis penggantian pod dan pipeline; jangan
-menyamakan laporan historis dengan kondisi cluster saat ini.
-
-### Bagian D — Observability, recovery, capacity (3 menit)
-
-Tunjukkan screenshot Prometheus target M5 yang berstatus `UP`, lalu jelaskan
-bahwa itu adalah bukti scrape saat pengujian. Buka laporan M7 recovery dan
-terangkan definisi RTO/RPO tanpa menjalankan injeksi. Akhiri dengan grafik atau
-tabel M9: 25 VU, 30 detik, 757,05 RPS, p95 47,99 ms, error 0%, serta keterbatasan
-benchmark lokal.
-
-### Bagian E — Penutup dan status milestone (1 menit)
-
-**Narasi:** “Hasil yang kami klaim memiliki batas waktu dan lingkungan uji.
-Tindak lanjut kami adalah merapikan pemetaan M7 ke M8, menyelaraskan bukti
-verifikasi M6, memastikan status GitOps/HPA live, serta melengkapi ADR M10.”
-
 ## 11. Status evidence dan daftar pekerjaan sebelum submit
 
 | Area | Evidence/status yang tersedia | Yang perlu dilakukan sebelum klaim final |
 | --- | --- | --- |
+| M0 business | README dan konteks kasus tersedia; evidence formal khusus M0 belum teridentifikasi di repo aplikasi. | Siapkan stakeholder, kebutuhan, constraint, cloud fit, dan success criteria di `01-business`. |
+| M1 architecture | Diagram runtime dan referensi keputusan ada di dokumen; paket ADR formal belum ditemukan. | Lengkapi architecture view, quality scenarios, boundaries, dan ADR yang benar-benar disepakati. |
 | M2 aplikasi | Laporan MVP merekam peminjaman, pengembalian, konflik transaksi, reservasi, tenant, dan dashboard. | Jelaskan bahwa M2 adalah snapshot sebelum role authorization selesai. |
 | M3 Kubernetes | Laporan mencatat readiness dan penggantian pod pada lab. | Bedakan angka run M3 dari QS05 pada laporan recovery. |
 | M4 CI/CD/GitOps | Laporan historis mencatat test, Trivy, promosi image, Argo sync dan rollback. | Periksa pipeline serta status Argo live saat presentasi. |
 | M5 observability | Evidence Prometheus target `UP` pada saat pengukuran. | Pastikan endpoint dan dashboard masih tersedia bila akan demo live. |
 | M6 security | Implementasi OIDC/RBAC/tenant dan 20 automated tests; live evidence di laporan M6 masih pending. | Tambahkan screenshot/log token-role-tenant yang disanitasi dan bukti scan; rekonsiliasi dengan M7. |
-| M8 reliability/recovery | Hasil QS05/QS06 ada di folder/judul M7. | Pindah/salin bukti sesuai template dosen, perbarui indeks, jangan mengubah run ID atau angka. |
-| M9 capacity/FinOps | Benchmark dan model biaya tersedia; hasilnya adalah pengukuran lokal dan estimasi. | Nyatakan asumsi, jangan menyebut estimasi sebagai invoice; rapikan selisih pembulatan biaya CUD. |
-| M10 ADR | Belum ditemukan evidence M10 terstruktur; beberapa laporan menyebut ADR. | Kumpulkan keputusan yang disepakati, status, alternatif, trade-off, dan tautan evidence. |
-| UI terbaru | Perbaikan UI dan tampilan NIM/NPM ada di branch lokal. | Pastikan commit terbaru sudah ada di GitHub branch yang dipakai untuk demo. |
+| M7 reliability/recovery | Hasil QS05/QS06 tercatat di laporan `docs/evidence/M7`. | Letakkan/salin tautan ke folder portfolio `08-reliability-recovery`; jangan ubah run ID atau angka. |
+| M8 capacity/FinOps | Benchmark dan model biaya tersedia pada report lokal bernama M9; hasilnya adalah pengukuran lokal dan estimasi. | Petakan ke folder `09-capacity-finops`, nyatakan asumsi, jangan sebut estimasi sebagai invoice, dan rapikan pembulatan CUD. |
+| ADR portfolio | Beberapa laporan menyebut ADR, tetapi paket terstruktur belum ditemukan. | Susun di `10-decisions-adr`; jelaskan keputusan saat M1 dan tautkan ke evidence lintas milestone. |
+| Final demo | Runbook lokal tersedia di dokumen ini. | Pindahkan salinan/tautan demo script dan bukti yang aman ke `11-demo-defense`; semua anggota latihan Q&A. |
+| UI terbaru | Perbaikan UI dan tampilan NIM/NPM sudah dipush ke `main` pada commit `c31931c`. | Pastikan branch yang dipakai untuk demo sudah memuat commit tersebut atau yang lebih baru. |
 
 ## 12. Pertanyaan yang mungkin ditanyakan dosen
 
@@ -626,7 +665,8 @@ Mahasiswa pada tenant yang benar tetap tidak boleh menjalankan aksi admin.
 **Apa arti 757 RPS?**
 
 Itu throughput yang tercatat pada workload, runtime, durasi, dan konfigurasi
-benchmark M9. Bukan batas kapasitas produksi yang universal.
+benchmark pada laporan capacity lokal (bernama M9 di repo, dipetakan sebagai
+M8 pada guideline). Bukan batas kapasitas produksi yang universal.
 
 **Apakah target Prometheus `UP` berarti sistem sehat?**
 
@@ -653,6 +693,6 @@ lokal; off-site storage adalah batasan/pekerjaan lanjutan.
 - [M4 — Frontend dan IAM, snapshot historis](evidence/M4_RoleB_Frontend_IAM_Evidence.md)
 - [M5 — Prometheus scrape](evidence/M5/M5-Evidence-Scrape-Prometheus.md)
 - [M6 — Security implementation dan batas verifikasi](evidence/M6_Security_Implementation.md)
-- [M7 — Reliability/recovery report; perlu pemetaan ke M8](evidence/M7/M7-Evidence-Reliability-Recovery.md)
-- [M9 — Capacity dan FinOps](evidence/M9/M9-Evidence-Capacity-FinOps.md)
+- [M7 — Reliability/recovery report; simpan di portfolio folder 08](evidence/M7/M7-Evidence-Reliability-Recovery.md)
+- [Capacity & FinOps — M8 guideline, report lokal bernama M9](evidence/M9/M9-Evidence-Capacity-FinOps.md)
 - [HPA dan load-test guide](autoscaling.md)
