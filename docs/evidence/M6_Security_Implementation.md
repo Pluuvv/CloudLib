@@ -28,7 +28,7 @@ The automated suite uses Quarkus `@TestSecurity` identities to test endpoint aut
 
 The SPA now uses Authorization Code Flow with PKCE, validates the OAuth state and OIDC nonce, and keeps access tokens in memory rather than local/session storage. The UI decodes claims only for presentation; the API is responsible for cryptographic token validation and authorization.
 
-The attendance QR display and gate action remain a UI simulation. The check-in API requires an authenticated student identity, but it does not yet verify a server-issued, short-lived, single-use QR token. Do not claim QR anti-replay protection based on this implementation.
+The student UI now records check-in directly using the authenticated identity; it no longer displays a generated mock QR. The API does not yet issue or validate short-lived, single-use QR tokens. Do not claim QR anti-replay protection based on this implementation.
 
 The non-sensitive `/hello` endpoint and Quarkus health endpoints remain public. Tenant-scoped business endpoints require an authenticated identity and the specified role.
 
