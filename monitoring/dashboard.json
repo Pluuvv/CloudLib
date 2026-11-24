@@ -1,0 +1,64 @@
+{
+  "dashboard": {
+    "title": "CloudLib - Live Capacity & SLO Monitoring",
+    "tags": ["cloudlib", "m9", "slo"],
+    "timezone": "browser",
+    "refresh": "5s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Throughput (Requests/sec)",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
+            "expr": "sum(rate(http_server_requests_seconds_count[30s]))",
+            "legendFormat": "Throughput (RPS)"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Response Latency p95 (ms)",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
+            "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket[30s])) by (le)) * 1000",
+            "legendFormat": "Latency p95 (ms)"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "HTTP Status Codes Distribution",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
+            "expr": "sum by (status) (rate(http_server_requests_seconds_count[30s]))",
+            "legendFormat": "HTTP {{status}}"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "JVM Heap Memory (MB)",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
+            "expr": "sum(jvm_memory_used_bytes{area=\"heap\"}) / 1024 / 1024",
+            "legendFormat": "Heap Memory Used (MB)"
+          }
+        ]
+      }
+    ],
+    "schemaVersion": 39
+  },
+  "overwrite": true
+}
