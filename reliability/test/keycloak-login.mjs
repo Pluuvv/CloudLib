@@ -5,7 +5,7 @@ export const issuer = 'http://localhost:8081/realms/cloudlib';
 export const fixtureMemberRef = 'm7-recovery-student';
 
 export async function loginAs(role, redirectUri) {
-  const username = 'm7-' + role;
+  const username = { mahasiswa: 'mhs_upn', petugas: 'petugas_upn', admin: 'admin_upn' }[role];
   const password = process.env['CLOUDLIB_' + role.toUpperCase() + '_PASSWORD'];
   assert.ok(password, 'Load private CloudLib fixture credentials before running the checks');
 

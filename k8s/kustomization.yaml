@@ -6,5 +6,6 @@ resources:
   - 01-configmap.yaml
   - 03-postgres.yaml
   - 04-cloudlib-deployment.yaml
+  - autoscaling/base
   - 05-cloudlib-service.yaml
   - 06-ingress.yaml

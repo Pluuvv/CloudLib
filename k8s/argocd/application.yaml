@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudlib-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: http://gitea:3000/student/capstone-gitops.git
+    targetRevision: main
+    path: overlays/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: capstone
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      name: cloudlib-app
+      namespace: capstone
+      jsonPointers:
+        - /spec/replicas
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - RespectIgnoreDifferences=true

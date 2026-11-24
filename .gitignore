@@ -51,3 +51,7 @@ docs/screenshots/
 # Local database backups; share instructions, not database archives.
 /backups/*
 !/backups/README.md
+
+# Local autoscaling results and Python bytecode.
+/scripts/.runtime/
+__pycache__/

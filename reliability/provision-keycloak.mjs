@@ -62,13 +62,13 @@ async function provision() {
   await adminRequest(profileUrl, 'PUT', profile, 200, 'Protect custom identity attributes');
 
   for (const [role, value] of definitions) {
-    const username = 'm7-' + role;
+    const username = { mahasiswa: 'mhs_upn', petugas: 'petugas_upn', admin: 'admin_upn' }[role];
     const attributes = { tenant: ['upnvj'] };
     if (role === 'mahasiswa') attributes.member_ref = ['m7-recovery-student'];
     const created = await adminRequest(realm + '/users', 'POST', {
       username,
-      firstName: 'M7',
-      lastName: 'Fixture',
+      firstName: { mahasiswa: 'Mahasiswa', petugas: 'Petugas', admin: 'Admin' }[role],
+      lastName: 'UPNVJ',
       email: username + '@example.invalid',
       emailVerified: true,
       enabled: true,
