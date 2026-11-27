@@ -1010,9 +1010,6 @@
       </div>
     </section>
 
-    <!-- ADR-012 token inspector: removed from UI per user request; element kept hidden for JS compatibility -->
-    <div id="jwtTokenInspector" style="display:none;" aria-hidden="true"></div>
-
   </main>
 
   <!-- Shared Footer Shell with Uploaded UPNVJ Logo -->
@@ -1061,39 +1058,15 @@
         </button>
       </div>
 
-      <!-- Informasi Autentikasi Keycloak -->
+      <!-- OIDC authentication is handled by Keycloak; the SPA never collects passwords. -->
       <p class="text-body-md text-light-on-surface-variant mb-3">
-        Masukkan identitas akun Keycloak Anda untuk mengakses layanan sirkulasi, reservasi workstation, dan katalog institusi.
+        Masuk dengan akun kampus melalui Keycloak untuk mengakses layanan perpustakaan sesuai peran Anda.
       </p>
 
-      <!-- Form Login Manual Murni -->
-      <form onsubmit="event.preventDefault(); submitManualLogin();" class="space-y-2.5">
-        <div>
-          <label class="block text-label-sm font-bold text-light-on-surface mb-1">Username Keycloak</label>
-          <input type="text" id="manualUsername" placeholder="Contoh: mhs_upn, petugas_upn, admin_upn" required class="w-full border border-light-outline-variant p-2 text-body-md bg-light-surface-container-lowest">
-        </div>
-        <div>
-          <label class="block text-label-sm font-bold text-light-on-surface mb-1">Password</label>
-          <input type="password" id="manualPassword" placeholder="Masukkan password akun" required class="w-full border border-light-outline-variant p-2 text-body-md bg-light-surface-container-lowest">
-        </div>
-        <div class="pt-1 flex flex-col gap-2">
-          <button type="submit" class="w-full py-2 bg-light-primary text-light-on-primary hover:bg-light-primary-container font-label text-label-lg transition-colors flex items-center justify-center gap-1.5 shadow-xs">
-            <span class="material-symbols-outlined text-[18px]">login</span>
-            <span>Masuk dengan Kredensial Keycloak</span>
-          </button>
-          
-          <div class="relative flex py-1 items-center">
-            <div class="flex-grow border-t border-light-outline-variant"></div>
-            <span class="flex-shrink mx-2 text-light-on-surface-variant text-[11px] uppercase">atau</span>
-            <div class="flex-grow border-t border-light-outline-variant"></div>
-          </div>
-
-          <button type="button" onclick="loginWithKeycloakSSO()" class="w-full py-2 border border-light-outline-variant bg-light-surface-container-lowest text-light-on-surface hover:bg-light-surface-container-low font-label text-label-md transition-colors flex items-center justify-center gap-1.5">
-            <span class="material-symbols-outlined text-[18px]">verified_user</span>
-            <span>Masuk via Halaman Login Keycloak (SSO Redirect)</span>
-          </button>
-        </div>
-      </form>
+      <button type="button" onclick="loginWithKeycloakSSO()" class="w-full py-2 bg-light-primary text-light-on-primary hover:bg-light-primary-container font-label text-label-lg transition-colors flex items-center justify-center gap-1.5 shadow-xs">
+        <span class="material-symbols-outlined text-[18px]">verified_user</span>
+        <span>Masuk dengan akun kampus</span>
+      </button>
     </div>
   </div>
 
@@ -1162,8 +1135,8 @@
     const OIDC_REDIRECT_URI = `${window.location.origin}${window.location.pathname}`;
     const OIDC_TRANSACTION_KEY = "cloudlib-oidc-transaction";
 
-    let accessToken = localStorage.getItem("cloudlib_access_token") || null;
-    let idToken = localStorage.getItem("cloudlib_id_token") || null;
+    let accessToken = null;
+    let idToken = null;
     let currentUser = null;
     let oidcMetadata = null;
 
@@ -1176,6 +1149,13 @@
     // INITIALIZATION
     // ==========================================
     window.addEventListener("DOMContentLoaded", async () => {
+      try {
+        localStorage.removeItem("cloudlib_access_token");
+        localStorage.removeItem("cloudlib_id_token");
+      } catch (error) {
+        console.warn("Could not clear legacy CloudLib tokens from local storage.", error);
+      }
+
       // Setup hero search tabs
       const heroTabs = document.querySelectorAll('.hero-tab');
       const heroInput = document.getElementById('hero-search-input');
@@ -1203,72 +1183,29 @@
       const slotPicker = document.getElementById("slotPicker");
       if (slotPicker) slotPicker.value = isoLocal;
 
-      // Check OAuth Redirect Callback (?code=...)
       const params = new URLSearchParams(window.location.search);
-      if (params.has("code") && params.has("state")) {
-        await completeOidcRedirect(params);
+      if (params.has("error")) {
+        const error = params.get("error_description") || params.get("error");
+        sessionStorage.removeItem(OIDC_TRANSACTION_KEY);
+        window.history.replaceState(null, document.title, OIDC_REDIRECT_URI);
+        showLoggedOutApp();
+        showAlert("danger", "Login Keycloak gagal", error);
         return;
       }
 
-      // Check existing saved session
-      if (accessToken) {
-        try {
-          parseAndActivateToken(accessToken, idToken);
-          return;
-        } catch (e) {
-          logoutSession();
-        }
+      if (params.has("code") && params.has("state")) {
+        await completeOidcRedirect(params);
+        return;
       }
 
       showLoggedOutApp();
     });
 
     // ==========================================
-    // AUTHENTICATION LOGIC (KEYCLOAK DIRECT & SSO)
+    // OIDC AUTHORIZATION CODE FLOW WITH PKCE
     // ==========================================
-    async function loginDirect(username, password) {
-      try {
-        showAlert("info", "Autentikasi", `Menghubungkan ke Keycloak sebagai ${username}...`);
-        const tokenRes = await fetch(`${OIDC_ISSUER}/protocol/openid-connect/token`, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({
-            grant_type: "password",
-            client_id: OIDC_CLIENT_ID,
-            username: username,
-            password: password,
-            scope: "openid profile email"
-          })
-        });
-
-        if (!tokenRes.ok) {
-          const errData = await tokenRes.json().catch(() => ({}));
-          throw new Error(errData.error_description || `Kredensial tidak valid (HTTP ${tokenRes.status})`);
-        }
-
-        const data = await tokenRes.json();
-        accessToken = data.access_token;
-        idToken = data.id_token || null;
-        localStorage.setItem("cloudlib_access_token", accessToken);
-        if (idToken) localStorage.setItem("cloudlib_id_token", idToken);
-
-        hideLoginModal();
-        parseAndActivateToken(accessToken, idToken);
-        showAlert("success", "Masuk Berhasil", `Selamat datang, ${currentUser.name}!`);
-      } catch (err) {
-        showAlert("danger", "Gagal Masuk", err.message);
-      }
-    }
-
     function showLoginModal() { document.getElementById("loginModal").style.display = "flex"; }
     function hideLoginModal() { document.getElementById("loginModal").style.display = "none"; }
-    
-    async function submitManualLogin() {
-      const u = document.getElementById("manualUsername").value.trim();
-      const p = document.getElementById("manualPassword").value.trim();
-      if (!u || !p) { showAlert("warning", "Perhatian", "Masukkan username dan password Keycloak."); return; }
-      await loginDirect(u, p);
-    }
 
     async function loginWithKeycloakSSO() {
       try {
@@ -1305,7 +1242,9 @@
 
         if (!txJson) throw new Error("Sesi transaksi login tidak ditemukan.");
         const tx = JSON.parse(txJson);
-        if (params.get("state") !== tx.state) throw new Error("State OAuth tidak cocok.");
+        if (!params.get("code") || params.get("state") !== tx.state) {
+          throw new Error("State OAuth tidak cocok.");
+        }
 
         const metadata = await getOidcMetadata();
         const tokenRes = await fetch(metadata.token_endpoint, {
@@ -1322,12 +1261,45 @@
 
         if (!tokenRes.ok) throw new Error(`Tukar kode gagal (HTTP ${tokenRes.status})`);
         const data = await tokenRes.json();
-        accessToken = data.access_token;
-        idToken = data.id_token || null;
-        localStorage.setItem("cloudlib_access_token", accessToken);
-        if (idToken) localStorage.setItem("cloudlib_id_token", idToken);
+        if (!data.access_token || !data.id_token) throw new Error("Token OIDC tidak lengkap.");
 
-        parseAndActivateToken(accessToken, idToken);
+        const idClaims = decodeJwt(data.id_token);
+        const idAudiences = Array.isArray(idClaims.aud) ? idClaims.aud : [idClaims.aud];
+        if (idClaims.iss !== OIDC_ISSUER || idClaims.nonce !== tx.nonce
+          || !idAudiences.includes(OIDC_CLIENT_ID) || !Number.isFinite(Number(idClaims.exp))
+          || Number(idClaims.exp) * 1000 <= Date.now()) {
+          throw new Error("Issuer, nonce, audience, atau masa berlaku ID token tidak valid.");
+        }
+
+        const claims = decodeJwt(data.access_token);
+        const accessAudiences = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
+        if (claims.iss !== OIDC_ISSUER || !Number.isFinite(Number(claims.exp))
+          || Number(claims.exp) * 1000 <= Date.now() || !accessAudiences.includes("cloudlib-api")) {
+          throw new Error("Issuer, audience, atau masa berlaku access token tidak valid.");
+        }
+
+        const roles = claims.realm_access && Array.isArray(claims.realm_access.roles)
+          ? claims.realm_access.roles
+          : [];
+        const role = ["admin", "petugas", "mahasiswa"].find(value => roles.includes(value));
+        if (!role || typeof claims.tenant !== "string" || !claims.tenant.trim()) {
+          throw new Error("Access token harus memuat role CloudLib dan klaim tenant.");
+        }
+        if (role === "mahasiswa" && (!claims.member_ref || !String(claims.member_ref).trim())) {
+          throw new Error("Token mahasiswa harus memuat klaim member_ref.");
+        }
+
+        accessToken = data.access_token;
+        idToken = data.id_token;
+        currentUser = {
+          username: claims.preferred_username || idClaims.preferred_username || idClaims.sub,
+          name: claims.name || idClaims.name || claims.preferred_username || idClaims.sub,
+          role,
+          tenant: claims.tenant,
+          memberRef: claims.member_ref || null
+        };
+        hideLoginModal();
+        showLoggedInApp();
         showAlert("success", "Masuk Berhasil", `Selamat datang, ${currentUser.name}!`);
       } catch (err) {
         showLoggedOutApp();
@@ -1335,35 +1307,30 @@
       }
     }
 
-    function logoutSession() {
-      localStorage.removeItem("cloudlib_access_token");
-      localStorage.removeItem("cloudlib_id_token");
+    async function logoutSession() {
+      const tokenHint = idToken;
       accessToken = null;
       idToken = null;
       currentUser = null;
       showLoggedOutApp();
-      showAlert("info", "Keluar", "Sesi telah berhasil diakhiri.");
-    }
-
-    function parseAndActivateToken(rawAccessToken, rawIdToken) {
-      const claims = decodeJwt(rawAccessToken);
-      if (Number(claims.exp) * 1000 <= Date.now()) {
-        throw new Error("Token telah kedaluwarsa.");
+      if (!tokenHint) {
+        showAlert("info", "Keluar", "Sesi lokal telah diakhiri.");
+        return;
       }
 
-      const roles = (claims.realm_access && claims.realm_access.roles) || [];
-      const role = ["admin", "petugas", "mahasiswa"].find(r => roles.includes(r)) || "mahasiswa";
-
-      currentUser = {
-        username: claims.preferred_username || "Pengguna",
-        name: claims.name || claims.preferred_username || "Pengguna CloudLib",
-        role: role,
-        tenant: claims.tenant || "upnvj",
-        memberRef: claims.member_ref || null,
-        claims: claims
-      };
-
-      showLoggedInApp();
+      try {
+        const metadata = await getOidcMetadata();
+        if (!metadata.end_session_endpoint) throw new Error("Endpoint logout Keycloak tidak tersedia.");
+        const logoutUrl = new URL(metadata.end_session_endpoint);
+        logoutUrl.search = new URLSearchParams({
+          id_token_hint: tokenHint,
+          client_id: OIDC_CLIENT_ID,
+          post_logout_redirect_uri: OIDC_REDIRECT_URI
+        }).toString();
+        window.location.assign(logoutUrl.toString());
+      } catch (err) {
+        showAlert("warning", "Sesi lokal diakhiri", `Logout Keycloak gagal: ${err.message}`);
+      }
     }
 
     function decodeJwt(token) {
@@ -1380,6 +1347,10 @@
       const res = await fetch(`${OIDC_ISSUER}/.well-known/openid-configuration`);
       if (!res.ok) throw new Error("Gagal mengambil metadata Keycloak.");
       oidcMetadata = await res.json();
+      if (oidcMetadata.issuer !== OIDC_ISSUER || !oidcMetadata.authorization_endpoint || !oidcMetadata.token_endpoint) {
+        oidcMetadata = null;
+        throw new Error("Metadata OIDC tidak sesuai dengan issuer CloudLib.");
+      }
       return oidcMetadata;
     }
 
@@ -1420,7 +1391,6 @@
       document.getElementById("heroStatCopies").innerText = "ADR-012";
       document.getElementById("heroStatAvail").innerText = "Active";
 
-      updateTokenInspector();
     }
 
     function showLoggedInApp() {
@@ -1460,7 +1430,6 @@
       document.getElementById("adminSection").style.display = currentUser.role === "admin" ? "block" : "none";
 
       renderNavTabs();
-      updateTokenInspector();
 
       // Trigger default role data loads
       if (currentUser.role === "mahasiswa") {
@@ -2188,11 +2157,6 @@
       } else {
         showAlert("danger", "Gagal", res.data?.error || "Gagal menambah tenant.");
       }
-    }
-
-    // Token Inspector (hidden from UI, no-op for display)
-    function updateTokenInspector() {
-      // Token data is never displayed to end users per UI requirements.
     }
 
     // Alert Utilities

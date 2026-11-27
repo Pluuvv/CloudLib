@@ -1,12 +1,10 @@
-version: '3.8'
-
 services:
   prometheus:
     image: prom/prometheus:v2.54.1
     container_name: cloudlib-prometheus
     restart: unless-stopped
     ports:
-      - "9090:9090"
+      - "127.0.0.1:9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     extra_hosts:
@@ -17,10 +15,10 @@ services:
     container_name: cloudlib-grafana
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD before starting monitoring}
       - GF_USERS_ALLOW_SIGN_UP=false
     depends_on:
       - prometheus

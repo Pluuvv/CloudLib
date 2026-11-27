@@ -3,7 +3,7 @@
     "id": 1,
     "uid": "bg58y3ltn0zr4a",
     "title": "CloudLib - Delivery & SLO Observability",
-    "tags": ["cloudlib", "slo", "m7", "m9"],
+    "tags": ["cloudlib", "slo", "m5"],
     "timezone": "browser",
     "refresh": "5s",
     "time": {
@@ -58,7 +58,7 @@
         "targets": [
           {
             "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
-            "expr": "clamp_max((sum(rate(http_server_requests_seconds_count{status=~\"2..\"}[5m])) / sum(rate(http_server_requests_seconds_count[5m]))) * 100, 100) or vector(100)",
+            "expr": "clamp_max((sum(rate(http_server_requests_seconds_count{status=~\"2..\"}[5m])) / sum(rate(http_server_requests_seconds_count[5m]))) * 100, 100)",
             "legendFormat": "Availability %"
           }
         ],
@@ -83,14 +83,14 @@
       },
       {
         "id": 3,
-        "title": "SLO Latency p95 (Target <= 200ms)",
+        "title": "Average HTTP Latency",
         "type": "stat",
         "gridPos": { "h": 4, "w": 5, "x": 10, "y": 0 },
         "targets": [
           {
             "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
-            "expr": "clamp_min((rate(http_server_requests_seconds_sum[1m]) / rate(http_server_requests_seconds_count[1m])) * 1450, 48) or vector(47.8)",
-            "legendFormat": "p95 Latency"
+            "expr": "(rate(http_server_requests_seconds_sum[5m]) / rate(http_server_requests_seconds_count[5m])) * 1000",
+            "legendFormat": "Average Latency"
           }
         ],
         "options": {
@@ -101,14 +101,7 @@
         "fieldConfig": {
           "defaults": {
             "unit": "ms",
-            "decimals": 1,
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                { "value": null, "color": "green" },
-                { "value": 200, "color": "red" }
-              ]
-            }
+            "decimals": 1
           }
         }
       },
@@ -120,7 +113,7 @@
         "targets": [
           {
             "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
-            "expr": "sum(http_server_requests_seconds_count) or vector(24000)",
+            "expr": "sum(http_server_requests_seconds_count)",
             "legendFormat": "Total Requests"
           }
         ],
@@ -149,7 +142,7 @@
         "targets": [
           {
             "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
-            "expr": "sum(http_server_requests_seconds_count{status=~\"5..\"}) or vector(0)",
+            "expr": "sum(http_server_requests_seconds_count{status=~\"5..\"})",
             "legendFormat": "5xx Count"
           }
         ],
@@ -196,24 +189,14 @@
       },
       {
         "id": 7,
-        "title": "HTTP Response Latency (Duration p50 / p90 / p95)",
+        "title": "Average HTTP Response Latency",
         "type": "timeseries",
         "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
         "targets": [
           {
             "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
-            "expr": "clamp_min((rate(http_server_requests_seconds_sum[30s]) / rate(http_server_requests_seconds_count[30s])) * 950, 32)",
-            "legendFormat": "p50 Latency (ms)"
-          },
-          {
-            "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
-            "expr": "clamp_min((rate(http_server_requests_seconds_sum[30s]) / rate(http_server_requests_seconds_count[30s])) * 1250, 42)",
-            "legendFormat": "p90 Latency (ms)"
-          },
-          {
-            "datasource": { "type": "prometheus", "uid": "ag58y0lwuxwcga" },
-            "expr": "clamp_min((rate(http_server_requests_seconds_sum[30s]) / rate(http_server_requests_seconds_count[30s])) * 1450, 48)",
-            "legendFormat": "p95 Latency (ms) [SLO]"
+            "expr": "(rate(http_server_requests_seconds_sum[5m]) / rate(http_server_requests_seconds_count[5m])) * 1000",
+            "legendFormat": "Average Latency (ms)"
           }
         ],
         "fieldConfig": {
@@ -221,15 +204,7 @@
             "unit": "ms",
             "custom": {
               "lineInterpolation": "smooth",
-              "fillOpacity": 15,
-              "thresholdsStyle": { "mode": "line" }
-            },
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                { "value": null, "color": "green" },
-                { "value": 200, "color": "red" }
-              ]
+              "fillOpacity": 15
             }
           }
         }

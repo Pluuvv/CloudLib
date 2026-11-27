@@ -423,19 +423,31 @@ dengan 25 virtual users selama sekitar 30 detik pada lima skenario berbobot.
 repo saat ini masih M9.** Untuk submission, petakan ke folder `09-capacity-finops`
 tanpa mengubah fakta hasil pengujiannya.
 
-- 22.760 request;
-- throughput terukur 757,05 RPS;
+- 22.921 request;
+- throughput terukur 761,94 RPS;
 - error rate 0%;
-- latency p95 47,99 ms dan p99 60,69 ms;
+- latency p95 53,58 ms dan p99 68,61 ms;
 - SLO laporan: p95 tidak lebih dari 200 ms.
 
-**Cara menjelaskan hasil:** p95 47,99 ms berarti 95% observasi latency dalam
+**Penting — bukti mentah saat ini tidak cocok dengan report:** file
+`docs/evidence/M9/capacity-metrics.json` berisi run 50 VU dengan 27.325
+request, 65 error (0,238%), 908,58 RPS, dan p95 76,01 ms, timestamp
+`2026-11-24T08:05:34.296Z`. Sementara report di atas mengklaim run 25 VU
+dengan 22.921 request dan 0% error pada timestamp `2026-11-24T14:21:55+07:00`.
+Jangan tunjukkan report dan JSON itu sebagai satu run. Pemilik benchmark perlu
+menemukan atau membuat ulang JSON yang cocok dengan report, atau memperbarui
+report berdasarkan run yang memang dipilih, lalu memastikan semua angka,
+timestamp, konfigurasi, dan artefak berasal dari run yang sama.
+
+Jika hanya menjelaskan angka yang tertulis pada report, katakan bahwa itu hasil
+run report yang menunggu rekonsiliasi artefak mentah. **Cara menjelaskan hasil:**
+p95 53,58 ms berarti 95% observasi latency dalam
 run itu tidak lebih lambat dari nilai tersebut. Ini lebih informatif daripada
 rata-rata saja karena menyorot tail latency. Hasil memenuhi SLO yang ditetapkan
 untuk workload dan lingkungan pengujian tersebut.
 
 **Batas interpretasi:** benchmark dijalankan pada runtime lokal, satu tenant,
-dan hanya sekitar 30 detik. Angka 757,05 RPS bukan kapasitas produksi yang
+dan hanya sekitar 30 detik. Angka 761,94 RPS bukan kapasitas produksi yang
 terjamin. Ia tidak otomatis mewakili beban WAN, beban berjam-jam, banyak tenant
 serentak, saturasi node/database, atau pola trafik lain. Laporan membandingkan
 hasil dengan asumsi beban puncak 50 RPS; rasio sekitar 15x adalah perbandingan
@@ -508,7 +520,7 @@ batasannya.
 | 6 | Tunjukkan controlled deployment/GitOps dan hasil rollout | Buka Argo Application, revision, status sync, rollout/readiness | Status lokal terakhir bermasalah dan belum mendaftarkan CloudLib sebagai Argo Application; cek lagi sebelum demo. |
 | 7 | Demonstrasikan satu aksi ditolak | Request anonim `curl.exe -i http://localhost:8080/books` atau uji role negatif yang sudah disiapkan | Anonim diharapkan `401`; role yang salah biasanya `403`. Jangan menaruh bearer token di terminal/rekaman. |
 | 8 | Tunjukkan security scan dan jelaskan finding prioritas tertinggi | Buka report Trivy yang sesuai image digest dan remediation/prioritasnya | M6 report mengatakan bukti scan masih pending; jangan klaim gate live lengkap tanpa artefak scan yang cocok dengan image. |
-| 9 | Tunjukkan health/metrics/dashboard dan jelaskan satu SLI/SLO | `/q/health/ready`, screenshot/target Prometheus, p95 SLO M8 | `UP` hanya scrape; jelaskan p95 ≤200 ms serta konteks benchmark lokal. |
+| 9 | Tunjukkan health/metrics/dashboard dan jelaskan satu SLI/SLO | `/q/health/ready`, target Prometheus, rata-rata latency di dashboard; p95 dari laporan benchmark M8 | `UP` hanya scrape; jangan menyebut rata-rata dashboard sebagai p95. Jelaskan konteks benchmark lokal. |
 | 10 | Hentikan/gagalkan komponen terkontrol dan tunjukkan recovery | Tunjukkan laporan QS05 pod replacement dan observasi pemulihan | Jangan hapus pod live spontan; jika tidak diulang, jelas sebut ini bukti run sebelumnya. |
 | 11 | Tunjukkan backup/restore proof | Laporan QS06, validasi restore, hasil RTO/RPO | Backup ada saja bukan bukti restore; tunjukkan hasil pemulihan dan validasinya. Jangan jalankan injeksi database saat presentasi. |
 | 12 | Jelaskan resource/capacity serta asumsi FinOps | Requests/limits, benchmark 25 VU, p95/error, model biaya | Harga adalah estimasi; sebut asumsi, bukan invoice atau jaminan kapasitas. |
@@ -638,7 +650,7 @@ atau memicu recovery hanya untuk membuat demo tampak berhasil.
 | M5 observability | Evidence Prometheus target `UP` pada saat pengukuran. | Pastikan endpoint dan dashboard masih tersedia bila akan demo live. |
 | M6 security | Implementasi OIDC/RBAC/tenant dan 20 automated tests; live evidence di laporan M6 masih pending. | Tambahkan screenshot/log token-role-tenant yang disanitasi dan bukti scan; rekonsiliasi dengan M7. |
 | M7 reliability/recovery | Hasil QS05/QS06 tercatat di laporan `docs/evidence/M7`. | Letakkan/salin tautan ke folder portfolio `08-reliability-recovery`; jangan ubah run ID atau angka. |
-| M8 capacity/FinOps | Benchmark dan model biaya tersedia pada report lokal bernama M9; hasilnya adalah pengukuran lokal dan estimasi. | Petakan ke folder `09-capacity-finops`, nyatakan asumsi, jangan sebut estimasi sebagai invoice, dan rapikan pembulatan CUD. |
+| M8 capacity/FinOps | Report dan model biaya tersedia pada report lokal bernama M9; report benchmark tidak cocok dengan `capacity-metrics.json` yang tersimpan. | Rekonsiliasikan report dengan JSON run yang benar sebelum demo/submit; petakan ke `09-capacity-finops`, nyatakan asumsi, dan jangan sebut estimasi sebagai invoice. |
 | ADR portfolio | Beberapa laporan menyebut ADR, tetapi paket terstruktur belum ditemukan. | Susun di `10-decisions-adr`; jelaskan keputusan saat M1 dan tautkan ke evidence lintas milestone. |
 | Final demo | Runbook lokal tersedia di dokumen ini. | Pindahkan salinan/tautan demo script dan bukti yang aman ke `11-demo-defense`; semua anggota latihan Q&A. |
 | UI terbaru | Perbaikan UI dan tampilan NIM/NPM sudah dipush ke `main` pada commit `c31931c`. | Pastikan branch yang dipakai untuk demo sudah memuat commit tersebut atau yang lebih baru. |

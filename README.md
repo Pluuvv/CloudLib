@@ -83,7 +83,7 @@ standalone parameters, prerequisites, and interpreting results.
 
 ## OIDC and role configuration
 
-The API uses OIDC bearer-token authentication. It validates tokens against the configured Keycloak realm, requires the `cloudlib-api` audience, and maps realm roles from `realm_access/roles`. The SPA uses Authorization Code Flow with PKCE and keeps access tokens in memory only. API authorization is enforced by the backend; hiding a UI control is not an authorization check.
+The API uses OIDC bearer-token authentication. It validates tokens against the configured Keycloak realm, requires the `cloudlib-api` audience, and maps realm roles from `realm_access/roles`. The SPA uses Authorization Code Flow with PKCE, checks selected OIDC claims to drive the UI, and keeps tokens in memory only; it never asks for or stores a user's Keycloak password. The backend remains authoritative for token validation and authorization; hiding a UI control is not an authorization check.
 
 Configure the Keycloak `cloudlib` realm with:
 
