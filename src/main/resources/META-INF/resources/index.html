@@ -5,996 +5,1282 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="cloudlib-oidc-issuer" content="http://localhost:8081/realms/cloudlib">
   <meta name="cloudlib-oidc-client-id" content="cloudlib-frontend">
-  <title>CloudLib | Perpustakaan Digital Kampus</title>
+  <title>UPNVJ Digital Library — Homepage &amp; Search Portal</title>
   
+  <!-- Tailwind CSS with Forms and Container Queries -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    /** @type {import('tailwindcss').Config} */
+    globalThis.tailwind = globalThis.tailwind || {};
+    globalThis.tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'upnvj-emerald': '#146C43',
+            'upnvj-gold': '#D97706',
+            'success': '#146C43',
+            'warning': '#B56100',
+            'light-primary': '#005230',
+            'light-on-primary': '#FFFFFF',
+            'light-primary-container': '#146C43',
+            'light-on-primary-container': '#98EAB7',
+            'light-secondary': '#904D00',
+            'light-on-secondary': '#FFFFFF',
+            'light-secondary-container': '#FE932C',
+            'light-on-secondary-container': '#663500',
+            'light-tertiary': '#782E35',
+            'light-on-tertiary': '#FFFFFF',
+            'light-tertiary-container': '#96454B',
+            'light-on-tertiary-container': '#FFCCCD',
+            'light-error': '#BA1A1A',
+            'light-on-error': '#FFFFFF',
+            'light-error-container': '#FFDAD6',
+            'light-on-error-container': '#93000A',
+            'light-background': '#F7FAF4',
+            'light-on-background': '#181D19',
+            'light-surface': '#F7FAF4',
+            'light-surface-dim': '#D7DBD5',
+            'light-surface-bright': '#F7FAF4',
+            'light-surface-container-lowest': '#FFFFFF',
+            'light-surface-container-low': '#F1F5EE',
+            'light-surface-container': '#EBEFE9',
+            'light-surface-container-high': '#E5E9E3',
+            'light-surface-container-highest': '#E0E4DE',
+            'light-on-surface': '#181D19',
+            'light-surface-variant': '#DBE5DB',
+            'light-on-surface-variant': '#3F4941',
+            'light-outline': '#6F7A71',
+            'light-outline-variant': '#BFC9BF',
+            'light-inverse-surface': '#2D312E',
+            'light-inverse-on-surface': '#EEF2EC',
+            'light-inverse-primary': '#86D8A5',
+            'light-shadow': '#000000',
+            'light-scrim': '#000000',
+            'dark-primary': '#86D8A5',
+            'dark-on-primary': '#00391F',
+            'dark-primary-container': '#146C43',
+            'dark-on-primary-container': '#98EAB7',
+            'dark-secondary': '#FFB77D',
+            'dark-on-secondary': '#4D2600',
+            'dark-secondary-container': '#D97707',
+            'dark-on-secondary-container': '#3C1C00',
+            'dark-tertiary': '#FFB3B5',
+            'dark-on-tertiary': '#5B1820',
+            'dark-tertiary-container': '#96454B',
+            'dark-on-tertiary-container': '#FFCCCD',
+            'dark-error': '#FFB4AB',
+            'dark-on-error': '#690005',
+            'dark-error-container': '#93000A',
+            'dark-on-error-container': '#FFDAD6',
+            'dark-background': '#101411',
+            'dark-on-background': '#E0E4DE',
+            'dark-surface': '#101411',
+            'dark-surface-dim': '#101411',
+            'dark-surface-bright': '#363A36',
+            'dark-surface-container-lowest': '#0B0F0C',
+            'dark-surface-container-low': '#181D19',
+            'dark-surface-container': '#1C211D',
+            'dark-surface-container-high': '#272B27',
+            'dark-surface-container-highest': '#313632',
+            'dark-on-surface': '#E0E4DE',
+            'dark-surface-variant': '#3F4941',
+            'dark-on-surface-variant': '#BFC9BF',
+            'dark-outline': '#89938A',
+            'dark-outline-variant': '#3F4941',
+            'dark-inverse-surface': '#E0E4DE',
+            'dark-inverse-on-surface': '#2D312E',
+            'dark-inverse-primary': '#146C43',
+            'dark-shadow': '#000000',
+            'dark-scrim': '#000000',
+          },
+          borderRadius: {
+            'none': '0px',
+            'sm': '5px',
+            'DEFAULT': '5px',
+            'md': '5px',
+            'lg': '5px',
+            'xl': '5px',
+            '2xl': '5px',
+            '3xl': '5px',
+            'full': '5px',
+          },
+          spacing: {
+            'gutter-xs': '4px',
+            'gutter-sm': '8px',
+            'gutter-md': '10px',
+            'gutter-lg': '10px',
+            'gutter-xl': '10px',
+            'section': '10px',
+            'page-margin': '10px',
+          },
+          fontFamily: {
+            'display': ['"Newsreader"', 'serif'],
+            'headline': ['"Newsreader"', 'serif'],
+            'title': ['"Lato"', 'sans-serif'],
+            'body': ['"Lato"', 'sans-serif'],
+            'label': ['"Lato"', 'sans-serif'],
+            'mono': ['"Red Hat Mono"', 'monospace'],
+          },
+          fontSize: {
+            'display-lg': ['40px', { lineHeight: '48px', letterSpacing: '-0.5px', fontWeight: '600' }],
+            'display-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.25px', fontWeight: '600' }],
+            'headline-lg': ['28px', { lineHeight: '36px', letterSpacing: '-0.25px', fontWeight: '600' }],
+            'headline-md': ['22px', { lineHeight: '28px', letterSpacing: '0px', fontWeight: '600' }],
+            'title-lg': ['18px', { lineHeight: '24px', letterSpacing: '0px', fontWeight: '700' }],
+            'title-md': ['15px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '700' }],
+            'body-lg': ['15px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+            'body-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '400' }],
+            'label-lg': ['13px', { lineHeight: '18px', letterSpacing: '0.1px', fontWeight: '700' }],
+            'label-sm': ['11px', { lineHeight: '15px', letterSpacing: '0.25px', fontWeight: '700' }],
+            'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+          },
+        },
+      },
+    };
+    if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+  </script>
+
+  <!-- Typography & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&family=Lato:wght@300;400;700&family=Red+Hat+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
   <style>
-    :root {
-      --primary: #2456a6;
-      --primary-hover: #194784;
-      --primary-light: #e8f0fc;
-      --secondary: #16766e;
-      --bg: #f4f7fb;
-      --surface: #ffffff;
-      --text: #172b4d;
-      --text-muted: #61728a;
-      --border: #dce4ef;
-      --danger: #c83d4d;
-      --danger-light: #fee2e2;
-      --warning: #a9680b;
-      --warning-light: #fef3c7;
-      --success: #16835d;
-      --success-light: #d1fae5;
-      --radius: 14px;
-      --shadow: 0 4px 16px rgba(23, 43, 77, 0.06);
+    /* Enforce 5px corner radius globally on all components and elements */
+    *, *::before, *::after {
+      border-radius: 5px !important;
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
-    }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    /* Top Header */
-    header {
-      background-color: var(--surface);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 40;
-    }
-    .header-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 10px 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--primary);
-      text-decoration: none;
-    }
-    .brand-badge {
-      background: var(--primary);
-      color: white;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-    .tenant-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 8px;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      background: var(--primary-light);
-      color: var(--primary);
-    }
-    .role-badge {
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 0.72rem;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-    .role-mahasiswa { background: #e0f2fe; color: #0369a1; }
-    .role-petugas { background: #fef3c7; color: #b45309; }
-    .role-admin { background: #f3e8ff; color: #7e22ce; }
-
-    .user-profile {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .account-picker {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      color: var(--text);
-      cursor: pointer;
-    }
-
-    /* Layout & Tabs */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 10px 10px 60px 10px;
-      width: 100%;
-      flex: 1;
-    }
-
-    .nav-tabs {
-      display: flex;
-      gap: 6px;
-      border-bottom: 2px solid var(--border);
-      margin-bottom: 10px;
-      overflow-x: auto;
-      padding-bottom: 2px;
-    }
-    .tab-btn {
-      padding: 8px 10px;
-      border: none;
-      background: none;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-      border-radius: 6px 6px 0 0;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-      transition: all 0.2s;
-    }
-    .tab-btn:hover {
-      color: var(--primary);
-      background: rgba(30, 64, 175, 0.05);
-    }
-    .tab-btn.active {
-      color: var(--primary);
-      border-bottom: 3px solid var(--primary);
-      background: var(--surface);
-    }
-
-    /* Grid */
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 10px;
-    }
-    .grid-4 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 10px;
-    }
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 10px;
-      box-shadow: var(--shadow);
-    }
-    .card-title {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    /* Forms */
-    .form-group {
-      margin-bottom: 10px;
-    }
-    .form-label {
-      display: block;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 4px;
-    }
-    .form-input, .form-select {
-      width: 100%;
-      padding: 8px 10px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 0.9rem;
-      color: var(--text);
-      background: #fafafa;
-    }
-    .form-input:focus, .form-select:focus {
-      outline: none;
-      border-color: var(--primary);
-      background: white;
-      box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.15);
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 8px 10px;
-      border-radius: 6px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      transition: all 0.15s ease-in-out;
-    }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:hover { background: var(--primary-hover); }
-    .btn-secondary { background: #e2e8f0; color: #334155; }
-    .btn-secondary:hover { background: #cbd5e1; }
-    .btn-block { width: 100%; }
-
-    /* Alert */
-    .alert {
-      padding: 10px;
-      border-radius: 6px;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      font-size: 0.85rem;
-      line-height: 1.4;
-    }
-    .alert-danger { background: var(--danger-light); color: #991b1b; border: 1px solid #f87171; }
-    .alert-warning { background: var(--warning-light); color: #92400e; border: 1px solid #fbbf24; }
-    .alert-success { background: var(--success-light); color: #065f46; border: 1px solid #34d399; }
-    .alert-info { background: #e0f2fe; color: #075985; border: 1px solid #7dd3fc; }
-
-    .alert-badge {
-      font-weight: 700;
-      font-size: 0.75rem;
-      padding: 2px 6px;
-      border-radius: 4px;
-      text-transform: uppercase;
-    }
-    .alert-badge-danger { background: #fca5a5; color: #7f1d1d; }
-    .alert-badge-warning { background: #fde68a; color: #78350f; }
-    .alert-badge-success { background: #a7f3d0; color: #064e3b; }
-    .alert-badge-info { background: #bae6fd; color: #0c4a6e; }
-
-    /* Table */
-    .table-responsive { width: 100%; overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; }
-    th { background: #f1f5f9; padding: 8px 10px; color: #475569; font-weight: 600; border-bottom: 1px solid var(--border); }
-    td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    tr:hover td { background: #f8fafc; }
-
-    /* Status Tags */
-    .badge {
+    .material-symbols-outlined {
       display: inline-block;
-      padding: 3px 8px;
-      border-radius: 999px;
-      font-size: 0.72rem;
-      font-weight: 600;
-    }
-    .badge-available { background: var(--success-light); color: var(--success); }
-    .badge-unavailable { background: var(--danger-light); color: var(--danger); }
-
-    /* Indicator Dots */
-    .dot {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      margin-right: 4px;
-    }
-    .dot-success { background-color: var(--success); }
-    .dot-danger { background-color: var(--danger); }
-
-    /* Stat Cards */
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-    }
-    .stat-num {
-      font-size: 1.7rem;
-      font-weight: 700;
-      color: var(--primary);
-      margin: 4px 0;
-      line-height: 1.1;
-    }
-    .stat-label {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
-
-    /* Mobile Bottom Navigation */
-    .mobile-nav {
-      display: none;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      padding: 6px 10px;
-      justify-content: space-around;
-      z-index: 50;
-    }
-    .mobile-nav-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: none;
-      border: none;
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-weight: 500;
-    }
-    .mobile-nav-btn.active { color: var(--primary); font-weight: 700; }
-
-    @media (max-width: 768px) {
-      .mobile-nav { display: flex; }
-      .nav-tabs { display: none; }
-      .header-inner { flex-direction: column; align-items: flex-start; gap: 8px; }
-      .user-profile { width: 100%; justify-content: space-between; }
-    }
-
-    [hidden] { display: none !important; }
-
-    .header-inner {
-      max-width: 1280px;
-      min-height: 72px;
-      padding: 12px 24px;
-    }
-
-    .brand {
-      gap: 12px;
-      font-size: 1.25rem;
-      letter-spacing: -0.03em;
-    }
-
-    .brand-badge {
-      width: 38px;
-      height: 38px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 11px;
-      background: #193d73;
-      letter-spacing: 0;
-    }
-
-    .tenant-badge {
-      margin-left: 8px;
-      padding: 5px 10px;
-      background: #eef4fb;
-      color: #526882;
-      font-weight: 500;
-    }
-
-    .user-profile { gap: 12px; }
-    .user-profile #userLabel { color: var(--text) !important; font-size: 0.9rem !important; }
-    .role-badge { border-radius: 999px; padding: 5px 10px; }
-
-    .container {
-      max-width: 1280px;
-      padding: 30px 24px 84px;
-    }
-
-    .workspace-intro {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin: 4px 0 24px;
-    }
-
-    .member-identity {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      min-width: 190px;
-      padding: 14px 18px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--surface);
-      box-shadow: var(--shadow);
-    }
-
-    .member-identity span {
-      color: var(--text-muted);
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-
-    .member-identity strong {
-      color: var(--text);
-      font-size: 1.05rem;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .eyebrow {
-      color: var(--primary);
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.09em;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-    }
-
-    .workspace-intro h1, .login-copy h1 {
-      color: var(--text);
-      font-size: clamp(1.6rem, 3vw, 2.15rem);
-      letter-spacing: -0.04em;
-      line-height: 1.2;
-      margin-bottom: 8px;
-    }
-
-    .workspace-intro p:last-child {
-      color: var(--text-muted);
-      max-width: 680px;
-      line-height: 1.6;
-    }
-
-    .nav-tabs {
-      gap: 8px;
-      margin-bottom: 20px;
-      border-bottom-width: 1px;
-    }
-
-    .tab-btn {
-      padding: 12px 14px;
-      border-radius: 10px 10px 0 0;
-    }
-
-    .tab-btn.active { border-bottom-width: 3px; }
-
-    .card, .stat-card {
-      border-color: var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-
-    .card { padding: 22px; }
-    .card-title { font-size: 1.05rem; margin-bottom: 10px; }
-    .grid-2, .grid-4 { gap: 16px; }
-
-    .form-label { color: var(--text); font-size: 0.84rem; }
-    .form-input, .form-select {
-      min-height: 44px;
-      border-radius: 9px;
-      background: #fff;
-    }
-
-    .btn {
-      min-height: 42px;
-      padding: 10px 16px;
-      border-radius: 9px;
-    }
-
-    .btn:focus-visible, .form-input:focus-visible, .form-select:focus-visible,
-    .tab-btn:focus-visible, .mobile-nav-btn:focus-visible {
-      outline: 3px solid rgba(36, 86, 166, 0.28);
-      outline-offset: 2px;
-    }
-
-    .table-responsive { border: 1px solid var(--border); border-radius: 10px; }
-    table { font-size: 0.88rem; }
-    th { background: #f2f5f9; color: #52627a; padding: 12px 14px; }
-    td { padding: 13px 14px; }
-    tr:last-child td { border-bottom: 0; }
-
-    .stat-card { padding: 20px; }
-    .stat-label { color: var(--text-muted); letter-spacing: 0.02em; }
-    .stat-num { font-size: 2rem; }
-
-    .login-panel {
-      display: grid;
-      grid-template-columns: minmax(0, 1.3fr) minmax(250px, 0.7fr);
-      gap: 36px;
-      align-items: center;
-      max-width: 900px;
-      margin: 56px auto;
-      padding: 40px;
-      border-radius: 18px;
-      box-shadow: 0 16px 40px rgba(23, 43, 77, 0.08);
-    }
-
-    .login-copy p {
-      color: var(--text-muted);
-      font-size: 1rem;
-      line-height: 1.7;
-      max-width: 530px;
-    }
-
-    .login-features {
-      display: grid;
-      gap: 12px;
-      list-style: none;
-      margin-top: 24px;
-    }
-
-    .login-features li {
-      color: #41536d;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.9rem;
-    }
-
-    .login-features li::before {
-      content: "";
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--secondary);
-      flex: 0 0 auto;
-    }
-
-    .login-actions {
-      padding: 24px;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: #f8fafd;
-    }
-
-    .login-actions h2 { font-size: 1.05rem; margin-bottom: 8px; }
-    .login-actions p { color: var(--text-muted); font-size: 0.86rem; line-height: 1.55; margin-bottom: 18px; }
-    .login-actions .btn { width: 100%; }
-    .login-actions small { display: block; color: var(--text-muted); margin-top: 12px; line-height: 1.5; }
-
-    .scope-card {
-      background: #f8fafd;
-      box-shadow: none;
-    }
-
-    .scope-tenant {
-      color: var(--primary);
-      display: inline-block;
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin: 8px 0;
-    }
-
-    .scope-card p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.6; }
-
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
       overflow: hidden;
-      clip: rect(0, 0, 0, 0);
       white-space: nowrap;
-      border: 0;
-    }
-
-    @media (max-width: 768px) {
-      .header-inner { flex-direction: row; align-items: center; padding: 12px 16px; }
-      .user-profile { width: auto; }
-      .container { padding: 24px 16px 96px; }
-      .workspace-intro { align-items: stretch; flex-direction: column; margin-bottom: 18px; }
-      .login-panel { grid-template-columns: 1fr; gap: 24px; margin: 24px auto; padding: 24px; }
-      .card { padding: 18px; }
-      .mobile-nav:not([hidden]) { display: flex; padding: 10px 4px calc(10px + env(safe-area-inset-bottom)); }
-      .mobile-nav-btn { min-width: 64px; gap: 4px; }
-      .member-identity { min-width: 0; }
-    }
-
-    @media (max-width: 480px) {
-      .tenant-badge { display: none !important; }
-      .user-profile { gap: 6px; }
-      .user-profile #userLabel { max-width: 108px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .role-badge { font-size: 0.65rem; }
-      .login-panel { padding: 20px; }
-      .login-actions { padding: 18px; }
+      direction: ltr;
+      vertical-align: middle;
     }
   </style>
 </head>
-<body>
+<body class="bg-light-surface text-light-on-surface font-body antialiased flex flex-col min-h-screen">
 
-  <!-- Top Global Header -->
-  <header>
-    <div class="header-inner">
-      <div style="display:flex; align-items:center; gap: 8px;">
-        <div class="brand">
-          <span class="brand-badge">CL</span>
-          <span>CloudLib</span>
-        </div>
-        <div id="tenantDisplay" class="tenant-badge" style="display:none;">
-          <span id="tenantNameLabel"></span>
+  <!-- Top Global Alert Banner -->
+  <div id="globalAlert" style="display:none;" class="sticky top-0 z-50 bg-light-surface-container-lowest border-b border-light-outline-variant shadow-sm">
+    <div class="max-w-6xl mx-auto p-3 flex items-center justify-between gap-2.5">
+      <div class="flex items-center gap-2 text-body-md">
+        <span id="alertIcon" class="material-symbols-outlined text-light-primary text-[20px]">info</span>
+        <div>
+          <strong id="alertTitle" class="font-label text-label-lg text-light-on-surface">Pemberitahuan</strong>:
+          <span id="alertMsg" class="text-light-on-surface-variant">Pesan sistem</span>
         </div>
       </div>
+      <button onclick="dismissAlert()" class="p-1 text-light-on-surface-variant hover:text-light-on-surface focus-visible:outline-none">
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+    </div>
+  </div>
 
-      <div class="user-profile" id="userProfile" style="display:none;">
-        <span id="userLabel" style="font-size:0.78rem;color:var(--text-muted);font-weight:600;"></span>
-        <span id="roleBadge" class="role-badge" style="display:none;"></span>
-        <button id="logoutButton" class="btn btn-secondary" onclick="logoutFromKeycloak()" style="display:none;">Keluar</button>
+  <!-- Shared Top Navigation Shell -->
+  <header class="sticky top-0 z-40 bg-light-surface-container-lowest border-b border-light-outline-variant">
+    <div class="max-w-6xl mx-auto px-3 py-2.5 flex items-center justify-between gap-2.5">
+      <a href="/" class="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+        <img src="/images/upnvj-logo.png" alt="Lambang Resmi UPNVJ" class="w-12 h-12 object-contain shrink-0">
+        <div class="flex flex-col">
+          <span class="font-headline text-title-lg text-light-primary leading-tight">UPNVJ Digital Library</span>
+          <span class="font-body text-label-sm text-light-on-surface-variant">Universitas Pembangunan Nasional "Veteran" Jakarta</span>
+        </div>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav aria-label="Primary library navigation" class="hidden md:flex items-center gap-4">
+        <a href="#hero-search-section" class="font-label text-label-lg text-light-primary border-b-2 border-light-primary py-1">Home</a>
+        <a href="#catalog-section" class="font-label text-label-lg text-light-on-surface-variant hover:text-light-primary py-1 transition-colors">Catalog</a>
+        <a href="#faculty-collections" class="font-label text-label-lg text-light-on-surface-variant hover:text-light-primary py-1 transition-colors">Repositories</a>
+        <a href="#campus-services" class="font-label text-label-lg text-light-on-surface-variant hover:text-light-primary py-1 transition-colors">Services</a>
+      </nav>
+
+      <!-- Auth State Control in Header -->
+      <div class="flex items-center gap-2">
+        <!-- Logged In Profile UI -->
+        <div id="userProfile" style="display:none;" class="flex items-center gap-2">
+          <span id="tenantBadge" class="inline-flex items-center gap-1 px-2.5 py-1 bg-light-surface-variant text-light-primary text-label-sm font-semibold border border-light-primary/20">
+            <span class="w-1.5 h-1.5 bg-success"></span>
+            <span id="tenantNameLabel">UPNVJ</span>
+          </span>
+          <span id="roleBadge" class="px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider bg-light-primary/10 text-light-primary border border-light-primary/30">
+            MAHASISWA
+          </span>
+          <div class="hidden sm:flex flex-col text-right">
+            <span id="userLabel" class="font-title text-label-lg text-light-on-surface leading-none">Budi Santoso</span>
+            <span id="memberRefLabel" class="font-mono text-mono-sm text-light-on-surface-variant">2410511001</span>
+          </div>
+          <button onclick="logoutSession()" type="button" class="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 border border-light-outline-variant bg-light-surface-container-lowest text-light-on-surface hover:bg-light-surface-container-low text-label-sm transition-colors">
+            <span class="material-symbols-outlined text-[16px]">logout</span>
+            <span class="hidden sm:inline">Keluar</span>
+          </button>
+        </div>
+
+        <!-- Logged Out Sign In Button -->
+        <div id="loggedOutButtons" class="flex items-center gap-2">
+          <button onclick="showLoginModal()" type="button" class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 border border-light-outline-variant bg-light-surface-container-lowest text-light-on-surface hover:bg-light-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary transition-colors">
+            <span class="material-symbols-outlined text-[18px] text-light-primary" aria-hidden="true">person</span>
+            <span class="font-label text-label-lg">Sign In</span>
+          </button>
+        </div>
       </div>
     </div>
   </header>
 
-  <!-- Notification Banner (Failure Boundaries & Alerts) -->
-  <div style="max-width: 1200px; margin: 10px auto 0 auto; padding: 0 10px; width: 100%;">
-    <div id="globalAlert" class="alert alert-info" style="display: none;">
-      <span id="alertBadge" class="alert-badge alert-badge-info">INFO</span>
-      <div style="flex: 1;">
-        <strong id="alertTitle">Pemberitahuan Sistem</strong>
-        <div id="alertMsg">Pesan sistem.</div>
+  <!-- ROLE-BASED WORKSPACE SUB-NAV (Rendered when signed in) -->
+  <section id="workspaceNavSection" style="display:none;" class="bg-light-surface-container-lowest border-b border-light-outline-variant shadow-xs">
+    <div class="max-w-6xl mx-auto px-3 py-2.5 flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-light-primary text-[22px]">space_dashboard</span>
+        <span id="workspaceTitle" class="font-headline text-title-md text-light-primary">Ruang Kerja Mahasiswa</span>
+        <span class="text-light-on-surface-variant text-label-sm hidden lg:inline">| Sistem Sirkulasi &amp; Fasilitas Terintegrasi</span>
       </div>
-      <button onclick="dismissAlert()" style="background:none;border:none;cursor:pointer;font-weight:700;color:inherit;padding:2px 6px;">Tutup</button>
-    </div>
-  </div>
 
-  <!-- Main Container -->
-  <main class="container">
-    <section id="loginPanel" class="card login-panel">
-      <div class="login-copy">
-        <p class="eyebrow">Perpustakaan digital kampus</p>
-        <h1>Semua layanan perpustakaan, dalam satu tempat.</h1>
-        <p>Temukan koleksi, kelola pinjaman, dan gunakan fasilitas kampus dengan akses yang sesuai akun Anda.</p>
-        <ul class="login-features">
-          <li>Cari buku dan cek ketersediaan koleksi</li>
-          <li>Lihat pinjaman dan reservasi fasilitas</li>
-          <li>Akses dipisahkan berdasarkan peran dan perpustakaan</li>
-        </ul>
+      <!-- Tab Buttons Container -->
+      <div id="navTabsContainer" class="flex flex-wrap items-center gap-1.5">
+        <!-- Injected dynamically based on role -->
       </div>
-      <div class="login-actions">
-        <h2>Masuk untuk melanjutkan</h2>
-        <p>Gunakan akun yang telah diberikan oleh pengelola perpustakaan.</p>
-        <button class="btn btn-primary" onclick="loginWithKeycloak()">Masuk dengan akun kampus</button>
-        <small>Autentikasi dilakukan melalui Keycloak CloudLib.</small>
+    </div>
+  </section>
+
+  <main class="flex-1">
+
+    <!-- SEARCH-FIRST CAMPUS HERO -->
+    <section id="hero-search-section" class="bg-light-surface-container-low border-b border-light-outline-variant">
+      <div class="max-w-6xl mx-auto px-3 py-4 grid grid-cols-1 lg:grid-cols-12 gap-3 items-center">
+        <div class="lg:col-span-7 flex flex-col gap-2.5">
+          <div class="flex flex-col gap-1.5">
+            <div class="inline-flex items-center gap-1 self-start px-2 py-0.5 bg-light-surface-variant border border-light-primary/20">
+              <span class="w-2 h-2 bg-success" aria-hidden="true"></span>
+              <span class="font-label text-label-sm text-light-primary">Kampus Bela Negara · Open Access &amp; Print Holdings</span>
+            </div>
+            <h1 class="font-display text-display-lg-mobile md:text-display-lg text-light-on-surface text-balance">
+              Explore UPNVJ’s scholarly books, journals, and theses.
+            </h1>
+            <p class="font-body text-body-lg text-light-on-surface-variant max-w-prose text-pretty">
+              Search across 48,500+ digital volumes, institutional repositories, and real-time physical shelf availability at Pondok Labu and Limo Campus Libraries.
+            </p>
+          </div>
+
+          <!-- Integrated Resource Tabs + Searchbar -->
+          <div class="flex flex-col gap-2 bg-light-surface-container-lowest p-3 border border-light-outline-variant shadow-sm">
+            <!-- Tabs Resource -->
+            <div role="tablist" aria-label="Resource categories" class="flex flex-wrap items-center gap-1 border-b border-light-outline-variant pb-1">
+              <button role="tab" id="tab-all" aria-selected="true" data-scope="All Resources" data-placeholder="Search titles, authors, ISBN, or thesis topics..." class="hero-tab px-3 py-1.5 border-b-2 border-light-primary text-light-primary font-label text-label-lg transition-colors">
+                <span>All Resources</span>
+              </button>
+              <button role="tab" id="tab-ebooks" aria-selected="false" data-scope="E-Books" data-placeholder="Search full-text e-books (Springer, IEEE, Gramedia)..." class="hero-tab px-3 py-1.5 border-b-2 border-transparent text-light-on-surface-variant hover:text-light-on-surface font-label text-label-lg transition-colors">
+                <span>E-Books</span>
+              </button>
+              <button role="tab" id="tab-journals" aria-selected="false" data-scope="Journals" data-placeholder="Search peer-reviewed journals, DOIs, or articles..." class="hero-tab px-3 py-1.5 border-b-2 border-transparent text-light-on-surface-variant hover:text-light-on-surface font-label text-label-lg transition-colors">
+                <span>Journals</span>
+              </button>
+              <button role="tab" id="tab-theses" aria-selected="false" data-scope="Theses" data-placeholder="Search UPNVJ skripsi, tesis, and dissertations..." class="hero-tab px-3 py-1.5 border-b-2 border-transparent text-light-on-surface-variant hover:text-light-on-surface font-label text-label-lg transition-colors">
+                <span>Theses</span>
+              </button>
+              <button role="tab" id="tab-print" aria-selected="false" data-scope="Print Books" data-placeholder="Search physical shelf holdings and call numbers..." class="hero-tab px-3 py-1.5 border-b-2 border-transparent text-light-on-surface-variant hover:text-light-on-surface font-label text-label-lg transition-colors">
+                <span>Print Books</span>
+              </button>
+            </div>
+
+            <!-- Search Form Connected to Live Catalog Filter -->
+            <form id="hero-search-form" onsubmit="event.preventDefault(); filterBooksFromHero();" role="search" class="flex items-center w-full border border-light-outline-variant bg-light-surface-container-lowest p-1 focus-within:border-light-primary focus-within:ring-1 focus-within:ring-light-primary transition-colors">
+              <span class="material-symbols-outlined text-light-on-surface-variant pl-2 pr-1 text-[20px]" aria-hidden="true">search</span>
+              <input id="hero-search-input" type="search" aria-label="Search UPNVJ Digital Library catalog" placeholder="Search titles, authors, ISBN, or thesis topics..." class="w-full border-0 bg-transparent font-body text-body-lg text-light-on-surface placeholder:text-light-on-surface-variant focus:ring-0 py-1.5 px-1">
+              <button type="submit" aria-label="Submit search" class="inline-flex items-center px-3 py-2 bg-light-primary text-light-on-primary hover:bg-light-primary-container font-label text-label-lg shrink-0 transition-colors">
+                <span>Search Catalog</span>
+              </button>
+            </form>
+
+            <div class="flex flex-wrap items-center gap-1.5 pt-0.5">
+              <span class="font-label text-label-sm text-light-on-surface-variant">Popular:</span>
+              <button type="button" onclick="quickSearch('Cloud')" class="px-2 py-0.5 bg-light-surface-container text-light-on-surface-variant hover:bg-light-surface-variant hover:text-light-primary font-label text-label-sm transition-colors">Cloud Computing</button>
+              <button type="button" onclick="quickSearch('Data')" class="px-2 py-0.5 bg-light-surface-container text-light-on-surface-variant hover:bg-light-surface-variant hover:text-light-primary font-label text-label-sm transition-colors">Data-Intensive</button>
+              <button type="button" onclick="quickSearch('Hukum')" class="px-2 py-0.5 bg-light-surface-container text-light-on-surface-variant hover:bg-light-surface-variant hover:text-light-primary font-label text-label-sm transition-colors">Hukum Tata Negara</button>
+              <button type="button" onclick="quickSearch('Finance')" class="px-2 py-0.5 bg-light-surface-container text-light-on-surface-variant hover:bg-light-surface-variant hover:text-light-primary font-label text-label-sm transition-colors">Corporate Finance</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campus Architectural Showcase with Uploaded UPNVJ Campus Image -->
+        <div class="lg:col-span-5 flex flex-col gap-2.5">
+          <div class="overflow-hidden border border-light-outline-variant bg-light-surface-container-lowest shadow-sm">
+            <img src="/images/upnvj-campus.webp" alt="Gedung Kampus UPNVJ Bela Negara" class="w-full h-64 object-cover">
+            <div class="p-3 flex items-center justify-between gap-2 bg-light-surface-container-lowest border-t border-light-outline-variant">
+              <div class="flex flex-col">
+                <span class="font-title text-title-md text-light-on-surface">UPNVJ Central Library</span>
+                <span class="font-body text-body-md text-light-on-surface-variant">Kampus Pondok Labu &amp; Limo</span>
+              </div>
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-light-surface-variant text-light-primary font-label text-label-sm tabular-nums">
+                <span class="w-1.5 h-1.5 bg-success" aria-hidden="true"></span>
+                Open until 20:00 WIB
+              </span>
+            </div>
+          </div>
+
+          <!-- Glanceable Library Metrics (Connected to Live Database) -->
+          <div class="grid grid-cols-3 gap-2">
+            <div class="border border-light-outline-variant bg-light-surface-container-lowest p-2 flex flex-col gap-0.5 shadow-xs">
+              <span id="heroStatBooks" class="font-headline text-headline-md text-light-primary tabular-nums">-</span>
+              <span class="font-label text-label-sm text-light-on-surface-variant">Master Titles</span>
+            </div>
+            <div class="border border-light-outline-variant bg-light-surface-container-lowest p-2 flex flex-col gap-0.5 shadow-xs">
+              <span id="heroStatCopies" class="font-headline text-headline-md text-light-primary tabular-nums">-</span>
+              <span class="font-label text-label-sm text-light-on-surface-variant">Physical Copies</span>
+            </div>
+            <div class="border border-light-outline-variant bg-light-surface-container-lowest p-2 flex flex-col gap-0.5 shadow-xs">
+              <span id="heroStatAvail" class="font-headline text-headline-md text-light-primary tabular-nums">-</span>
+              <span class="font-label text-label-sm text-light-on-surface-variant">Available on Shelf</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section id="workspaceIntro" class="workspace-intro" hidden>
-      <div>
-        <p class="eyebrow">CloudLib · ruang kerja</p>
-        <h1 id="workspaceTitle"></h1>
-        <p id="workspaceDescription"></p>
-      </div>
-      <div id="memberIdentity" class="member-identity" hidden>
-        <span>NIM / NPM mahasiswa</span>
-        <strong id="memberRefLabel"></strong>
-      </div>
-    </section>
+    <!-- ============================================================== -->
+    <!-- SECTION: ROLE-SPECIFIC WORKSPACES (Shown when signed in)       -->
+    <!-- ============================================================== -->
 
-    <!-- Desktop Navigation Tabs -->
-    <div class="nav-tabs" id="desktopNavTabs" hidden>
-      <!-- Injected dynamically based on role -->
-    </div>
-
-    <!-- VIEW 1: MAHASISWA -->
-    <section id="mahasiswaSection" style="display:none;">
+    <!-- A. WORKSPACE MAHASISWA -->
+    <section id="mahasiswaSection" style="display:none;" class="max-w-6xl mx-auto px-3 py-4">
       
-      <!-- Tab 1.1: Katalog Buku & Ketersediaan -->
-      <div id="mhs-tab-katalog" class="tab-content">
-        <div class="card">
-          <div class="card-title">
-            <span>Koleksi buku</span>
-            <button class="btn btn-secondary" onclick="loadBooks()">Perbarui</button>
+      <!-- Tab 1: Pinjaman Saya -->
+      <div id="mhs-tab-pinjaman" class="tab-pane" style="display:none;">
+        <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-sm mb-2.5">
+          <div class="flex items-center justify-between pb-2 border-b border-light-outline-variant mb-2">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-light-primary">bookmark</span>
+              <h2 class="font-headline text-headline-md text-light-on-surface">Pinjaman Aktif Saya</h2>
+            </div>
+            <button onclick="loadMyLoans()" class="inline-flex items-center gap-1 px-2.5 py-1 border border-light-outline-variant text-label-sm hover:bg-light-surface-container-low transition-colors">
+              <span class="material-symbols-outlined text-[16px]">refresh</span> Perbarui
+            </button>
           </div>
-          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:16px;">
-            Cari berdasarkan judul, penulis, atau ISBN. Periksa jumlah eksemplar yang tersedia.
-          </p>
-          <div class="form-group" style="display:flex; gap:6px; max-width:620px;">
-            <label class="sr-only" for="bookSearchInput">Cari buku</label>
-            <input type="search" id="bookSearchInput" class="form-input" placeholder="Contoh: Cloud Computing" oninput="filterBooks()">
-          </div>
-          <div class="table-responsive">
-            <table>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-body-md border-collapse">
               <thead>
-                <tr>
-                  <th>Judul Buku</th>
-                  <th>Penulis</th>
-                  <th>ISBN</th>
-                  <th>Ketersediaan Eksemplar</th>
+                <tr class="bg-light-surface-container text-light-on-surface-variant text-label-sm uppercase tracking-wider border-b border-light-outline-variant">
+                  <th class="py-2 px-2.5">No Transaksi</th>
+                  <th class="py-2 px-2.5">ID Eksemplar</th>
+                  <th class="py-2 px-2.5">Barcode Buku</th>
+                  <th class="py-2 px-2.5">Tanggal Pinjam</th>
+                  <th class="py-2 px-2.5">Batas Jatuh Tempo</th>
+                  <th class="py-2 px-2.5">Status</th>
                 </tr>
               </thead>
-              <tbody id="bookTableBody">
-                <!-- Dynamically loaded -->
+              <tbody id="myLoansTableBody" class="divide-y divide-light-outline-variant">
+                <tr><td colspan="6" class="py-2.5 text-center text-light-on-surface-variant">Memuat pinjaman aktif...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- Tab 1.2: Presensi -->
-      <div id="mhs-tab-checkin" class="tab-content" style="display:none;">
-        <div class="card">
-          <div class="card-title"><span>Catat kehadiran</span></div>
-          <p style="color:var(--text-muted); line-height:1.6; margin-bottom:18px;">
-            Kehadiran dicatat atas nama akun mahasiswa yang sedang masuk. QR presensi belum tersedia; tombol ini mengirim check-in langsung ke layanan.
-          </p>
-          <button class="btn btn-primary" onclick="submitStudentCheckIn()">Catat kehadiran</button>
+      <!-- Tab 2: Presensi Gerbang -->
+      <div id="mhs-tab-presensi" class="tab-pane" style="display:none;">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 mb-2.5">
+          <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-sm flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-1.5 mb-1.5">
+                <span class="material-symbols-outlined text-light-primary text-[22px]">door_front</span>
+                <h2 class="font-headline text-headline-md text-light-on-surface">Presensi Gerbang Mandiri</h2>
+              </div>
+              <p class="text-body-md text-light-on-surface-variant mb-2.5">
+                Lakukan presensi saat memasuki gerbang perpustakaan kampus. Sistem secara otomatis mengekstrak nomor anggota mahasiswa (NPM) dari token JWT terverifikasi Keycloak sesuai standar <strong>ADR-012</strong>.
+              </p>
+            </div>
+            <div>
+              <button onclick="submitStudentCheckIn()" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-light-primary text-light-on-primary hover:bg-light-primary-container font-label text-label-lg transition-colors w-full sm:w-auto shadow-xs">
+                <span class="material-symbols-outlined">how_to_reg</span>
+                <span>Tap Presensi Masuk Sekarang</span>
+              </button>
+              <div id="checkInResult" class="mt-2 text-body-md"></div>
+            </div>
+          </div>
+
+          <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-sm">
+            <h3 class="font-title text-title-md text-light-on-surface mb-2 flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-upnvj-gold">verified</span>
+              <span>Tata Tertib &amp; Akses Layanan</span>
+            </h3>
+            <ul class="space-y-1.5 text-body-md text-light-on-surface-variant">
+              <li class="flex items-start gap-1.5">
+                <span class="material-symbols-outlined text-success text-[16px] shrink-0 mt-0.5">check_circle</span>
+                <span>Wajib check-in sebelum memanfaatkan ruang baca dan workstation lab komputer.</span>
+              </li>
+              <li class="flex items-start gap-1.5">
+                <span class="material-symbols-outlined text-success text-[16px] shrink-0 mt-0.5">check_circle</span>
+                <span>Batas maksimal peminjaman adalah 2 eksemplar buku cetak selama 14 hari kalender.</span>
+              </li>
+              <li class="flex items-start gap-1.5">
+                <span class="material-symbols-outlined text-success text-[16px] shrink-0 mt-0.5">check_circle</span>
+                <span>Data presensi langsung tersimpan ke database pengunjung tenant kampus secara real-time.</span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
-      <!-- Tab 1.3: Reservasi Komputer (QS02 Anti-Double Booking) -->
-      <div id="mhs-tab-komputer" class="tab-content" style="display:none;">
-        <div class="grid-2">
-          <div class="card">
-            <div class="card-title">
-              <span>Reservasi komputer</span>
+      <!-- Tab 3: Fasilitas Komputer -->
+      <div id="mhs-tab-komputer" class="tab-pane" style="display:none;">
+        <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-sm mb-2.5">
+          <div class="flex items-center justify-between pb-2 border-b border-light-outline-variant mb-2">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-light-primary">computer</span>
+              <h2 class="font-headline text-headline-md text-light-on-surface">Workstation Komputer &amp; Lab Riset</h2>
             </div>
-            <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:16px;">
-              Pilih komputer dan waktu yang tersedia. Sistem akan menolak jadwal yang sudah dipesan.
-            </p>
-            <div class="form-group">
-              <label class="form-label">Pilih Perangkat Komputer</label>
-              <select id="pcSelector" class="form-select">
-                <!-- Dynamically loaded -->
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Pilih Waktu Mulai Slot</label>
-              <input type="datetime-local" id="slotPicker" class="form-input">
-            </div>
-            <button class="btn btn-primary btn-block" onclick="submitReservation()">
-              Konfirmasi Pemesanan Slot
+            <button onclick="loadComputers()" class="inline-flex items-center gap-1 px-2.5 py-1 border border-light-outline-variant text-label-sm hover:bg-light-surface-container-low transition-colors">
+              <span class="material-symbols-outlined text-[16px]">refresh</span> Perbarui Unit
             </button>
           </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-body-md border-collapse">
+              <thead>
+                <tr class="bg-light-surface-container text-light-on-surface-variant text-label-sm uppercase tracking-wider border-b border-light-outline-variant">
+                  <th class="py-2 px-2.5">Unit Workstation</th>
+                  <th class="py-2 px-2.5">ID Unit</th>
+                  <th class="py-2 px-2.5">Status Reservasi</th>
+                  <th class="py-2 px-2.5 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="computersTableBody" class="divide-y divide-light-outline-variant">
+                <tr><td colspan="4" class="py-2.5 text-center text-light-on-surface-variant">Memuat unit komputer...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-          <div class="card">
-            <div class="card-title">
-              <span>Jadwal reservasi</span>
-              <button class="btn btn-secondary" onclick="loadComputers()">Perbarui</button>
+        <!-- Tabel Reservasi Saya -->
+        <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-sm">
+          <div class="flex items-center justify-between pb-2 border-b border-light-outline-variant mb-2">
+            <h3 class="font-title text-title-md text-light-on-surface flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-light-secondary">schedule</span>
+              <span>Jadwal Reservasi Komputer Saya</span>
+            </h3>
+            <button onclick="loadMyReservations()" class="inline-flex items-center gap-1 px-2.5 py-1 border border-light-outline-variant text-label-sm hover:bg-light-surface-container-low transition-colors">
+              <span class="material-symbols-outlined text-[16px]">refresh</span> Perbarui Jadwal
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-body-md border-collapse">
+              <thead>
+                <tr class="bg-light-surface-container text-light-on-surface-variant text-label-sm uppercase tracking-wider border-b border-light-outline-variant">
+                  <th class="py-2 px-2.5">No Reservasi</th>
+                  <th class="py-2 px-2.5">ID Komputer</th>
+                  <th class="py-2 px-2.5">Unit</th>
+                  <th class="py-2 px-2.5">Slot Waktu Penggunaan</th>
+                </tr>
+              </thead>
+              <tbody id="myReservationsTableBody" class="divide-y divide-light-outline-variant">
+                <tr><td colspan="4" class="py-2.5 text-center text-light-on-surface-variant">Memuat reservasi aktif...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- B. WORKSPACE PETUGAS SIRKULASI -->
+    <section id="petugasSection" style="display:none;" class="max-w-6xl mx-auto px-3 py-4">
+      
+      <!-- Tab 1: Sirkulasi Pinjam & Kembali -->
+      <div id="petugas-tab-sirkulasi" class="tab-pane">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 mb-2.5">
+          <!-- Form Pinjam -->
+          <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-sm">
+            <div class="flex items-center gap-1.5 mb-2">
+              <span class="material-symbols-outlined text-light-primary text-[20px]">output</span>
+              <h3 class="font-headline text-headline-md text-light-on-surface">Peminjaman Buku</h3>
             </div>
-            <div class="table-responsive">
-              <table>
+            <div class="space-y-2">
+              <div>
+                <label class="block text-label-sm font-semibold text-light-on-surface mb-1">Barcode Eksemplar Fisik</label>
+                <input type="text" id="borrowBarcode" placeholder="Contoh: UPN-CC-001" class="w-full border border-light-outline-variant p-2 text-body-md bg-light-surface-container-lowest">
+              </div>
+              <div>
+                <label class="block text-label-sm font-semibold text-light-on-surface mb-1">Nomor Anggota / NPM Mahasiswa</label>
+                <input type="text" id="borrowMemberRef" placeholder="Contoh: 2410511001" class="w-full border border-light-outline-variant p-2 text-body-md bg-light-surface-container-lowest">
+              </div>
+              <button onclick="submitBorrow()" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-light-primary text-light-on-primary hover:bg-light-primary-container font-label text-label-lg transition-colors w-full">
+                <span class="material-symbols-outlined text-[18px]">check</span>
+                <span>Proses Peminjaman</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Form Kembali -->
+          <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-sm">
+            <div class="flex items-center gap-1.5 mb-2">
+              <span class="material-symbols-outlined text-light-secondary text-[20px]">keyboard_return</span>
+              <h3 class="font-headline text-headline-md text-light-on-surface">Pengembalian Buku</h3>
+            </div>
+            <div class="space-y-2">
+              <div>
+                <label class="block text-label-sm font-semibold text-light-on-surface mb-1">Barcode Eksemplar Fisik</label>
+                <input type="text" id="returnBarcode" placeholder="Contoh: UPN-CC-001" class="w-full border border-light-outline-variant p-2 text-body-md bg-light-surface-container-lowest">
+              </div>
+              <p class="text-body-md text-light-on-surface-variant">
+                Status eksemplar akan secara otomatis dikembalikan menjadi TERSEDIA di rak fisik perpustakaan.
+              </p>
+              <button onclick="submitReturn()" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 border border-light-outline-variant bg-light-surface-container-lowest hover:bg-light-surface-container-low font-label text-label-lg transition-colors w-full">
+                <span class="material-symbols-outlined text-[18px]">done_all</span>
+                <span>Selesaikan Pengembalian</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabel Pinjaman Meja Sirkulasi -->
+        <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-sm">
+          <div class="flex items-center justify-between pb-2 border-b border-light-outline-variant mb-2">
+            <h3 class="font-title text-title-md text-light-on-surface flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-light-primary">receipt_long</span>
+              <span>Daftar Seluruh Pinjaman Aktif (Meja Sirkulasi)</span>
+            </h3>
+            <button onclick="loadActiveLoansPetugas()" class="inline-flex items-center gap-1 px-2.5 py-1 border border-light-outline-variant text-label-sm hover:bg-light-surface-container-low transition-colors">
+              <span class="material-symbols-outlined text-[16px]">refresh</span> Perbarui
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-body-md border-collapse">
+              <thead>
+                <tr class="bg-light-surface-container text-light-on-surface-variant text-label-sm uppercase tracking-wider border-b border-light-outline-variant">
+                  <th class="py-2 px-2.5">No Transaksi</th>
+                  <th class="py-2 px-2.5">ID Eksemplar</th>
+                  <th class="py-2 px-2.5">Barcode</th>
+                  <th class="py-2 px-2.5">Peminjam (NPM)</th>
+                  <th class="py-2 px-2.5">Tgl Pinjam</th>
+                  <th class="py-2 px-2.5">Jatuh Tempo</th>
+                  <th class="py-2 px-2.5 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="petugasLoansTableBody" class="divide-y divide-light-outline-variant">
+                <tr><td colspan="7" class="py-2.5 text-center text-light-on-surface-variant">Memuat pinjaman aktif...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Kelola Eksemplar -->
+      <div id="petugas-tab-eksemplar" class="tab-pane" style="display:none;">
+        <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-sm mb-2.5">
+          <div class="flex items-center gap-1.5 mb-2 pb-2 border-b border-light-outline-variant">
+            <span class="material-symbols-outlined text-light-primary text-[20px]">add_circle</span>
+            <h3 class="font-headline text-headline-md text-light-on-surface">Daftarkan Eksemplar Fisik Baru</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+            <div>
+              <label class="block text-label-sm font-semibold text-light-on-surface mb-1">Pilih Judul Buku Master</label>
+              <select id="newCopyBookId" class="w-full border border-light-outline-variant p-2 text-body-md bg-light-surface-container-lowest"></select>
+            </div>
+            <div>
+              <label class="block text-label-sm font-semibold text-light-on-surface mb-1">Kode Barcode Fisik Unik</label>
+              <input type="text" id="newCopyBarcode" placeholder="Contoh: UPN-CC-003" class="w-full border border-light-outline-variant p-2 text-body-md bg-light-surface-container-lowest">
+            </div>
+          </div>
+          <button onclick="submitCreateCopy()" class="inline-flex items-center gap-1.5 px-3 py-2 bg-light-primary text-light-on-primary hover:bg-light-primary-container font-label text-label-lg transition-colors">
+            <span class="material-symbols-outlined text-[18px]">save</span>
+            <span>Tambahkan Eksemplar ke Rak</span>
+          </button>
+        </div>
+
+        <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-sm">
+          <div class="flex items-center justify-between pb-2 border-b border-light-outline-variant mb-2">
+            <h3 class="font-title text-title-md text-light-on-surface flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-light-primary">inventory_2</span>
+              <span>Inventaris Seluruh Eksemplar Fisik</span>
+            </h3>
+            <button onclick="loadAllCopies()" class="inline-flex items-center gap-1 px-2.5 py-1 border border-light-outline-variant text-label-sm hover:bg-light-surface-container-low transition-colors">
+              <span class="material-symbols-outlined text-[16px]">refresh</span> Perbarui
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-body-md border-collapse">
+              <thead>
+                <tr class="bg-light-surface-container text-light-on-surface-variant text-label-sm uppercase tracking-wider border-b border-light-outline-variant">
+                  <th class="py-2 px-2.5">ID</th>
+                  <th class="py-2 px-2.5">Judul Buku</th>
+                  <th class="py-2 px-2.5">Barcode Fisik</th>
+                  <th class="py-2 px-2.5">Status di Rak</th>
+                </tr>
+              </thead>
+              <tbody id="copiesTableBody" class="divide-y divide-light-outline-variant">
+                <tr><td colspan="4" class="py-2.5 text-center text-light-on-surface-variant">Memuat eksemplar...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Presensi Manual -->
+      <div id="petugas-tab-presensi" class="tab-pane" style="display:none;">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+          <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-sm">
+            <h3 class="font-headline text-headline-md text-light-on-surface mb-2 flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-light-primary">edit_calendar</span>
+              <span>Catat Presensi Kunjungan Manual</span>
+            </h3>
+            <p class="text-body-md text-light-on-surface-variant mb-2.5">
+              Gunakan opsi ini jika mahasiswa mengalami kendala koneksi perangkat atau tidak membawa gawai.
+            </p>
+            <div class="space-y-2">
+              <div>
+                <label class="block text-label-sm font-semibold text-light-on-surface mb-1">Nomor Anggota / NPM Mahasiswa</label>
+                <input type="text" id="fallbackNPM" placeholder="Contoh: 2410511001" class="w-full border border-light-outline-variant p-2 text-body-md bg-light-surface-container-lowest">
+              </div>
+              <button onclick="submitFallbackCheckIn()" class="inline-flex items-center gap-1.5 px-3 py-2 bg-light-primary text-light-on-primary hover:bg-light-primary-container font-label text-label-lg transition-colors w-full sm:w-auto">
+                <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                <span>Catat Presensi</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-sm">
+            <div class="flex items-center justify-between pb-2 border-b border-light-outline-variant mb-2">
+              <h3 class="font-title text-title-md text-light-on-surface flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-light-secondary">history</span>
+                <span>Daftar Pengunjung Terbaru</span>
+              </h3>
+              <button onclick="loadAttendanceLogs()" class="text-label-sm text-light-primary hover:underline">Segarkan</button>
+            </div>
+            <div class="overflow-y-auto max-h-60">
+              <table class="w-full text-left text-body-md border-collapse">
                 <thead>
-                  <tr>
-                    <th>Label Komputer</th>
-                    <th>ID Anggota</th>
-                    <th>Jadwal Slot Mulai</th>
+                  <tr class="bg-light-surface-container text-light-on-surface-variant text-label-sm uppercase border-b border-light-outline-variant">
+                    <th class="py-2 px-2.5">Waktu</th>
+                    <th class="py-2 px-2.5">NPM Mahasiswa</th>
                   </tr>
                 </thead>
-                <tbody id="reservationTableBody">
-                  <!-- Dynamically loaded -->
+                <tbody id="attendanceLogsBody" class="divide-y divide-light-outline-variant">
+                  <tr><td colspan="2" class="py-2.5 text-center text-light-on-surface-variant">Memuat log presensi...</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- Tab 1.4: Peminjaman Saya & Riwayat -->
-      <div id="mhs-tab-pinjaman" class="tab-content" style="display:none;">
-        <div class="card">
-          <div class="card-title">
-            <span>Pinjaman aktif</span>
-            <button class="btn btn-secondary" onclick="loadMyLoans()">Perbarui</button>
+    <!-- C. WORKSPACE ADMINISTRATOR -->
+    <section id="adminSection" style="display:none;" class="max-w-6xl mx-auto px-3 py-4">
+      
+      <!-- Tab 1: Ringkasan Eksekutif -->
+      <div id="admin-tab-ringkasan" class="tab-pane">
+        <!-- 4 Grid Stat Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2.5">
+          <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-xs">
+            <span class="font-label text-label-sm uppercase text-light-on-surface-variant tracking-wider">Judul Buku</span>
+            <div class="font-headline text-headline-lg text-light-primary tabular-nums mt-0.5" id="statTotalBooks">-</div>
+            <span class="font-body text-label-sm text-light-on-surface-variant">Judul terdaftar</span>
           </div>
-          <div class="table-responsive">
-            <table>
+          <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-xs">
+            <span class="font-label text-label-sm uppercase text-light-on-surface-variant tracking-wider">Eksemplar Fisik</span>
+            <div class="font-headline text-headline-lg text-light-primary tabular-nums mt-0.5" id="statTotalCopies">-</div>
+            <span class="font-body text-label-sm text-success font-semibold">Tersedia: <strong id="statAvailCopies">-</strong></span>
+          </div>
+          <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-xs">
+            <span class="font-label text-label-sm uppercase text-light-on-surface-variant tracking-wider">Pinjaman Aktif</span>
+            <div class="font-headline text-headline-lg text-warning tabular-nums mt-0.5" id="statActiveLoans">-</div>
+            <span class="font-body text-label-sm text-light-on-surface-variant">Sedang dipinjam</span>
+          </div>
+          <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-xs">
+            <span class="font-label text-label-sm uppercase text-light-on-surface-variant tracking-wider">Total Kunjungan</span>
+            <div class="font-headline text-headline-lg text-light-primary tabular-nums mt-0.5" id="statTotalVisitors">-</div>
+            <span class="font-body text-label-sm text-light-on-surface-variant">Reservasi PC: <strong id="statReservations">-</strong></span>
+          </div>
+        </div>
+
+        <!-- Progress Utilisasi Koleksi -->
+        <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-sm">
+          <div class="flex items-center justify-between pb-2 border-b border-light-outline-variant mb-2">
+            <h3 class="font-title text-title-md text-light-on-surface flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-light-primary">pie_chart</span>
+              <span>Rasio Ketersediaan Koleksi Fisik di Rak</span>
+            </h3>
+            <button onclick="loadDashboard()" class="text-label-sm text-light-primary hover:underline">Perbarui Metrik</button>
+          </div>
+          <div>
+            <div class="flex justify-between text-label-sm font-semibold mb-1.5">
+              <span>Koleksi Siap Pinjam</span>
+              <span id="availRatioLabel">Menghitung...</span>
+            </div>
+            <div class="w-full bg-light-error-container h-3 overflow-hidden flex">
+              <div id="availProgressBar" class="bg-success h-full transition-all duration-surface-enter" style="width: 50%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Kelola Judul Buku -->
+      <div id="admin-tab-buku" class="tab-pane" style="display:none;">
+        <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-sm mb-2.5">
+          <h3 class="font-headline text-headline-md text-light-on-surface mb-2 pb-2 border-b border-light-outline-variant flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-light-primary">library_add</span>
+            <span>Daftarkan Judul Buku Master Baru</span>
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
+            <div>
+              <label class="block text-label-sm font-semibold text-light-on-surface mb-1">Judul Buku</label>
+              <input type="text" id="newBookTitle" placeholder="Contoh: Clean Architecture" class="w-full border border-light-outline-variant p-2 text-body-md bg-light-surface-container-lowest">
+            </div>
+            <div>
+              <label class="block text-label-sm font-semibold text-light-on-surface mb-1">Penulis</label>
+              <input type="text" id="newBookAuthor" placeholder="Contoh: Robert C. Martin" class="w-full border border-light-outline-variant p-2 text-body-md bg-light-surface-container-lowest">
+            </div>
+            <div>
+              <label class="block text-label-sm font-semibold text-light-on-surface mb-1">ISBN</label>
+              <input type="text" id="newBookIsbn" placeholder="Contoh: 978-0134494166" class="w-full border border-light-outline-variant p-2 text-body-md bg-light-surface-container-lowest">
+            </div>
+          </div>
+          <button onclick="submitCreateBook()" class="inline-flex items-center gap-1.5 px-3 py-2 bg-light-primary text-light-on-primary hover:bg-light-primary-container font-label text-label-lg transition-colors">
+            <span class="material-symbols-outlined text-[18px]">save</span>
+            <span>Simpan Master Buku</span>
+          </button>
+        </div>
+
+        <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-sm">
+          <div class="flex items-center justify-between pb-2 border-b border-light-outline-variant mb-2">
+            <h3 class="font-title text-title-md text-light-on-surface">Daftar Judul Buku Terdaftar</h3>
+            <button onclick="loadBooks()" class="text-label-sm text-light-primary hover:underline">Perbarui</button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-body-md border-collapse">
               <thead>
-                <tr>
-                  <th>Nomor Transaksi</th>
-                  <th>Kode eksemplar</th>
-                  <th>Tanggal pinjam</th>
-                  <th>Batas pengembalian</th>
-                  <th>Status</th>
+                <tr class="bg-light-surface-container text-light-on-surface-variant text-label-sm uppercase tracking-wider border-b border-light-outline-variant">
+                  <th class="py-2 px-2.5">ID</th>
+                  <th class="py-2 px-2.5">Judul Buku</th>
+                  <th class="py-2 px-2.5">Penulis</th>
+                  <th class="py-2 px-2.5">ISBN</th>
                 </tr>
               </thead>
-              <tbody id="myLoansTableBody">
-                <!-- Dynamically loaded -->
+              <tbody id="adminBooksTableBody" class="divide-y divide-light-outline-variant">
+                <tr><td colspan="4" class="py-2.5 text-center text-light-on-surface-variant">Memuat judul buku...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
 
-    </section>
-
-    <!-- VIEW 2: PETUGAS PERPUSTAKAAN (Circulation Desk) -->
-    <section id="petugasSection" style="display:none;">
-      <div class="grid-2">
-
-        <!-- Form Peminjaman Buku -->
-        <div class="card">
-          <div class="card-title">
-            <span>Catat peminjaman</span>
+      <!-- Tab 3: Kelola Komputer -->
+      <div id="admin-tab-komputer" class="tab-pane" style="display:none;">
+        <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-sm mb-2.5">
+          <h3 class="font-headline text-headline-md text-light-on-surface mb-2 pb-2 border-b border-light-outline-variant flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-light-primary">add_to_queue</span>
+            <span>Daftarkan Unit Workstation Baru</span>
+          </h3>
+          <div class="flex flex-col sm:flex-row gap-2 items-end max-w-lg mb-2">
+            <div class="flex-1 w-full">
+              <label class="block text-label-sm font-semibold text-light-on-surface mb-1">Label Unit Komputer</label>
+              <input type="text" id="newCompCode" placeholder="Contoh: PC-LAB-03" class="w-full border border-light-outline-variant p-2 text-body-md bg-light-surface-container-lowest">
+            </div>
+            <button onclick="submitCreateComputer()" class="inline-flex items-center gap-1.5 px-3 py-2 bg-light-primary text-light-on-primary hover:bg-light-primary-container font-label text-label-lg transition-colors shrink-0">
+              <span class="material-symbols-outlined text-[18px]">add</span>
+              <span>Daftarkan</span>
+            </button>
           </div>
-          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:16px;">
-            Masukkan kode eksemplar dan nomor anggota. Masa peminjaman adalah 14 hari.
-          </p>
-          <div class="form-group">
-            <label class="form-label">Kode eksemplar</label>
-            <input type="text" id="borrowBarcode" class="form-input" placeholder="Contoh: UPN-CC-001">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Nomor anggota (NPM)</label>
-            <input type="text" id="borrowMemberRef" class="form-input" placeholder="Contoh: 2410511001">
-          </div>
-          <button class="btn btn-primary btn-block" onclick="submitBorrow()">Catat peminjaman</button>
         </div>
 
-        <!-- Form Pengembalian Buku & Kondisi Fisik -->
-        <div class="card">
-          <div class="card-title">
-            <span>Catat pengembalian</span>
+        <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-sm">
+          <div class="flex items-center justify-between pb-2 border-b border-light-outline-variant mb-2">
+            <h3 class="font-title text-title-md text-light-on-surface">Unit Komputer Terdaftar</h3>
+            <button onclick="loadComputers()" class="text-label-sm text-light-primary hover:underline">Perbarui</button>
           </div>
-          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:16px;">
-            Masukkan barcode eksemplar untuk menyelesaikan pengembalian.
-          </p>
-          <div class="form-group">
-            <label class="form-label">Kode eksemplar</label>
-            <input type="text" id="returnBarcode" class="form-input" placeholder="Contoh: UPN-CC-001">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-body-md border-collapse">
+              <thead>
+                <tr class="bg-light-surface-container text-light-on-surface-variant text-label-sm uppercase tracking-wider border-b border-light-outline-variant">
+                  <th class="py-2 px-2.5">ID</th>
+                  <th class="py-2 px-2.5">Label Unit</th>
+                  <th class="py-2 px-2.5">Tenant ID</th>
+                </tr>
+              </thead>
+              <tbody id="adminComputersTableBody" class="divide-y divide-light-outline-variant">
+                <tr><td colspan="3" class="py-2.5 text-center text-light-on-surface-variant">Memuat komputer...</td></tr>
+              </tbody>
+            </table>
           </div>
-          <button class="btn btn-primary btn-block" style="background:#16766e;" onclick="submitReturn()">
-            Selesaikan pengembalian
+        </div>
+      </div>
+
+      <!-- Tab 4: Manajemen Multi-Tenant -->
+      <div id="admin-tab-tenant" class="tab-pane" style="display:none;">
+        <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-sm mb-2.5">
+          <h3 class="font-headline text-headline-md text-light-on-surface mb-2 pb-2 border-b border-light-outline-variant flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-light-primary">domain_add</span>
+            <span>Daftarkan Tenant Institusi Kampus Baru</span>
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 max-w-xl mb-2">
+            <div>
+              <label class="block text-label-sm font-semibold text-light-on-surface mb-1">Kode Tenant (Unik)</label>
+              <input type="text" id="newTenantCode" placeholder="Contoh: fik / fk / pusat" class="w-full border border-light-outline-variant p-2 text-body-md bg-light-surface-container-lowest">
+            </div>
+            <div>
+              <label class="block text-label-sm font-semibold text-light-on-surface mb-1">Nama Institusi Kampus</label>
+              <input type="text" id="newTenantName" placeholder="Contoh: Digital Library Fakultas Ilmu Komputer" class="w-full border border-light-outline-variant p-2 text-body-md bg-light-surface-container-lowest">
+            </div>
+          </div>
+          <button onclick="submitCreateTenant()" class="inline-flex items-center gap-1.5 px-3 py-2 bg-light-primary text-light-on-primary hover:bg-light-primary-container font-label text-label-lg transition-colors">
+            <span class="material-symbols-outlined text-[18px]">add_business</span>
+            <span>Daftarkan Tenant Baru</span>
           </button>
         </div>
 
-        <!-- Input NPM Cadangan Check-in (Fallback) -->
-        <div class="card" style="grid-column: 1 / -1;">
-          <div class="card-title">
-            <span>Catat presensi manual</span>
+        <div class="bg-light-surface-container-lowest border border-light-outline-variant p-3 shadow-sm">
+          <div class="flex items-center justify-between pb-2 border-b border-light-outline-variant mb-2">
+            <h3 class="font-title text-title-md text-light-on-surface">Daftar Seluruh Tenant di CloudLib</h3>
+            <button onclick="loadTenants()" class="text-label-sm text-light-primary hover:underline">Perbarui</button>
           </div>
-          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:16px;">
-            Catat kehadiran atas nama anggota yang tidak dapat menggunakan aplikasinya.
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-body-md border-collapse">
+              <thead>
+                <tr class="bg-light-surface-container text-light-on-surface-variant text-label-sm uppercase tracking-wider border-b border-light-outline-variant">
+                  <th class="py-2 px-2.5">ID</th>
+                  <th class="py-2 px-2.5">Kode Tenant</th>
+                  <th class="py-2 px-2.5">Nama Institusi Kampus</th>
+                </tr>
+              </thead>
+              <tbody id="tenantsTableBody" class="divide-y divide-light-outline-variant">
+                <tr><td colspan="3" class="py-2.5 text-center text-light-on-surface-variant">Memuat tenant...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIVE CATALOG TABLE SECTION -->
+    <section id="catalog-section" class="max-w-6xl mx-auto px-3 py-4">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-2">
+        <div class="flex flex-col gap-0.5">
+          <h2 class="font-headline text-headline-lg text-light-on-surface">Katalog Buku &amp; Ketersediaan Fisik di Rak</h2>
+          <p class="font-body text-body-lg text-light-on-surface-variant">Koleksi buku terdaftar di basis data tenant dan jumlah eksemplar fisik siap pinjam.</p>
+        </div>
+        <div id="catalogControls" class="flex items-center gap-2">
+          <input type="text" id="bookSearchInput" onkeyup="filterBooks()" placeholder="Filter cepat judul atau ISBN..." class="border border-light-outline-variant px-2.5 py-1 text-body-md bg-light-surface-container-lowest w-64">
+          <button onclick="loadBooks()" class="inline-flex items-center gap-1 px-2.5 py-1 border border-light-outline-variant bg-light-surface-container-lowest hover:bg-light-surface-container-low text-label-sm transition-colors">
+            <span class="material-symbols-outlined text-[16px]">refresh</span> Perbarui
+          </button>
+        </div>
+      </div>
+
+      <!-- Real Catalog Table or Login Callout -->
+      <div class="border border-light-outline-variant bg-light-surface-container-lowest overflow-hidden shadow-sm">
+        <div id="catalogTableWrapper" class="overflow-x-auto">
+          <table class="w-full text-left text-body-md border-collapse">
+            <thead>
+              <tr class="bg-light-surface-container text-light-on-surface-variant text-label-sm uppercase tracking-wider border-b border-light-outline-variant">
+                <th class="py-2.5 px-3">Judul Buku</th>
+                <th class="py-2.5 px-3">Penulis</th>
+                <th class="py-2.5 px-3">ISBN / Call Number</th>
+                <th class="py-2.5 px-3">Stok di Rak</th>
+                <th class="py-2.5 px-3 text-right">Rincian Fisik</th>
+              </tr>
+            </thead>
+            <tbody id="booksTableBody" class="divide-y divide-light-outline-variant">
+              <tr>
+                <td colspan="5" class="py-4 px-3 text-center text-light-on-surface-variant">
+                  Mengambil koleksi katalog buku...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Banner saat belum login (ADR-012 Multi-Tenant Protected) -->
+        <div id="catalogAuthPrompt" style="display:none;" class="p-4 text-center bg-light-surface-container-low border-t border-light-outline-variant">
+          <span class="material-symbols-outlined text-light-primary text-[32px] mb-1">lock</span>
+          <h4 class="font-title text-title-md text-light-on-surface">Katalog Buku Terisolasi Multi-Tenant (ADR-012)</h4>
+          <p class="font-body text-body-md text-light-on-surface-variant max-w-md mx-auto mt-1 mb-3">
+            Sesuai arsitektur keamanan, katalog buku dan ketersediaan eksemplar terikat pada tenant perguruan tinggi masing-masing. Silakan masuk akun untuk memuat data buku.
           </p>
-          <div style="display:flex; gap:6px; max-width:550px;">
-            <label class="sr-only" for="fallbackNPM">Nomor anggota mahasiswa</label>
-            <input type="text" id="fallbackNPM" class="form-input" placeholder="Nomor anggota mahasiswa">
-            <button class="btn btn-secondary" onclick="submitFallbackCheckIn()">Catat presensi</button>
-          </div>
+          <button onclick="showLoginModal()" class="inline-flex items-center gap-1.5 px-4 py-2 bg-light-primary text-light-on-primary hover:bg-light-primary-container font-label text-label-lg transition-colors">
+            <span class="material-symbols-outlined text-[18px]">login</span>
+            <span>Masuk Akun Sekarang</span>
+          </button>
         </div>
-
       </div>
     </section>
 
-    <!-- VIEW 3: ADMIN & PENGELOLA (Executive Dashboard) -->
-    <section id="adminSection" style="display:none;">
-      <div class="grid-4" style="margin-bottom:16px;">
-        <div class="stat-card">
-          <span class="stat-label">Judul buku</span>
-          <span class="stat-num" id="statTotalBooks">-</span>
-          <span style="font-size:0.82rem; color:var(--text-muted);">Jumlah judul terdaftar</span>
+    <!-- BROWSE COLLECTIONS BY FACULTY -->
+    <section id="faculty-collections" class="max-w-6xl mx-auto px-3 py-4 border-t border-light-outline-variant">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-2">
+        <div class="flex flex-col gap-0.5">
+          <h2 class="font-headline text-headline-lg text-light-on-surface">Browse collections by faculty</h2>
+          <p class="font-body text-body-lg text-light-on-surface-variant">Direct access to curated reading lists, accredited journals, and student repositories across UPNVJ’s faculties.</p>
         </div>
-        <div class="stat-card">
-          <span class="stat-label">Eksemplar</span>
-          <span class="stat-num" id="statTotalCopies">-</span>
-          <span style="font-size:0.82rem; color:var(--success);">Tersedia: <strong id="statAvailCopies">-</strong></span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Pinjaman aktif</span>
-          <span class="stat-num" id="statActiveLoans">-</span>
-          <span style="font-size:0.82rem; color:var(--warning);">Sedang dipinjam anggota</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Kunjungan</span>
-          <span class="stat-num" id="statTotalVisitors">-</span>
-          <span style="font-size:0.82rem; color:var(--text-muted);">Reservasi komputer: <strong id="statReservations">-</strong></span>
-        </div>
+        <button onclick="quickSearch('')" class="inline-flex items-center gap-1 font-label text-label-lg text-light-primary hover:underline shrink-0">
+          <span>View full catalog</span>
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_forward</span>
+        </button>
       </div>
 
-      <div class="grid-2">
-        <!-- Visual Bar Utilisasi -->
-        <div class="card">
-          <div class="card-title">
-            <span>Ketersediaan koleksi</span>
-            <button class="btn btn-secondary" onclick="loadDashboard()">Perbarui</button>
-          </div>
-          <div style="margin: 10px 0;">
-            <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:600; margin-bottom:4px;">
-              <span>Eksemplar yang tersedia</span>
-              <span id="availRatioLabel">Memuat...</span>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 items-stretch">
+        <div onclick="quickSearch('Informatika')" class="group cursor-pointer border border-light-outline-variant bg-light-surface-container-lowest p-3 flex flex-col justify-between gap-2 hover:border-light-primary hover:bg-light-surface-container-low transition-colors">
+          <header class="flex items-start justify-between gap-2">
+            <div class="flex flex-col">
+              <span class="font-mono text-mono-sm text-light-primary">FIK</span>
+              <h3 class="font-title text-title-md text-light-on-surface group-hover:text-light-primary">Fakultas Ilmu Komputer</h3>
             </div>
-            <div style="height:12px; background:#fee2e2; border-radius:999px; overflow:hidden; display:flex;">
-              <div id="availProgressBar" style="background:#10b981; width:50%; transition:width 0.5s;"></div>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted); margin-top:6px;">
-              <span><span class="dot dot-success"></span>Tersedia di Rak</span>
-              <span><span class="dot dot-danger"></span>Sedang Dipinjam</span>
-            </div>
-          </div>
+            <span class="material-symbols-outlined text-light-on-surface-variant group-hover:text-light-primary text-[20px]" aria-hidden="true">arrow_forward</span>
+          </header>
+          <p class="font-body text-body-md text-light-on-surface-variant tabular-nums">Cloud computing, IEEE journals &amp; informatics theses</p>
         </div>
 
-        <div class="card scope-card">
-          <div class="card-title"><span>Lingkup data</span></div>
-          <p>Ringkasan ini hanya menampilkan data perpustakaan yang terkait dengan akun Anda.</p>
-          <strong id="activeTenantLabel" class="scope-tenant"></strong>
-          <p>Data dari perpustakaan lain tidak ditampilkan di ruang kerja ini.</p>
+        <div onclick="quickSearch('Ekonomi')" class="group cursor-pointer border border-light-outline-variant bg-light-surface-container-lowest p-3 flex flex-col justify-between gap-2 hover:border-light-primary hover:bg-light-surface-container-low transition-colors">
+          <header class="flex items-start justify-between gap-2">
+            <div class="flex flex-col">
+              <span class="font-mono text-mono-sm text-light-primary">FEB</span>
+              <h3 class="font-title text-title-md text-light-on-surface group-hover:text-light-primary">Fakultas Ekonomi &amp; Bisnis</h3>
+            </div>
+            <span class="material-symbols-outlined text-light-on-surface-variant group-hover:text-light-primary text-[20px]" aria-hidden="true">arrow_forward</span>
+          </header>
+          <p class="font-body text-body-md text-light-on-surface-variant tabular-nums">Corporate finance, accounting &amp; management volumes</p>
+        </div>
+
+        <div onclick="quickSearch('Hukum')" class="group cursor-pointer border border-light-outline-variant bg-light-surface-container-lowest p-3 flex flex-col justify-between gap-2 hover:border-light-primary hover:bg-light-surface-container-low transition-colors">
+          <header class="flex items-start justify-between gap-2">
+            <div class="flex flex-col">
+              <span class="font-mono text-mono-sm text-light-primary">FH</span>
+              <h3 class="font-title text-title-md text-light-on-surface group-hover:text-light-primary">Fakultas Hukum</h3>
+            </div>
+            <span class="material-symbols-outlined text-light-on-surface-variant group-hover:text-light-primary text-[20px]" aria-hidden="true">arrow_forward</span>
+          </header>
+          <p class="font-body text-body-md text-light-on-surface-variant tabular-nums">Constitutional law, criminal law &amp; judicial archives</p>
+        </div>
+
+        <div onclick="quickSearch('Kedokteran')" class="group cursor-pointer border border-light-outline-variant bg-light-surface-container-lowest p-3 flex flex-col justify-between gap-2 hover:border-light-primary hover:bg-light-surface-container-low transition-colors">
+          <header class="flex items-start justify-between gap-2">
+            <div class="flex flex-col">
+              <span class="font-mono text-mono-sm text-light-primary">FK</span>
+              <h3 class="font-title text-title-md text-light-on-surface group-hover:text-light-primary">Fakultas Kedokteran</h3>
+            </div>
+            <span class="material-symbols-outlined text-light-on-surface-variant group-hover:text-light-primary text-[20px]" aria-hidden="true">arrow_forward</span>
+          </header>
+          <p class="font-body text-body-md text-light-on-surface-variant tabular-nums">Clinical sciences, PubMed &amp; medical textbooks</p>
+        </div>
+
+        <div onclick="quickSearch('Sosial')" class="group cursor-pointer border border-light-outline-variant bg-light-surface-container-lowest p-3 flex flex-col justify-between gap-2 hover:border-light-primary hover:bg-light-surface-container-low transition-colors">
+          <header class="flex items-start justify-between gap-2">
+            <div class="flex flex-col">
+              <span class="font-mono text-mono-sm text-light-primary">FISIP</span>
+              <h3 class="font-title text-title-md text-light-on-surface group-hover:text-light-primary">Ilmu Sosial &amp; Politik</h3>
+            </div>
+            <span class="material-symbols-outlined text-light-on-surface-variant group-hover:text-light-primary text-[20px]" aria-hidden="true">arrow_forward</span>
+          </header>
+          <p class="font-body text-body-md text-light-on-surface-variant tabular-nums">International relations &amp; communication studies</p>
+        </div>
+
+        <div onclick="quickSearch('Teknik')" class="group cursor-pointer border border-light-outline-variant bg-light-surface-container-lowest p-3 flex flex-col justify-between gap-2 hover:border-light-primary hover:bg-light-surface-container-low transition-colors">
+          <header class="flex items-start justify-between gap-2">
+            <div class="flex flex-col">
+              <span class="font-mono text-mono-sm text-light-primary">FT</span>
+              <h3 class="font-title text-title-md text-light-on-surface group-hover:text-light-primary">Fakultas Teknik</h3>
+            </div>
+            <span class="material-symbols-outlined text-light-on-surface-variant group-hover:text-light-primary text-[20px]" aria-hidden="true">arrow_forward</span>
+          </header>
+          <p class="font-body text-body-md text-light-on-surface-variant tabular-nums">Mechanical, industrial &amp; naval systems</p>
+        </div>
+
+        <div onclick="quickSearch('Kesehatan')" class="group cursor-pointer border border-light-outline-variant bg-light-surface-container-lowest p-3 flex flex-col justify-between gap-2 hover:border-light-primary hover:bg-light-surface-container-low transition-colors">
+          <header class="flex items-start justify-between gap-2">
+            <div class="flex flex-col">
+              <span class="font-mono text-mono-sm text-light-primary">FIKES</span>
+              <h3 class="font-title text-title-md text-light-on-surface group-hover:text-light-primary">Fakultas Ilmu Kesehatan</h3>
+            </div>
+            <span class="material-symbols-outlined text-light-on-surface-variant group-hover:text-light-primary text-[20px]" aria-hidden="true">arrow_forward</span>
+          </header>
+          <p class="font-body text-body-md text-light-on-surface-variant tabular-nums">Public health, nursing &amp; clinical nutrition</p>
+        </div>
+
+        <div onclick="quickSearch('Skripsi')" class="group cursor-pointer border border-light-outline-variant bg-light-surface-container-lowest p-3 flex flex-col justify-between gap-2 hover:border-light-primary hover:bg-light-surface-container-low transition-colors">
+          <header class="flex items-start justify-between gap-2">
+            <div class="flex flex-col">
+              <span class="font-mono text-mono-sm text-light-secondary">REPOSITORY</span>
+              <h3 class="font-title text-title-md text-light-on-surface group-hover:text-light-primary">Skripsi &amp; Thesis Archive</h3>
+            </div>
+            <span class="material-symbols-outlined text-light-primary text-[20px]" aria-hidden="true">arrow_forward</span>
+          </header>
+          <p class="font-body text-body-md text-light-on-surface-variant tabular-nums">Open-access UPNVJ student theses &amp; capstones</p>
         </div>
       </div>
-
     </section>
+
+    <!-- ADR-012 token inspector: removed from UI per user request; element kept hidden for JS compatibility -->
+    <div id="jwtTokenInspector" style="display:none;" aria-hidden="true"></div>
 
   </main>
 
-  <!-- Mobile Bottom Navigation Bar -->
-  <nav class="mobile-nav" id="mobileNav" hidden aria-label="Navigasi mahasiswa">
-    <!-- Populated based on role -->
-  </nav>
+  <!-- Shared Footer Shell with Uploaded UPNVJ Logo -->
+  <footer id="campus-services" class="bg-light-surface-container border-t border-light-outline-variant mt-auto">
+    <div class="max-w-6xl mx-auto px-3 py-4 grid grid-cols-1 md:grid-cols-3 gap-2.5">
+      <div class="flex flex-col gap-1.5">
+        <div class="flex items-center gap-2">
+          <img src="/images/upnvj-logo.png" alt="Lambang Resmi UPNVJ" class="w-8 h-8 object-contain">
+          <span class="font-headline text-title-md text-light-primary">Perpustakaan UPNVJ</span>
+        </div>
+        <p class="font-body text-body-md text-light-on-surface-variant max-w-sm">
+          Jl. RS. Fatmawati Raya, Pondok Labu, Jakarta Selatan 12450. Melayani sivitas akademika UPNVJ dengan koleksi digital, repositori skripsi, dan eksemplar fisik.
+        </p>
+      </div>
 
+      <div class="flex flex-col gap-1">
+        <span class="font-title text-title-md text-light-on-surface">Campus Library Hours</span>
+        <p class="font-body text-body-md text-light-on-surface-variant tabular-nums">Pondok Labu Central: Mon–Fri, 08:00–20:00 WIB</p>
+        <p class="font-body text-body-md text-light-on-surface-variant tabular-nums">Limo Campus Library: Mon–Fri, 08:00–17:00 WIB</p>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <span class="font-title text-title-md text-light-on-surface">Akses Cepat Layanan</span>
+        <div class="flex flex-wrap gap-x-4 gap-y-1">
+          <a href="#catalog-section" class="font-body text-body-md text-light-primary hover:underline">Katalog Buku</a>
+          <a href="#faculty-collections" class="font-body text-body-md text-light-primary hover:underline">Repositori Skripsi</a>
+          <a href="#hero-search-section" class="font-body text-body-md text-light-primary hover:underline">Pencarian Digital</a>
+          <button onclick="showLoginModal()" class="font-body text-body-md text-light-primary hover:underline text-left">Masuk Portal</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================== -->
+  <!-- MODAL: LOGIN DIALOG (KREDENSIAL MURNI & SSO - NO DEMO BUTTONS) -->
+  <!-- ============================================================== -->
+  <div id="loginModal" style="display:none;" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/40 backdrop-blur-xs">
+    <div class="bg-light-surface-container-lowest border border-light-outline-variant shadow-lg max-w-md w-full p-3 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-2 border-b border-light-outline-variant mb-2.5">
+        <div class="flex items-center gap-2">
+          <img src="/images/upnvj-logo.png" alt="Logo UPNVJ" class="w-7 h-7 object-contain">
+          <h3 class="font-headline text-headline-md text-light-on-surface">Masuk ke UPNVJ Digital Library</h3>
+        </div>
+        <button onclick="hideLoginModal()" class="text-light-on-surface-variant hover:text-light-on-surface">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <!-- Informasi Autentikasi Keycloak -->
+      <p class="text-body-md text-light-on-surface-variant mb-3">
+        Masukkan identitas akun Keycloak Anda untuk mengakses layanan sirkulasi, reservasi workstation, dan katalog institusi.
+      </p>
+
+      <!-- Form Login Manual Murni -->
+      <form onsubmit="event.preventDefault(); submitManualLogin();" class="space-y-2.5">
+        <div>
+          <label class="block text-label-sm font-bold text-light-on-surface mb-1">Username Keycloak</label>
+          <input type="text" id="manualUsername" placeholder="Contoh: mhs_upn, petugas_upn, admin_upn" required class="w-full border border-light-outline-variant p-2 text-body-md bg-light-surface-container-lowest">
+        </div>
+        <div>
+          <label class="block text-label-sm font-bold text-light-on-surface mb-1">Password</label>
+          <input type="password" id="manualPassword" placeholder="Masukkan password akun" required class="w-full border border-light-outline-variant p-2 text-body-md bg-light-surface-container-lowest">
+        </div>
+        <div class="pt-1 flex flex-col gap-2">
+          <button type="submit" class="w-full py-2 bg-light-primary text-light-on-primary hover:bg-light-primary-container font-label text-label-lg transition-colors flex items-center justify-center gap-1.5 shadow-xs">
+            <span class="material-symbols-outlined text-[18px]">login</span>
+            <span>Masuk dengan Kredensial Keycloak</span>
+          </button>
+          
+          <div class="relative flex py-1 items-center">
+            <div class="flex-grow border-t border-light-outline-variant"></div>
+            <span class="flex-shrink mx-2 text-light-on-surface-variant text-[11px] uppercase">atau</span>
+            <div class="flex-grow border-t border-light-outline-variant"></div>
+          </div>
+
+          <button type="button" onclick="loginWithKeycloakSSO()" class="w-full py-2 border border-light-outline-variant bg-light-surface-container-lowest text-light-on-surface hover:bg-light-surface-container-low font-label text-label-md transition-colors flex items-center justify-center gap-1.5">
+            <span class="material-symbols-outlined text-[18px]">verified_user</span>
+            <span>Masuk via Halaman Login Keycloak (SSO Redirect)</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: RESERVASI WORKSTATION -->
+  <div id="reserveModal" style="display:none;" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/40 backdrop-blur-xs">
+    <div class="bg-light-surface-container-lowest border border-light-outline-variant shadow-lg max-w-md w-full p-3">
+      <div class="flex items-center justify-between pb-2 border-b border-light-outline-variant mb-2.5">
+        <h3 class="font-headline text-headline-md text-light-on-surface">Reservasi Workstation</h3>
+        <button onclick="hideReserveModal()" class="text-light-on-surface-variant hover:text-light-on-surface">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <input type="hidden" id="reserveComputerId">
+      <div class="space-y-2.5">
+        <div>
+          <label class="block text-label-sm font-semibold text-light-on-surface mb-1">Unit Komputer Terpilih</label>
+          <input type="text" id="reserveComputerCode" readonly class="w-full border border-light-outline-variant p-2 text-body-md bg-light-surface-container text-light-on-surface-variant">
+        </div>
+        <div>
+          <label class="block text-label-sm font-semibold text-light-on-surface mb-1">Pilih Slot Waktu Penggunaan</label>
+          <input type="datetime-local" id="slotPicker" class="w-full border border-light-outline-variant p-2 text-body-md bg-light-surface-container-lowest">
+        </div>
+        <div class="flex justify-end gap-2 pt-1">
+          <button onclick="hideReserveModal()" class="px-3 py-1.5 border border-light-outline-variant text-label-md hover:bg-light-surface-container-low transition-colors">Batal</button>
+          <button onclick="submitReservation()" class="px-4 py-1.5 bg-light-primary text-light-on-primary hover:bg-light-primary-container text-label-md font-semibold transition-colors">Konfirmasi Reservasi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DETAIL EKSEMPLAR BUKU -->
+  <div id="copiesModal" style="display:none;" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/40 backdrop-blur-xs">
+    <div class="bg-light-surface-container-lowest border border-light-outline-variant shadow-lg max-w-lg w-full p-3">
+      <div class="flex items-center justify-between pb-2 border-b border-light-outline-variant mb-2.5">
+        <h3 id="copiesModalTitle" class="font-headline text-headline-md text-light-on-surface">Detail Eksemplar Fisik</h3>
+        <button onclick="hideCopiesModal()" class="text-light-on-surface-variant hover:text-light-on-surface">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <div class="overflow-x-auto max-h-60 mb-2.5">
+        <table class="w-full text-left text-body-md border-collapse">
+          <thead>
+            <tr class="bg-light-surface-container text-light-on-surface-variant text-label-sm uppercase tracking-wider border-b border-light-outline-variant">
+              <th class="py-2 px-2.5">ID</th>
+              <th class="py-2 px-2.5">Barcode Fisik</th>
+              <th class="py-2 px-2.5">Status di Rak</th>
+            </tr>
+          </thead>
+          <tbody id="copiesModalTableBody" class="divide-y divide-light-outline-variant">
+            <tr><td colspan="3" class="py-2 text-center text-light-on-surface-variant">Memuat eksemplar...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="flex justify-end">
+        <button onclick="hideCopiesModal()" class="px-3 py-1.5 border border-light-outline-variant text-label-md hover:bg-light-surface-container-low transition-colors">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- JAVASCRIPT CONTROLLER & API INTEGRATION                        -->
+  <!-- ============================================================== -->
   <script>
-    // ==========================================
-    // OIDC AUTHORIZATION CODE FLOW WITH PKCE
-    // ==========================================
     const OIDC_ISSUER = document.querySelector('meta[name="cloudlib-oidc-issuer"]').content.replace(/\/$/, "");
     const OIDC_CLIENT_ID = document.querySelector('meta[name="cloudlib-oidc-client-id"]').content;
     const OIDC_REDIRECT_URI = `${window.location.origin}${window.location.pathname}`;
     const OIDC_TRANSACTION_KEY = "cloudlib-oidc-transaction";
-    let oidcMetadata = null;
-    let accessToken = null;
-    let idToken = null;
+
+    let accessToken = localStorage.getItem("cloudlib_access_token") || null;
+    let idToken = localStorage.getItem("cloudlib_id_token") || null;
     let currentUser = null;
+    let oidcMetadata = null;
 
     let cachedBooks = [];
     let cachedCopies = [];
     let cachedComputers = [];
+    let cachedReservations = [];
 
     // ==========================================
-    // INITIALIZATION & OIDC SESSION
+    // INITIALIZATION
     // ==========================================
     window.addEventListener("DOMContentLoaded", async () => {
+      // Setup hero search tabs
+      const heroTabs = document.querySelectorAll('.hero-tab');
+      const heroInput = document.getElementById('hero-search-input');
+      heroTabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+          heroTabs.forEach((t) => {
+            t.setAttribute('aria-selected', 'false');
+            t.classList.remove('border-light-primary', 'text-light-primary');
+            t.classList.add('border-transparent', 'text-light-on-surface-variant');
+          });
+          tab.setAttribute('aria-selected', 'true');
+          tab.classList.remove('border-transparent', 'text-light-on-surface-variant');
+          tab.classList.add('border-light-primary', 'text-light-primary');
+          if (heroInput && tab.dataset.placeholder) {
+            heroInput.placeholder = tab.dataset.placeholder;
+          }
+        });
+      });
+
+      // Default tomorrow datetime for slot picker
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(9, 0, 0, 0);
       const isoLocal = new Date(tomorrow.getTime() - (tomorrow.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
-      document.getElementById("slotPicker").value = isoLocal;
+      const slotPicker = document.getElementById("slotPicker");
+      if (slotPicker) slotPicker.value = isoLocal;
 
-      try {
-        await initializeOidcSession();
-      } catch (error) {
-        showLoggedOutApp();
-        showAlert("danger", "Login Keycloak gagal", error.message);
+      // Check OAuth Redirect Callback (?code=...)
+      const params = new URLSearchParams(window.location.search);
+      if (params.has("code") && params.has("state")) {
+        await completeOidcRedirect(params);
+        return;
       }
+
+      // Check existing saved session
+      if (accessToken) {
+        try {
+          parseAndActivateToken(accessToken, idToken);
+          return;
+        } catch (e) {
+          logoutSession();
+        }
+      }
+
+      showLoggedOutApp();
     });
 
-    async function getOidcMetadata() {
-      if (oidcMetadata) return oidcMetadata;
+    // ==========================================
+    // AUTHENTICATION LOGIC (KEYCLOAK DIRECT & SSO)
+    // ==========================================
+    async function loginDirect(username, password) {
+      try {
+        showAlert("info", "Autentikasi", `Menghubungkan ke Keycloak sebagai ${username}...`);
+        const tokenRes = await fetch(`${OIDC_ISSUER}/protocol/openid-connect/token`, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            grant_type: "password",
+            client_id: OIDC_CLIENT_ID,
+            username: username,
+            password: password,
+            scope: "openid profile email"
+          })
+        });
 
-      const response = await fetch(`${OIDC_ISSUER}/.well-known/openid-configuration`, {
-        headers: { "Accept": "application/json" }
-      });
-      if (!response.ok) throw new Error(`Metadata OIDC gagal dimuat (HTTP ${response.status}).`);
+        if (!tokenRes.ok) {
+          const errData = await tokenRes.json().catch(() => ({}));
+          throw new Error(errData.error_description || `Kredensial tidak valid (HTTP ${tokenRes.status})`);
+        }
 
-      const metadata = await response.json();
-      if (metadata.issuer !== OIDC_ISSUER) throw new Error("Issuer pada metadata tidak sesuai konfigurasi.");
-      if (!metadata.authorization_endpoint || !metadata.token_endpoint) {
-        throw new Error("Metadata OIDC tidak menyediakan endpoint authorization dan token.");
+        const data = await tokenRes.json();
+        accessToken = data.access_token;
+        idToken = data.id_token || null;
+        localStorage.setItem("cloudlib_access_token", accessToken);
+        if (idToken) localStorage.setItem("cloudlib_id_token", idToken);
+
+        hideLoginModal();
+        parseAndActivateToken(accessToken, idToken);
+        showAlert("success", "Masuk Berhasil", `Selamat datang, ${currentUser.name}!`);
+      } catch (err) {
+        showAlert("danger", "Gagal Masuk", err.message);
       }
-      oidcMetadata = metadata;
-      return oidcMetadata;
     }
 
-    function randomUrlSafeValue() {
-      const bytes = crypto.getRandomValues(new Uint8Array(32));
-      return base64UrlEncode(bytes);
+    function showLoginModal() { document.getElementById("loginModal").style.display = "flex"; }
+    function hideLoginModal() { document.getElementById("loginModal").style.display = "none"; }
+    
+    async function submitManualLogin() {
+      const u = document.getElementById("manualUsername").value.trim();
+      const p = document.getElementById("manualPassword").value.trim();
+      if (!u || !p) { showAlert("warning", "Perhatian", "Masukkan username dan password Keycloak."); return; }
+      await loginDirect(u, p);
     }
 
-    function base64UrlEncode(bytes) {
-      let binary = "";
-      bytes.forEach(byte => { binary += String.fromCharCode(byte); });
-      return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-    }
-
-    async function createCodeChallenge(verifier) {
-      if (!crypto.subtle) throw new Error("PKCE membutuhkan HTTPS atau localhost dengan Web Crypto API.");
-      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
-      return base64UrlEncode(new Uint8Array(digest));
-    }
-
-    async function loginWithKeycloak() {
+    async function loginWithKeycloakSSO() {
       try {
         const metadata = await getOidcMetadata();
-        const state = randomUrlSafeValue();
-        const nonce = randomUrlSafeValue();
-        const verifier = randomUrlSafeValue();
+        const state = randomUrlSafe();
+        const nonce = randomUrlSafe();
+        const verifier = randomUrlSafe();
         const challenge = await createCodeChallenge(verifier);
         sessionStorage.setItem(OIDC_TRANSACTION_KEY, JSON.stringify({ state, nonce, verifier }));
 
-        const authorizationUrl = new URL(metadata.authorization_endpoint);
-        authorizationUrl.search = new URLSearchParams({
+        const authUrl = new URL(metadata.authorization_endpoint);
+        authUrl.search = new URLSearchParams({
           response_type: "code",
           client_id: OIDC_CLIENT_ID,
           redirect_uri: OIDC_REDIRECT_URI,
@@ -1004,565 +1290,931 @@
           code_challenge: challenge,
           code_challenge_method: "S256"
         }).toString();
-        window.location.assign(authorizationUrl.toString());
-      } catch (error) {
-        showAlert("danger", "Login Keycloak gagal", error.message);
+
+        window.location.assign(authUrl.toString());
+      } catch (err) {
+        showAlert("danger", "SSO Gagal", err.message);
       }
     }
 
-    async function initializeOidcSession() {
-      const params = new URLSearchParams(window.location.search);
-      if (params.has("error")) {
-        const error = params.get("error_description") || params.get("error");
+    async function completeOidcRedirect(params) {
+      try {
+        const txJson = sessionStorage.getItem(OIDC_TRANSACTION_KEY);
         sessionStorage.removeItem(OIDC_TRANSACTION_KEY);
         window.history.replaceState(null, document.title, OIDC_REDIRECT_URI);
+
+        if (!txJson) throw new Error("Sesi transaksi login tidak ditemukan.");
+        const tx = JSON.parse(txJson);
+        if (params.get("state") !== tx.state) throw new Error("State OAuth tidak cocok.");
+
+        const metadata = await getOidcMetadata();
+        const tokenRes = await fetch(metadata.token_endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            grant_type: "authorization_code",
+            client_id: OIDC_CLIENT_ID,
+            redirect_uri: OIDC_REDIRECT_URI,
+            code: params.get("code"),
+            code_verifier: tx.verifier
+          })
+        });
+
+        if (!tokenRes.ok) throw new Error(`Tukar kode gagal (HTTP ${tokenRes.status})`);
+        const data = await tokenRes.json();
+        accessToken = data.access_token;
+        idToken = data.id_token || null;
+        localStorage.setItem("cloudlib_access_token", accessToken);
+        if (idToken) localStorage.setItem("cloudlib_id_token", idToken);
+
+        parseAndActivateToken(accessToken, idToken);
+        showAlert("success", "Masuk Berhasil", `Selamat datang, ${currentUser.name}!`);
+      } catch (err) {
         showLoggedOutApp();
-        showAlert("danger", "Login Keycloak gagal", error);
-        return;
+        showAlert("danger", "Login SSO Gagal", err.message);
       }
-
-      if (params.has("code") || params.has("state")) {
-        await completeOidcLogin(params);
-        return;
-      }
-
-      showLoggedOutApp();
     }
 
-    async function completeOidcLogin(params) {
-      const transactionText = sessionStorage.getItem(OIDC_TRANSACTION_KEY);
-      sessionStorage.removeItem(OIDC_TRANSACTION_KEY);
-      window.history.replaceState(null, document.title, OIDC_REDIRECT_URI);
-      if (!transactionText) throw new Error("Transaksi login tidak ditemukan atau sudah kedaluwarsa.");
+    function logoutSession() {
+      localStorage.removeItem("cloudlib_access_token");
+      localStorage.removeItem("cloudlib_id_token");
+      accessToken = null;
+      idToken = null;
+      currentUser = null;
+      showLoggedOutApp();
+      showAlert("info", "Keluar", "Sesi telah berhasil diakhiri.");
+    }
 
-      const transaction = JSON.parse(transactionText);
-      if (!params.get("code") || params.get("state") !== transaction.state) {
-        throw new Error("State OAuth tidak valid; login dibatalkan.");
-      }
-
-      const metadata = await getOidcMetadata();
-      const tokenResponse = await fetch(metadata.token_endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          grant_type: "authorization_code",
-          client_id: OIDC_CLIENT_ID,
-          redirect_uri: OIDC_REDIRECT_URI,
-          code: params.get("code"),
-          code_verifier: transaction.verifier
-        })
-      });
-      if (!tokenResponse.ok) throw new Error(`Penukaran authorization code gagal (HTTP ${tokenResponse.status}).`);
-
-      const tokens = await tokenResponse.json();
-      if (!tokens.access_token || !tokens.id_token) throw new Error("Token OIDC tidak lengkap.");
-      const idClaims = decodeJwtPayload(tokens.id_token);
-      if (idClaims.iss !== OIDC_ISSUER || idClaims.nonce !== transaction.nonce) {
-        throw new Error("Issuer atau nonce pada ID token tidak valid.");
-      }
-      const audiences = Array.isArray(idClaims.aud) ? idClaims.aud : [idClaims.aud];
-      if (!audiences.includes(OIDC_CLIENT_ID) || Number(idClaims.exp) * 1000 <= Date.now()) {
-        throw new Error("Audience atau masa berlaku ID token tidak valid.");
+    function parseAndActivateToken(rawAccessToken, rawIdToken) {
+      const claims = decodeJwt(rawAccessToken);
+      if (Number(claims.exp) * 1000 <= Date.now()) {
+        throw new Error("Token telah kedaluwarsa.");
       }
 
-      const claims = decodeJwtPayload(tokens.access_token);
-      if (claims.iss !== OIDC_ISSUER || Number(claims.exp) * 1000 <= Date.now()) {
-        throw new Error("Issuer atau masa berlaku access token tidak valid.");
-      }
-      const realmRoles = claims.realm_access && Array.isArray(claims.realm_access.roles)
-        ? claims.realm_access.roles
-        : [];
-      const role = ["admin", "petugas", "mahasiswa"].find(value => realmRoles.includes(value));
-      if (!role || typeof claims.tenant !== "string" || !claims.tenant.trim()) {
-        throw new Error("Access token harus memuat role CloudLib dan klaim tenant.");
-      }
-      if (role === "mahasiswa" && (!claims.member_ref || !String(claims.member_ref).trim())) {
-        throw new Error("Access token mahasiswa harus memuat klaim member_ref.");
-      }
+      const roles = (claims.realm_access && claims.realm_access.roles) || [];
+      const role = ["admin", "petugas", "mahasiswa"].find(r => roles.includes(r)) || "mahasiswa";
 
-      accessToken = tokens.access_token;
-      idToken = tokens.id_token;
       currentUser = {
-        username: claims.preferred_username || idClaims.preferred_username || idClaims.sub,
-        name: claims.name || idClaims.name || claims.preferred_username || idClaims.sub,
-        role,
-        tenant: claims.tenant,
-        tenantName: claims.tenant_name || claims.tenant,
-        memberRef: claims.member_ref || null
+        username: claims.preferred_username || "Pengguna",
+        name: claims.name || claims.preferred_username || "Pengguna CloudLib",
+        role: role,
+        tenant: claims.tenant || "upnvj",
+        memberRef: claims.member_ref || null,
+        claims: claims
       };
+
       showLoggedInApp();
     }
 
-    function decodeJwtPayload(token) {
+    function decodeJwt(token) {
       const parts = token.split(".");
-      if (parts.length !== 3) throw new Error("Format token JWT tidak valid.");
+      if (parts.length !== 3) throw new Error("Format JWT tidak valid.");
       const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
       const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
-      const bytes = Uint8Array.from(atob(padded), character => character.charCodeAt(0));
-      return JSON.parse(new TextDecoder().decode(bytes));
+      const binary = atob(padded);
+      return JSON.parse(decodeURIComponent(escape(binary)));
     }
 
+    async function getOidcMetadata() {
+      if (oidcMetadata) return oidcMetadata;
+      const res = await fetch(`${OIDC_ISSUER}/.well-known/openid-configuration`);
+      if (!res.ok) throw new Error("Gagal mengambil metadata Keycloak.");
+      oidcMetadata = await res.json();
+      return oidcMetadata;
+    }
+
+    function randomUrlSafe() {
+      const bytes = crypto.getRandomValues(new Uint8Array(32));
+      let bin = "";
+      bytes.forEach(b => bin += String.fromCharCode(b));
+      return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    }
+
+    async function createCodeChallenge(verifier) {
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
+      const bytes = new Uint8Array(digest);
+      let bin = "";
+      bytes.forEach(b => bin += String.fromCharCode(b));
+      return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    }
+
+    // ==========================================
+    // UI VISIBILITY & ROLE MANAGEMENT
+    // ==========================================
     function showLoggedOutApp() {
-      currentUser = null;
-      accessToken = null;
-      idToken = null;
-      document.getElementById("loginPanel").hidden = false;
-      document.getElementById("workspaceIntro").hidden = true;
-      document.getElementById("memberIdentity").hidden = true;
-      document.getElementById("memberRefLabel").textContent = "";
+      document.getElementById("workspaceNavSection").style.display = "none";
       document.getElementById("userProfile").style.display = "none";
-      document.getElementById("logoutButton").style.display = "none";
-      document.getElementById("tenantDisplay").style.display = "none";
-      document.getElementById("roleBadge").style.display = "none";
+      document.getElementById("loggedOutButtons").style.display = "flex";
+
       document.getElementById("mahasiswaSection").style.display = "none";
       document.getElementById("petugasSection").style.display = "none";
       document.getElementById("adminSection").style.display = "none";
-      document.getElementById("desktopNavTabs").innerHTML = "";
-      document.getElementById("desktopNavTabs").hidden = true;
-      document.getElementById("mobileNav").innerHTML = "";
-      document.getElementById("mobileNav").hidden = true;
+
+      // Show catalog login prompt instead of error
+      document.getElementById("catalogTableWrapper").style.display = "none";
+      document.getElementById("catalogAuthPrompt").style.display = "block";
+      document.getElementById("catalogControls").style.display = "none";
+
+      // Reset hero stats
+      document.getElementById("heroStatBooks").innerText = "OIDC";
+      document.getElementById("heroStatCopies").innerText = "ADR-012";
+      document.getElementById("heroStatAvail").innerText = "Active";
+
+      updateTokenInspector();
     }
 
     function showLoggedInApp() {
-      document.getElementById("loginPanel").hidden = true;
-      document.getElementById("workspaceIntro").hidden = false;
+      document.getElementById("workspaceNavSection").style.display = "block";
       document.getElementById("userProfile").style.display = "flex";
-      document.getElementById("logoutButton").style.display = "inline-flex";
-      document.getElementById("userLabel").innerText = currentUser.name;
-      document.getElementById("tenantDisplay").style.display = "inline-flex";
-      document.getElementById("tenantNameLabel").innerText = currentUser.tenantName;
-      const roleBadge = document.getElementById("roleBadge");
-      const roleLabels = { mahasiswa: "Mahasiswa", petugas: "Petugas", admin: "Admin" };
-      roleBadge.innerText = roleLabels[currentUser.role];
-      roleBadge.className = `role-badge role-${currentUser.role}`;
-      roleBadge.style.display = "inline-flex";
+      document.getElementById("loggedOutButtons").style.display = "none";
 
-      const workspaceCopy = {
-        mahasiswa: ["Layanan mahasiswa", "Cari buku, pantau pinjaman, dan pesan fasilitas perpustakaan."],
-        petugas: ["Meja sirkulasi", "Catat peminjaman, pengembalian, dan presensi anggota."],
-        admin: ["Ringkasan perpustakaan", "Pantau koleksi dan aktivitas pada perpustakaan Anda."]
-      }[currentUser.role];
-      document.getElementById("workspaceTitle").innerText = workspaceCopy[0];
-      document.getElementById("workspaceDescription").innerText = workspaceCopy[1];
-      document.getElementById("activeTenantLabel").innerText = currentUser.tenantName;
-      const memberIdentity = document.getElementById("memberIdentity");
-      memberIdentity.hidden = currentUser.role !== "mahasiswa";
-      if (currentUser.role === "mahasiswa") {
-        document.getElementById("memberRefLabel").textContent = currentUser.memberRef;
+      // Catalog view on login
+      document.getElementById("catalogTableWrapper").style.display = "block";
+      document.getElementById("catalogAuthPrompt").style.display = "none";
+      document.getElementById("catalogControls").style.display = "flex";
+
+      // Header labels
+      document.getElementById("userLabel").innerText = currentUser.name;
+      document.getElementById("roleBadge").innerText = currentUser.role.toUpperCase();
+      document.getElementById("tenantNameLabel").innerText = currentUser.tenant.toUpperCase();
+      
+      const memberEl = document.getElementById("memberRefLabel");
+      if (currentUser.memberRef) {
+        memberEl.innerText = currentUser.memberRef;
+        memberEl.style.display = "inline";
+      } else {
+        memberEl.style.display = "none";
       }
 
+      // Workspace titles
+      const titles = {
+        mahasiswa: "Ruang Kerja Mahasiswa (Layanan Mandiri)",
+        petugas: "Ruang Kerja Petugas (Meja Sirkulasi)",
+        admin: "Ruang Kerja Administrator (Manajemen Tenant)"
+      };
+      document.getElementById("workspaceTitle").innerText = titles[currentUser.role] || "Ruang Kerja";
+
+      // Active section
       document.getElementById("mahasiswaSection").style.display = currentUser.role === "mahasiswa" ? "block" : "none";
       document.getElementById("petugasSection").style.display = currentUser.role === "petugas" ? "block" : "none";
       document.getElementById("adminSection").style.display = currentUser.role === "admin" ? "block" : "none";
 
       renderNavTabs();
+      updateTokenInspector();
 
+      // Trigger default role data loads
       if (currentUser.role === "mahasiswa") {
-        showMhsTab("katalog");
+        showTab("mhs-tab-pinjaman");
+        loadBooks();
+        loadMyLoans();
+        loadComputers();
+        loadMyReservations();
+      } else if (currentUser.role === "petugas") {
+        showTab("petugas-tab-sirkulasi");
+        loadBooks();
+        loadActiveLoansPetugas();
+        loadAllCopies();
+        loadAttendanceLogs();
+      } else if (currentUser.role === "admin") {
+        showTab("admin-tab-ringkasan");
+        loadDashboard();
         loadBooks();
         loadComputers();
-        loadMyLoans();
-      } else if (currentUser.role === "admin") {
-        loadDashboard();
+        loadTenants();
       }
-    }
-
-    async function logoutFromKeycloak() {
-      const tokenHint = idToken;
-      let logoutUrl = null;
-      try {
-        const metadata = await getOidcMetadata();
-        if (metadata.end_session_endpoint) {
-          logoutUrl = new URL(metadata.end_session_endpoint);
-          logoutUrl.searchParams.set("client_id", OIDC_CLIENT_ID);
-          logoutUrl.searchParams.set("post_logout_redirect_uri", OIDC_REDIRECT_URI);
-          if (tokenHint) logoutUrl.searchParams.set("id_token_hint", tokenHint);
-        }
-      } catch (error) {
-        showAlert("warning", "Logout Keycloak", error.message);
-      }
-
-      showLoggedOutApp();
-      if (logoutUrl) window.location.assign(logoutUrl.toString());
     }
 
     function renderNavTabs() {
-      const desktopTabs = document.getElementById("desktopNavTabs");
-      const mobileNav = document.getElementById("mobileNav");
-      desktopTabs.innerHTML = "";
-      mobileNav.innerHTML = "";
-      const hasStudentNavigation = currentUser.role === "mahasiswa";
-      desktopTabs.hidden = !hasStudentNavigation;
-      mobileNav.hidden = !hasStudentNavigation;
+      const container = document.getElementById("navTabsContainer");
+      container.innerHTML = "";
 
-      if (hasStudentNavigation) {
-        const tabs = [
-          { id: "katalog", label: "Koleksi buku", mobileLabel: "Koleksi" },
-          { id: "checkin", label: "Presensi ke perpustakaan", mobileLabel: "Presensi" },
-          { id: "komputer", label: "Reservasi komputer", mobileLabel: "Komputer" },
-          { id: "pinjaman", label: "Pinjaman saya", mobileLabel: "Pinjaman" }
-        ];
+      const tabDefs = {
+        mahasiswa: [
+          { id: "mhs-tab-pinjaman", label: "Pinjaman Saya", icon: "bookmark" },
+          { id: "mhs-tab-presensi", label: "Presensi Gerbang", icon: "door_front" },
+          { id: "mhs-tab-komputer", label: "Workstation Lab", icon: "computer" }
+        ],
+        petugas: [
+          { id: "petugas-tab-sirkulasi", label: "Sirkulasi Meja", icon: "swap_horiz" },
+          { id: "petugas-tab-eksemplar", label: "Inventaris Eksemplar", icon: "inventory_2" },
+          { id: "petugas-tab-presensi", label: "Presensi Manual", icon: "how_to_reg" }
+        ],
+        admin: [
+          { id: "admin-tab-ringkasan", label: "Ringkasan Eksekutif", icon: "dashboard" },
+          { id: "admin-tab-buku", label: "Master Judul Buku", icon: "library_books" },
+          { id: "admin-tab-komputer", label: "Unit Komputer", icon: "desktop_windows" },
+          { id: "admin-tab-tenant", label: "Manajemen Tenant", icon: "apartment" }
+        ]
+      }[currentUser.role] || [];
 
-        tabs.forEach((t, i) => {
-          // Desktop
-          const btn = document.createElement("button");
-          btn.className = `tab-btn ${i === 0 ? 'active' : ''}`;
-          btn.id = `desk-tab-${t.id}`;
-          btn.innerText = t.label;
-          btn.onclick = () => showMhsTab(t.id);
-          desktopTabs.appendChild(btn);
-
-          // Mobile
-          const mBtn = document.createElement("button");
-          mBtn.className = `mobile-nav-btn ${i === 0 ? 'active' : ''}`;
-          mBtn.id = `mob-tab-${t.id}`;
-          mBtn.innerText = t.mobileLabel;
-          mBtn.onclick = () => showMhsTab(t.id);
-          mobileNav.appendChild(mBtn);
-        });
-      }
-    }
-
-    function showMhsTab(tabId) {
-      const tabs = ["katalog", "checkin", "komputer", "pinjaman"];
-      tabs.forEach(t => {
-        document.getElementById(`mhs-tab-${t}`).style.display = t === tabId ? "block" : "none";
-        const deskBtn = document.getElementById(`desk-tab-${t}`);
-        if (deskBtn) deskBtn.className = `tab-btn ${t === tabId ? 'active' : ''}`;
-        const mobBtn = document.getElementById(`mob-tab-${t}`);
-        if (mobBtn) mobBtn.className = `mobile-nav-btn ${t === tabId ? 'active' : ''}`;
+      tabDefs.forEach((t, idx) => {
+        const btn = document.createElement("button");
+        btn.className = `inline-flex items-center gap-1.5 px-2.5 py-1 text-label-sm font-semibold transition-colors ${idx === 0 ? "bg-light-primary text-light-on-primary" : "border border-light-outline-variant text-light-on-surface hover:bg-light-surface-container-low"}`;
+        btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">${t.icon}</span><span>${t.label}</span>`;
+        btn.onclick = () => {
+          container.querySelectorAll("button").forEach(b => {
+            b.className = "inline-flex items-center gap-1.5 px-2.5 py-1 border border-light-outline-variant text-light-on-surface hover:bg-light-surface-container-low text-label-sm font-semibold transition-colors";
+          });
+          btn.className = "inline-flex items-center gap-1.5 px-2.5 py-1 bg-light-primary text-light-on-primary text-label-sm font-semibold transition-colors";
+          showTab(t.id);
+        };
+        container.appendChild(btn);
       });
     }
 
+    function showTab(tabId) {
+      document.querySelectorAll(".tab-pane").forEach(el => el.style.display = "none");
+      const target = document.getElementById(tabId);
+      if (target) target.style.display = "block";
+    }
+
     // ==========================================
-    // API CALL HELPER (Complies with ADR-012)
+    // API CLIENT HELPER (ADR-012 ENFORCED)
     // ==========================================
     async function apiRequest(endpoint, method = "GET", body = null) {
       if (!accessToken) {
-        return { status: 401, ok: false, data: { error: "Sesi login tidak tersedia." } };
+        return { ok: false, status: 401, data: { error: "Belum masuk akun." } };
       }
 
-      const headers = { "Authorization": `Bearer ${accessToken}` };
-      if (body !== null) headers["Content-Type"] = "application/json";
-      const options = { method, headers };
-      if (body !== null) options.body = JSON.stringify(body);
+      const headers = {
+        "Authorization": `Bearer ${accessToken}`,
+        "Accept": "application/json"
+      };
+      if (body) headers["Content-Type"] = "application/json";
 
-      let res;
       try {
-        res = await fetch(endpoint, options);
-      } catch (err) {
-        return {
-          status: 503,
-          ok: false,
-          data: { error: "Layanan backend tidak dapat dihubungi. Periksa konektivitas jaringan." }
-        };
-      }
-
-      const responseText = await res.text();
-      let data = {};
-      if (responseText) {
-        try {
-          data = JSON.parse(responseText);
-        } catch {
-          data = { error: responseText };
-        }
-      }
-      return { status: res.status, ok: res.ok, data };
-    }
-
-    // ==========================================
-    // 1. MAHASISWA: KATALOG & BUKU
-    // ==========================================
-    async function loadBooks() {
-      const resBooks = await apiRequest("/books");
-      const resCopies = await apiRequest("/books/copies");
-
-      const tbody = document.getElementById("bookTableBody");
-      tbody.innerHTML = "";
-
-      if (!resBooks.ok) {
-        handleApiError(resBooks, "Gagal memuat katalog buku");
-        return;
-      }
-
-      cachedBooks = resBooks.data || [];
-      cachedCopies = resCopies.data || [];
-
-      renderBookTable(cachedBooks);
-    }
-
-    function renderBookTable(books) {
-      const tbody = document.getElementById("bookTableBody");
-      tbody.innerHTML = "";
-
-      if (books.length === 0) {
-        const query = document.getElementById("bookSearchInput").value.trim();
-        const emptyMessage = query
-          ? "Tidak ada buku yang cocok dengan pencarian."
-          : `Belum ada koleksi buku untuk ${escapeHtml(currentUser.tenantName)}.`;
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:18px;">${emptyMessage}</td></tr>`;
-        return;
-      }
-
-      books.forEach(b => {
-        const copies = cachedCopies.filter(c => c.bookId === b.id);
-        const total = copies.length;
-        const available = copies.filter(c => c.status === "AVAILABLE").length;
-
-        let copyBadges = copies.map(c => `
-          <span class="badge ${c.status === 'AVAILABLE' ? 'badge-available' : 'badge-unavailable'}">
-            ${c.barcode} (${c.status === 'AVAILABLE' ? 'Tersedia' : 'Dipinjam'})
-          </span>
-        `).join(" ");
-
-        if (total === 0) {
-          copyBadges = `<span style="font-size:0.75rem; color:var(--text-muted);">Belum ada eksemplar fisik</span>`;
-        }
-
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td><strong>${escapeHtml(b.title)}</strong></td>
-          <td>${escapeHtml(b.author || '-')}</td>
-          <td><code style="font-size:0.78rem;">${escapeHtml(b.isbn || '-')}</code></td>
-          <td>
-            <div style="margin-bottom:4px; font-weight:600; font-size:0.78rem;">
-              Tersedia: ${available} / ${total}
-            </div>
-            ${copyBadges}
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function filterBooks() {
-      const q = document.getElementById("bookSearchInput").value.toLowerCase();
-      const filtered = cachedBooks.filter(b => 
-        b.title.toLowerCase().includes(q) || 
-        (b.author && b.author.toLowerCase().includes(q)) || 
-        (b.isbn && b.isbn.includes(q))
-      );
-      renderBookTable(filtered);
-    }
-
-    // ==========================================
-    // 2. PRESENSI MAHASISWA
-    // ==========================================
-    async function submitStudentCheckIn() {
-      const res = await apiRequest("/attendance/checkin", "POST", {});
-      if (res.ok) {
-        showAlert("success", "Kehadiran tercatat", `Check-in berhasil disimpan untuk ${currentUser.name}.`);
-      } else {
-        handleApiError(res, "Gagal mencatat kehadiran");
-      }
-    }
-
-    // ==========================================
-    // 3. RESERVASI KOMPUTER (QS02)
-    // ==========================================
-    async function loadComputers() {
-      const resPC = await apiRequest("/computers");
-      const resRes = await apiRequest("/computers/reservations");
-
-      if (!resPC.ok) {
-        handleApiError(resPC, "Gagal memuat fasilitas komputer");
-        return;
-      }
-
-      cachedComputers = resPC.data || [];
-      const pcSelector = document.getElementById("pcSelector");
-      pcSelector.innerHTML = "";
-      cachedComputers.forEach(pc => {
-        const opt = document.createElement("option");
-        opt.value = pc.id;
-        opt.innerText = `${pc.label} (ID: ${pc.id})`;
-        pcSelector.appendChild(opt);
-      });
-
-      const resList = resRes.data || [];
-      const tbody = document.getElementById("reservationTableBody");
-      tbody.innerHTML = "";
-
-      if (resList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:10px;">Belum ada jadwal reservasi aktif.</td></tr>`;
-        return;
-      }
-
-      resList.forEach(r => {
-        const pc = cachedComputers.find(c => c.id === r.computerId);
-        const tr = document.createElement("tr");
-        const formattedDate = new Date(r.slotStart).toLocaleString("id-ID", { 
-          dateStyle: "medium", timeStyle: "short" 
+        const res = await fetch(endpoint, {
+          method,
+          headers,
+          body: body ? JSON.stringify(body) : null
         });
-        tr.innerHTML = `
-          <td><strong>${pc ? escapeHtml(pc.label) : 'PC #' + r.computerId}</strong></td>
-          <td><code>${escapeHtml(r.memberRef)}</code></td>
-          <td>${formattedDate}</td>
-        `;
-        tbody.appendChild(tr);
-      });
+
+        const text = await res.text();
+        let data = null;
+        try { data = text ? JSON.parse(text) : null; } catch (e) { data = text; }
+
+        if (res.status === 401) {
+          showAlert("danger", "Sesi Kedaluwarsa", "Silakan masuk akun kembali.");
+          logoutSession();
+          return { ok: false, status: 401, data };
+        }
+
+        return { ok: res.ok, status: res.status, data };
+      } catch (err) {
+        return { ok: false, status: 0, data: { error: err.message } };
+      }
     }
 
-    async function submitReservation() {
-      const computerId = parseInt(document.getElementById("pcSelector").value, 10);
-      const slotInput = document.getElementById("slotPicker").value;
+    // ==========================================
+    // WORKFLOW FUNCTIONS
+    // ==========================================
 
-      if (!slotInput) {
-        showAlert("warning", "Waktu Diperlukan", "Tentukan tanggal dan jam slot reservasi.");
+    // 1. Buku & Eksemplar
+    async function loadBooks() {
+      if (!accessToken) return;
+
+      const tbody = document.getElementById("booksTableBody");
+      const adminTbody = document.getElementById("adminBooksTableBody");
+
+      // Fetch books and copies
+      const [bRes, cRes] = await Promise.all([
+        apiRequest("/books"),
+        apiRequest("/books/copies")
+      ]);
+
+      if (!bRes.ok) {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-light-error">Gagal mengambil katalog (HTTP ${bRes.status})</td></tr>`;
         return;
       }
 
-      const isoSlot = new Date(slotInput).toISOString();
-
-      const res = await apiRequest("/computers/reservations", "POST", {
-        computerId: computerId,
-        slotStart: isoSlot
-      });
-
-      if (res.ok) {
-        showAlert("success", "Reservasi Berhasil", `Unit ${res.data.label} berhasil dipesan untuk tanggal ${new Date(res.data.slotStart).toLocaleString('id-ID')}.`);
-        loadComputers();
-      } else {
-        handleApiError(res, "Pemesanan Slot Gagal");
+      cachedBooks = bRes.data || [];
+      if (cRes.ok && Array.isArray(cRes.data)) {
+        cachedCopies = cRes.data;
       }
+
+      // Update Glanceable Metrics in Hero
+      const totalBooks = cachedBooks.length;
+      const totalCopies = cachedCopies.length;
+      const availCopies = cachedCopies.filter(c => c.status === "AVAILABLE").length;
+
+      const heroBooks = document.getElementById("heroStatBooks");
+      const heroCopies = document.getElementById("heroStatCopies");
+      const heroAvail = document.getElementById("heroStatAvail");
+      if (heroBooks) heroBooks.innerText = totalBooks;
+      if (heroCopies) heroCopies.innerText = totalCopies;
+      if (heroAvail) heroAvail.innerText = availCopies;
+
+      // Populate Book select dropdown for petugas
+      const bookSelect = document.getElementById("newCopyBookId");
+      if (bookSelect) {
+        bookSelect.innerHTML = cachedBooks.map(b => `<option value="${b.id}">${escapeHtml(b.title)} (${escapeHtml(b.isbn || '-')})</option>`).join("");
+      }
+
+      renderBooksTable(cachedBooks);
+      renderAdminBooksTable(cachedBooks);
     }
 
-    // ==========================================
-    // 4. MAHASISWA: PINJAMAN SAYA
-    // ==========================================
-    async function loadMyLoans() {
-      const res = await apiRequest("/loans/active");
-      const tbody = document.getElementById("myLoansTableBody");
-      tbody.innerHTML = "";
+    function quickSearch(keyword) {
+      const input = document.getElementById("hero-search-input");
+      if (input) input.value = keyword;
+      filterBooks(keyword);
+      document.getElementById("catalog-section")?.scrollIntoView({ behavior: 'smooth' });
+    }
 
+    function filterBooksFromHero() {
+      const val = document.getElementById("hero-search-input").value;
+      filterBooks(val);
+      document.getElementById("catalog-section")?.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function filterBooks(overrideVal = null) {
+      const q = (overrideVal !== null ? overrideVal : (document.getElementById("bookSearchInput").value || document.getElementById("hero-search-input")?.value || "")).toLowerCase().trim();
+      const filtered = cachedBooks.filter(b => {
+        return (b.title || "").toLowerCase().includes(q) ||
+               (b.author || "").toLowerCase().includes(q) ||
+               (b.isbn || "").toLowerCase().includes(q);
+      });
+      renderBooksTable(filtered);
+    }
+
+    function renderBooksTable(books) {
+      const tbody = document.getElementById("booksTableBody");
+      if (!tbody) return;
+
+      if (!books.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-light-on-surface-variant">Tidak ada judul buku ditemukan dalam katalog.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = books.map(b => {
+        const bookCopies = cachedCopies.filter(c => c.bookId === b.id);
+        const availCopies = bookCopies.filter(c => c.status === "AVAILABLE");
+        const countText = bookCopies.length > 0 ? `${availCopies.length} / ${bookCopies.length} Tersedia` : "Belum Ada Eksemplar";
+        const isAvail = availCopies.length > 0;
+
+        return `
+          <tr class="hover:bg-light-surface-container-low transition-colors">
+            <td class="py-2.5 px-3 font-semibold text-light-on-surface">
+              <span class="font-title text-title-md">${escapeHtml(b.title)}</span>
+            </td>
+            <td class="py-2.5 px-3 text-light-on-surface-variant">${escapeHtml(b.author || "-")}</td>
+            <td class="py-2.5 px-3 font-mono text-mono-sm text-light-primary">${escapeHtml(b.isbn || "-")}</td>
+            <td class="py-2.5 px-3">
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 text-label-sm ${isAvail ? 'bg-light-surface-variant text-light-primary border border-light-primary/20' : 'bg-light-error-container text-light-on-error-container border border-light-error/20'}">
+                <span class="w-1.5 h-1.5 ${isAvail ? 'bg-success' : 'bg-light-error'}"></span>
+                <span>${countText}</span>
+              </span>
+            </td>
+            <td class="py-2.5 px-3 text-right">
+              <button onclick="showCopiesModal(${b.id}, '${escapeHtml(b.title)}')" class="inline-flex items-center gap-1 px-2.5 py-1 border border-light-outline-variant text-label-sm font-semibold hover:bg-light-surface-container-low transition-colors">
+                <span class="material-symbols-outlined text-[16px]">qr_code</span> Lihat Rak
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function renderAdminBooksTable(books) {
+      const tbody = document.getElementById("adminBooksTableBody");
+      if (!tbody) return;
+
+      if (!books.length) {
+        tbody.innerHTML = `<tr><td colspan="4" class="py-2.5 text-center text-light-on-surface-variant">Belum ada master buku terdaftar.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = books.map(b => `
+        <tr class="hover:bg-light-surface-container-low transition-colors">
+          <td class="py-2 px-2.5 font-mono text-mono-sm">${b.id}</td>
+          <td class="py-2 px-2.5 font-semibold text-light-on-surface">${escapeHtml(b.title)}</td>
+          <td class="py-2 px-2.5 text-light-on-surface-variant">${escapeHtml(b.author || "-")}</td>
+          <td class="py-2 px-2.5 font-mono text-mono-sm text-light-primary">${escapeHtml(b.isbn || "-")}</td>
+        </tr>
+      `).join("");
+    }
+
+    function showCopiesModal(bookId, title) {
+      document.getElementById("copiesModalTitle").innerText = `Eksemplar: ${title}`;
+      const tbody = document.getElementById("copiesModalTableBody");
+      const copies = cachedCopies.filter(c => c.bookId === bookId);
+
+      if (!copies.length) {
+        tbody.innerHTML = `<tr><td colspan="3" class="py-2.5 text-center text-light-on-surface-variant">Belum ada eksemplar fisik terdaftar untuk judul ini.</td></tr>`;
+      } else {
+        tbody.innerHTML = copies.map(c => `
+          <tr class="hover:bg-light-surface-container-low transition-colors">
+            <td class="py-1.5 px-2 font-mono text-mono-sm">#${c.id}</td>
+            <td class="py-1.5 px-2 font-mono text-mono-sm font-bold text-light-primary">${escapeHtml(c.barcode)}</td>
+            <td class="py-1.5 px-2">
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 text-label-sm ${c.status === 'AVAILABLE' ? 'bg-light-surface-variant text-light-primary' : 'bg-light-secondary-container/20 text-light-secondary'}">
+                <span class="w-1.5 h-1.5 ${c.status === 'AVAILABLE' ? 'bg-success' : 'bg-warning'}"></span>
+                <span>${c.status === 'AVAILABLE' ? 'TERSEDIA DI RAK' : 'SEDANG DIPINJAM'}</span>
+              </span>
+            </td>
+          </tr>
+        `).join("");
+      }
+
+      document.getElementById("copiesModal").style.display = "flex";
+    }
+
+    function hideCopiesModal() { document.getElementById("copiesModal").style.display = "none"; }
+
+    // 2. Pinjaman Mahasiswa
+    async function loadMyLoans() {
+      const tbody = document.getElementById("myLoansTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = `<tr><td colspan="6" class="py-2.5 text-center text-light-on-surface-variant">Memuat pinjaman...</td></tr>`;
+
+      const res = await apiRequest("/loans/active");
       if (!res.ok) {
-        handleApiError(res, "Gagal memuat daftar pinjaman");
+        tbody.innerHTML = `<tr><td colspan="6" class="py-2.5 text-center text-light-error">Gagal memuat pinjaman (${res.status})</td></tr>`;
         return;
       }
 
       const loans = res.data || [];
-      const myLoans = loans.filter(l => l.memberRef === currentUser.memberRef);
-
-      if (myLoans.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:10px;">Tidak ada transaksi pinjaman aktif saat ini.</td></tr>`;
+      if (!loans.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-2.5 text-center text-light-on-surface-variant">Tidak ada pinjaman buku aktif saat ini.</td></tr>`;
         return;
       }
 
-      myLoans.forEach(l => {
-        const tr = document.createElement("tr");
-        const borrowDate = new Date(l.borrowedAt).toLocaleDateString("id-ID");
-        const dueDate = new Date(l.dueAt).toLocaleDateString("id-ID");
-        tr.innerHTML = `
-          <td>#${l.id}</td>
-          <td><strong>Barcode ID: ${l.bookCopyId}</strong></td>
-          <td>${borrowDate}</td>
-          <td><span style="color:var(--warning); font-weight:600;">${dueDate}</span></td>
-          <td><span class="badge badge-unavailable">Dipinjam</span></td>
+      tbody.innerHTML = loans.map(l => {
+        const copy = cachedCopies.find(c => c.id === l.bookCopyId);
+        const barcodeText = copy ? copy.barcode : `ID #${l.bookCopyId}`;
+        const borrowDate = l.borrowedAt ? new Date(l.borrowedAt).toLocaleDateString("id-ID") : "-";
+        const dueDate = l.dueAt ? new Date(l.dueAt).toLocaleDateString("id-ID") : "-";
+
+        return `
+          <tr class="hover:bg-light-surface-container-low transition-colors">
+            <td class="py-2 px-2.5 font-mono text-mono-sm">TRX-${l.id}</td>
+            <td class="py-2 px-2.5 font-mono text-mono-sm">#${l.bookCopyId}</td>
+            <td class="py-2 px-2.5 font-mono text-mono-sm font-bold text-light-primary">${escapeHtml(barcodeText)}</td>
+            <td class="py-2 px-2.5">${borrowDate}</td>
+            <td class="py-2 px-2.5 font-semibold text-light-error">${dueDate}</td>
+            <td class="py-2 px-2.5">
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 text-label-sm bg-light-secondary-container/20 text-light-secondary border border-light-secondary/25">
+                <span class="w-1.5 h-1.5 bg-warning"></span>
+                <span>${l.returnedAt ? "DIKEMBALIKAN" : "AKTIF DIPINJAM"}</span>
+              </span>
+            </td>
+          </tr>
         `;
-        tbody.appendChild(tr);
-      });
+      }).join("");
     }
 
-    // ==========================================
-    // 5. PETUGAS: SIRKULASI & FALLBACK
-    // ==========================================
+    // 3. Presensi Gerbang Mahasiswa
+    async function submitStudentCheckIn() {
+      const resEl = document.getElementById("checkInResult");
+      resEl.innerHTML = `<span class="text-light-on-surface-variant">Menghubungkan gerbang perpustakaan...</span>`;
+
+      const res = await apiRequest("/attendance/checkin", "POST", {});
+      if (res.ok) {
+        const d = res.data;
+        resEl.innerHTML = `
+          <div class="p-2 bg-light-surface-variant border border-light-primary/30 text-light-primary">
+            <strong class="font-label text-label-lg block">Presensi Gerbang Berhasil Dicatat!</strong>
+            <span class="text-body-md text-light-on-surface">No Presensi: #${d.checkInId} | NPM: ${d.memberRef} | Waktu: ${new Date(d.checkInAt).toLocaleTimeString("id-ID")}</span>
+          </div>
+        `;
+        showAlert("success", "Presensi Berhasil", `Kehadiran mahasiswa ${d.memberRef} berhasil dicatat di gerbang.`);
+      } else {
+        resEl.innerHTML = `<span class="text-light-error">Gagal mencatat presensi: ${res.data?.error || res.status}</span>`;
+        showAlert("danger", "Gagal Presensi", res.data?.error || "Terjadi kendala jaringan.");
+      }
+    }
+
+    // 4. Fasilitas Komputer
+    async function loadComputers() {
+      const tbody = document.getElementById("computersTableBody");
+      const adminTbody = document.getElementById("adminComputersTableBody");
+
+      if (tbody) tbody.innerHTML = `<tr><td colspan="4" class="py-2.5 text-center text-light-on-surface-variant">Memuat workstation...</td></tr>`;
+      if (adminTbody) adminTbody.innerHTML = `<tr><td colspan="3" class="py-2.5 text-center text-light-on-surface-variant">Memuat workstation...</td></tr>`;
+
+      const [cRes, rRes] = await Promise.all([
+        apiRequest("/computers"),
+        apiRequest("/computers/reservations")
+      ]);
+
+      if (!cRes.ok) {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="4" class="py-2.5 text-center text-light-error">Gagal memuat komputer (${cRes.status})</td></tr>`;
+        return;
+      }
+
+      cachedComputers = cRes.data || [];
+      if (rRes.ok && Array.isArray(rRes.data)) {
+        cachedReservations = rRes.data;
+      }
+
+      // Render Mahasiswa
+      if (tbody) {
+        if (!cachedComputers.length) {
+          tbody.innerHTML = `<tr><td colspan="4" class="py-2.5 text-center text-light-on-surface-variant">Belum ada unit workstation di tenant ini.</td></tr>`;
+        } else {
+          tbody.innerHTML = cachedComputers.map(c => {
+            const hasReservation = cachedReservations.some(r => r.computerId === c.id);
+            return `
+              <tr class="hover:bg-light-surface-container-low transition-colors">
+                <td class="py-2 px-2.5 font-bold text-light-on-surface">${escapeHtml(c.label)}</td>
+                <td class="py-2 px-2.5 font-mono text-mono-sm">Unit #${c.id}</td>
+                <td class="py-2 px-2.5">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 text-label-sm ${hasReservation ? 'bg-light-secondary-container/20 text-light-secondary' : 'bg-light-surface-variant text-light-primary'}">
+                    <span class="w-1.5 h-1.5 ${hasReservation ? 'bg-warning' : 'bg-success'}"></span>
+                    <span>${hasReservation ? 'DIPESAN' : 'TERSEDIA'}</span>
+                  </span>
+                </td>
+                <td class="py-2 px-2.5 text-right">
+                  <button onclick="showReserveModal(${c.id}, '${escapeHtml(c.label)}')" class="inline-flex items-center gap-1 px-2.5 py-1 bg-light-primary text-light-on-primary hover:bg-light-primary-container text-label-sm font-semibold transition-colors">
+                    <span class="material-symbols-outlined text-[16px]">calendar_today</span> Pesan
+                  </button>
+                </td>
+              </tr>
+            `;
+          }).join("");
+        }
+      }
+
+      // Render Admin
+      if (adminTbody) {
+        if (!cachedComputers.length) {
+          adminTbody.innerHTML = `<tr><td colspan="3" class="py-2.5 text-center text-light-on-surface-variant">Belum ada komputer terdaftar.</td></tr>`;
+        } else {
+          adminTbody.innerHTML = cachedComputers.map(c => `
+            <tr class="hover:bg-light-surface-container-low transition-colors">
+              <td class="py-1.5 px-2.5 font-mono text-mono-sm">#${c.id}</td>
+              <td class="py-1.5 px-2.5 font-bold text-light-on-surface">${escapeHtml(c.label)}</td>
+              <td class="py-1.5 px-2.5 font-mono text-mono-sm text-light-on-surface-variant">${c.tenantId}</td>
+            </tr>
+          `).join("");
+        }
+      }
+    }
+
+    async function loadMyReservations() {
+      const tbody = document.getElementById("myReservationsTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = `<tr><td colspan="4" class="py-2.5 text-center text-light-on-surface-variant">Memuat reservasi...</td></tr>`;
+
+      const res = await apiRequest("/computers/reservations");
+      if (!res.ok) {
+        tbody.innerHTML = `<tr><td colspan="4" class="py-2.5 text-center text-light-error">Gagal memuat reservasi (${res.status})</td></tr>`;
+        return;
+      }
+
+      const list = res.data || [];
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="4" class="py-2.5 text-center text-light-on-surface-variant">Belum ada workstation yang Anda pesan saat ini.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(r => `
+        <tr class="hover:bg-light-surface-container-low transition-colors">
+          <td class="py-2 px-2.5 font-mono text-mono-sm">RSV-${r.id || r.reservationId}</td>
+          <td class="py-2 px-2.5 font-mono text-mono-sm">Unit #${r.computerId}</td>
+          <td class="py-2 px-2.5 font-bold text-light-primary">${escapeHtml(r.label || 'Workstation')}</td>
+          <td class="py-2 px-2.5 font-semibold">${r.slotStart ? new Date(r.slotStart).toLocaleString("id-ID") : "-"}</td>
+        </tr>
+      `).join("");
+    }
+
+    function showReserveModal(id, label) {
+      document.getElementById("reserveComputerId").value = id;
+      document.getElementById("reserveComputerCode").value = label;
+      document.getElementById("reserveModal").style.display = "flex";
+    }
+
+    function hideReserveModal() { document.getElementById("reserveModal").style.display = "none"; }
+
+    async function submitReservation() {
+      const compId = document.getElementById("reserveComputerId").value;
+      const slotVal = document.getElementById("slotPicker").value;
+      if (!slotVal) {
+        showAlert("warning", "Peringatan", "Pilih slot waktu reservasi terlebih dahulu.");
+        return;
+      }
+
+      hideReserveModal();
+      showAlert("info", "Memproses", "Menyimpan slot workstation...");
+      const isoSlot = new Date(slotVal).toISOString();
+
+      const res = await apiRequest("/computers/reservations", "POST", {
+        computerId: parseInt(compId),
+        slotStart: isoSlot
+      });
+
+      if (res.ok) {
+        showAlert("success", "Reservasi Sukses", "Workstation komputer berhasil dipesan!");
+        loadComputers();
+        loadMyReservations();
+      } else {
+        showAlert("danger", "Gagal Reservasi", res.data?.error || "Gagal memesan workstation.");
+      }
+    }
+
+    // 5. Sirkulasi Petugas
     async function submitBorrow() {
       const barcode = document.getElementById("borrowBarcode").value.trim();
       const memberRef = document.getElementById("borrowMemberRef").value.trim();
-
       if (!barcode || !memberRef) {
-        showAlert("warning", "Data Belum Lengkap", "Harap isi barcode koleksi dan NPM mahasiswa.");
+        showAlert("warning", "Form Belum Lengkap", "Masukkan kode barcode dan nomor anggota mahasiswa.");
         return;
       }
 
+      showAlert("info", "Memproses", `Meminjamkan eksemplar ${barcode}...`);
       const res = await apiRequest("/loans", "POST", { barcode, memberRef });
       if (res.ok) {
-        showAlert("success", "Peminjaman Berhasil", `Koleksi barcode ${barcode} dipinjamkan ke anggota ${memberRef}. Batas kembali: ${new Date(res.data.dueAt).toLocaleDateString('id-ID')}`);
+        showAlert("success", "Peminjaman Berhasil", `Koleksi ${barcode} berhasil dipinjamkan ke anggota ${memberRef}.`);
         document.getElementById("borrowBarcode").value = "";
         document.getElementById("borrowMemberRef").value = "";
+        loadActiveLoansPetugas();
+        loadAllCopies();
+        loadBooks();
       } else {
-        handleApiError(res, "Peminjaman Ditolak");
+        showAlert("danger", "Gagal Pinjam", res.data?.error || "Gagal mencatat peminjaman.");
       }
     }
 
-    async function submitReturn() {
-      const barcode = document.getElementById("returnBarcode").value.trim();
-
+    async function submitReturn(barcodeParam = null) {
+      const barcode = barcodeParam || document.getElementById("returnBarcode").value.trim();
       if (!barcode) {
-        showAlert("warning", "Kode eksemplar diperlukan", "Masukkan kode eksemplar yang akan dikembalikan.");
+        showAlert("warning", "Form Belum Lengkap", "Masukkan barcode eksemplar.");
         return;
       }
 
+      showAlert("info", "Memproses", `Mengembalikan eksemplar ${barcode}...`);
       const res = await apiRequest("/loans/return", "POST", { barcode });
       if (res.ok) {
-        showAlert("success", "Pengembalian tercatat", `Eksemplar ${barcode} berhasil dikembalikan.`);
+        showAlert("success", "Pengembalian Selesai", `Eksemplar ${barcode} telah berhasil dikembalikan ke rak.`);
         document.getElementById("returnBarcode").value = "";
+        loadActiveLoansPetugas();
+        loadAllCopies();
+        loadBooks();
       } else {
-        handleApiError(res, "Pengembalian Gagal");
+        showAlert("danger", "Gagal Pengembalian", res.data?.error || "Gagal memproses pengembalian.");
+      }
+    }
+
+    async function loadActiveLoansPetugas() {
+      const tbody = document.getElementById("petugasLoansTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = `<tr><td colspan="7" class="py-2.5 text-center text-light-on-surface-variant">Memuat pinjaman aktif...</td></tr>`;
+
+      const res = await apiRequest("/loans/active");
+      if (!res.ok) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-2.5 text-center text-light-error">Gagal memuat pinjaman (${res.status})</td></tr>`;
+        return;
+      }
+
+      const loans = res.data || [];
+      if (!loans.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-2.5 text-center text-light-on-surface-variant">Tidak ada transaksi peminjaman aktif saat ini.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = loans.map(l => {
+        const copy = cachedCopies.find(c => c.id === l.bookCopyId);
+        const barcode = copy ? copy.barcode : `ID #${l.bookCopyId}`;
+        const borrowDate = l.borrowedAt ? new Date(l.borrowedAt).toLocaleDateString("id-ID") : "-";
+        const dueDate = l.dueAt ? new Date(l.dueAt).toLocaleDateString("id-ID") : "-";
+
+        return `
+          <tr class="hover:bg-light-surface-container-low transition-colors">
+            <td class="py-2 px-2.5 font-mono text-mono-sm">TRX-${l.id}</td>
+            <td class="py-2 px-2.5 font-mono text-mono-sm">#${l.bookCopyId}</td>
+            <td class="py-2 px-2.5 font-mono text-mono-sm font-bold text-light-primary">${escapeHtml(barcode)}</td>
+            <td class="py-2 px-2.5 font-semibold">${escapeHtml(l.memberRef)}</td>
+            <td class="py-2 px-2.5">${borrowDate}</td>
+            <td class="py-2 px-2.5 font-semibold text-light-error">${dueDate}</td>
+            <td class="py-2 px-2.5 text-right">
+              ${copy ? `<button onclick="submitReturn('${escapeHtml(copy.barcode)}')" class="inline-flex items-center gap-1 px-2.5 py-1 border border-light-outline-variant text-label-sm font-semibold hover:bg-light-surface-container-low transition-colors">Kembalikan</button>` : '-'}
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function loadAllCopies() {
+      const tbody = document.getElementById("copiesTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = `<tr><td colspan="4" class="py-2.5 text-center text-light-on-surface-variant">Memuat eksemplar...</td></tr>`;
+
+      const res = await apiRequest("/books/copies");
+      if (!res.ok) {
+        tbody.innerHTML = `<tr><td colspan="4" class="py-2.5 text-center text-light-error">Gagal memuat eksemplar (${res.status})</td></tr>`;
+        return;
+      }
+
+      cachedCopies = res.data || [];
+      if (!cachedCopies.length) {
+        tbody.innerHTML = `<tr><td colspan="4" class="py-2.5 text-center text-light-on-surface-variant">Belum ada eksemplar terdaftar.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = cachedCopies.map(c => {
+        const book = cachedBooks.find(b => b.id === c.bookId);
+        const title = book ? book.title : `Judul #${c.bookId}`;
+
+        return `
+          <tr class="hover:bg-light-surface-container-low transition-colors">
+            <td class="py-2 px-2.5 font-mono text-mono-sm">#${c.id}</td>
+            <td class="py-2 px-2.5 font-semibold text-light-on-surface">${escapeHtml(title)}</td>
+            <td class="py-2 px-2.5 font-mono text-mono-sm font-bold text-light-primary">${escapeHtml(c.barcode)}</td>
+            <td class="py-2 px-2.5">
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 text-label-sm ${c.status === 'AVAILABLE' ? 'bg-light-surface-variant text-light-primary' : 'bg-light-secondary-container/20 text-light-secondary'}">
+                <span class="w-1.5 h-1.5 ${c.status === 'AVAILABLE' ? 'bg-success' : 'bg-warning'}"></span>
+                <span>${c.status === 'AVAILABLE' ? 'TERSEDIA DI RAK' : 'SEDANG DIPINJAM'}</span>
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function submitCreateCopy() {
+      const bookId = document.getElementById("newCopyBookId").value;
+      const barcode = document.getElementById("newCopyBarcode").value.trim();
+      if (!bookId || !barcode) {
+        showAlert("warning", "Peringatan", "Pilih judul buku dan isi kode barcode.");
+        return;
+      }
+
+      const res = await apiRequest("/books/copies", "POST", {
+        bookId: parseInt(bookId),
+        barcode: barcode
+      });
+
+      if (res.ok) {
+        showAlert("success", "Sukses", `Eksemplar fisik '${barcode}' berhasil didaftarkan!`);
+        document.getElementById("newCopyBarcode").value = "";
+        loadAllCopies();
+        loadBooks();
+      } else {
+        showAlert("danger", "Gagal", res.data?.error || "Gagal menambah eksemplar.");
       }
     }
 
     async function submitFallbackCheckIn() {
       const npm = document.getElementById("fallbackNPM").value.trim();
-      if (!npm) {
-        showAlert("warning", "NPM Diperlukan", "Ketik nomor pokok mahasiswa yang bersangkutan.");
-        return;
-      }
+      if (!npm) { showAlert("warning", "Form Belum Lengkap", "Masukkan NPM mahasiswa."); return; }
 
       const res = await apiRequest("/attendance/checkin", "POST", { memberRef: npm });
       if (res.ok) {
-        showAlert("success", "Presensi Manual Berhasil", `Kehadiran mahasiswa NPM ${npm} berhasil disimpan ke sistem.`);
+        showAlert("success", "Presensi Berhasil", `Presensi manual mahasiswa ${npm} berhasil disimpan.`);
         document.getElementById("fallbackNPM").value = "";
+        loadAttendanceLogs();
       } else {
-        handleApiError(res, "Presensi Manual Gagal");
+        showAlert("danger", "Gagal Presensi", res.data?.error || "Gagal mencatat presensi.");
       }
     }
 
-    // ==========================================
-    // 6. ADMIN: DASHBOARD SUMMARY
-    // ==========================================
-    async function loadDashboard() {
-      const res = await apiRequest("/dashboard/summary");
+    async function loadAttendanceLogs() {
+      const tbody = document.getElementById("attendanceLogsBody");
+      if (!tbody) return;
+      tbody.innerHTML = `<tr><td colspan="2" class="py-2 text-center text-light-on-surface-variant">Memuat pengunjung...</td></tr>`;
+
+      const res = await apiRequest("/attendance");
       if (!res.ok) {
-        handleApiError(res, "Gagal memuat ringkasan dashboard");
+        tbody.innerHTML = `<tr><td colspan="2" class="py-2 text-center text-light-error">Gagal memuat log presensi.</td></tr>`;
         return;
       }
 
-      const d = res.data;
-      document.getElementById("statTotalBooks").innerText = d.totalBooks;
-      document.getElementById("statTotalCopies").innerText = d.totalCopies;
-      document.getElementById("statAvailCopies").innerText = d.availableCopies;
-      document.getElementById("statActiveLoans").innerText = d.activeLoans;
-      document.getElementById("statTotalVisitors").innerText = d.totalVisitors;
-      document.getElementById("statReservations").innerText = d.totalReservations;
+      const logs = res.data || [];
+      if (!logs.length) {
+        tbody.innerHTML = `<tr><td colspan="2" class="py-2 text-center text-light-on-surface-variant">Belum ada catatan pengunjung.</td></tr>`;
+        return;
+      }
 
-      const totalCopies = d.totalCopies || 0;
-      const avail = d.availableCopies || 0;
-      const pct = totalCopies === 0 ? 0 : Math.round((avail / totalCopies) * 100);
-      document.getElementById("availProgressBar").style.width = `${pct}%`;
-      document.getElementById("availRatioLabel").innerText = totalCopies === 0
-        ? "Belum ada eksemplar"
-        : `${pct}% tersedia (${avail} dari ${totalCopies})`;
+      tbody.innerHTML = logs.slice(-10).reverse().map(l => `
+        <tr class="hover:bg-light-surface-container-low transition-colors">
+          <td class="py-1.5 px-2 font-mono text-mono-sm">${l.checkInAt ? new Date(l.checkInAt).toLocaleTimeString("id-ID") : "-"}</td>
+          <td class="py-1.5 px-2 font-semibold text-light-on-surface">${escapeHtml(l.memberRef)}</td>
+        </tr>
+      `).join("");
     }
 
-    // ==========================================
-    // NOTIFICATION & FAILURE BOUNDARIES
-    // ==========================================
+    // 6. Admin Workflows
+    async function loadDashboard() {
+      const res = await apiRequest("/dashboard/summary");
+      if (!res.ok) return;
+
+      const d = res.data;
+      document.getElementById("statTotalBooks").innerText = d.totalBooks !== undefined ? d.totalBooks : "-";
+      document.getElementById("statTotalCopies").innerText = d.totalCopies !== undefined ? d.totalCopies : "-";
+      document.getElementById("statAvailCopies").innerText = d.availableCopies !== undefined ? d.availableCopies : "-";
+      document.getElementById("statActiveLoans").innerText = d.activeLoans !== undefined ? d.activeLoans : "-";
+      document.getElementById("statTotalVisitors").innerText = d.totalVisitors !== undefined ? d.totalVisitors : "-";
+      document.getElementById("statReservations").innerText = d.totalReservations !== undefined ? d.totalReservations : "-";
+
+      const total = d.totalCopies || 1;
+      const avail = d.availableCopies || 0;
+      const pct = Math.round((avail / total) * 100);
+      document.getElementById("availProgressBar").style.width = `${pct}%`;
+      document.getElementById("availRatioLabel").innerText = `${pct}% (${avail} dari ${d.totalCopies || 0} eksemplar)`;
+    }
+
+    async function submitCreateBook() {
+      const title = document.getElementById("newBookTitle").value.trim();
+      const author = document.getElementById("newBookAuthor").value.trim();
+      const isbn = document.getElementById("newBookIsbn").value.trim();
+      if (!title || !isbn) {
+        showAlert("warning", "Peringatan", "Judul buku dan ISBN wajib diisi.");
+        return;
+      }
+
+      const res = await apiRequest("/books", "POST", { title, author, isbn });
+      if (res.ok) {
+        showAlert("success", "Sukses", `Buku '${title}' berhasil ditambahkan ke katalog master!`);
+        document.getElementById("newBookTitle").value = "";
+        document.getElementById("newBookAuthor").value = "";
+        document.getElementById("newBookIsbn").value = "";
+        loadBooks();
+        loadDashboard();
+      } else {
+        showAlert("danger", "Gagal", res.data?.error || "Gagal menambah buku.");
+      }
+    }
+
+    async function submitCreateComputer() {
+      const code = document.getElementById("newCompCode").value.trim();
+      if (!code) { showAlert("warning", "Peringatan", "Label workstation komputer wajib diisi."); return; }
+
+      const res = await apiRequest("/computers", "POST", { label: code });
+      if (res.ok) {
+        showAlert("success", "Sukses", `Workstation '${code}' berhasil didaftarkan!`);
+        document.getElementById("newCompCode").value = "";
+        loadComputers();
+        loadDashboard();
+      } else {
+        showAlert("danger", "Gagal", res.data?.error || "Gagal menambah komputer.");
+      }
+    }
+
+    async function loadTenants() {
+      const tbody = document.getElementById("tenantsTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = `<tr><td colspan="3" class="py-2.5 text-center text-light-on-surface-variant">Memuat data tenant...</td></tr>`;
+
+      const res = await apiRequest("/tenants");
+      if (!res.ok) {
+        tbody.innerHTML = `<tr><td colspan="3" class="py-2.5 text-center text-light-error">Gagal memuat tenant (${res.status})</td></tr>`;
+        return;
+      }
+
+      const tenants = res.data || [];
+      tbody.innerHTML = tenants.map(t => `
+        <tr class="hover:bg-light-surface-container-low transition-colors">
+          <td class="py-2 px-2.5 font-mono text-mono-sm">${t.id}</td>
+          <td class="py-2 px-2.5 font-mono text-mono-sm font-bold text-light-primary">${escapeHtml(t.code)}</td>
+          <td class="py-2 px-2.5 font-semibold text-light-on-surface">${escapeHtml(t.name)}</td>
+        </tr>
+      `).join("");
+    }
+
+    async function submitCreateTenant() {
+      const code = document.getElementById("newTenantCode").value.trim();
+      const name = document.getElementById("newTenantName").value.trim();
+      if (!code || !name) {
+        showAlert("warning", "Peringatan", "Kode tenant dan nama institusi wajib diisi.");
+        return;
+      }
+
+      const res = await apiRequest("/tenants", "POST", { code, name });
+      if (res.ok) {
+        showAlert("success", "Sukses", `Tenant '${name}' (${code}) berhasil didaftarkan!`);
+        document.getElementById("newTenantCode").value = "";
+        document.getElementById("newTenantName").value = "";
+        loadTenants();
+      } else {
+        showAlert("danger", "Gagal", res.data?.error || "Gagal menambah tenant.");
+      }
+    }
+
+    // Token Inspector (hidden from UI, no-op for display)
+    function updateTokenInspector() {
+      // Token data is never displayed to end users per UI requirements.
+    }
+
+    // Alert Utilities
     function showAlert(type, title, message) {
-      const alertBox = document.getElementById("globalAlert");
-      const alertBadge = document.getElementById("alertBadge");
-      const alertTitle = document.getElementById("alertTitle");
-      const alertMsg = document.getElementById("alertMsg");
+      const box = document.getElementById("globalAlert");
+      const icon = document.getElementById("alertIcon");
+      const titleEl = document.getElementById("alertTitle");
+      const msgEl = document.getElementById("alertMsg");
 
-      alertBox.className = `alert alert-${type}`;
-      alertBadge.className = `alert-badge alert-badge-${type}`;
-      alertBadge.innerText = type.toUpperCase();
-      alertTitle.innerText = title;
-      alertMsg.innerText = message;
-      alertBox.style.display = "flex";
+      const iconMap = {
+        info: "info",
+        success: "check_circle",
+        warning: "warning",
+        danger: "error"
+      };
+      icon.innerText = iconMap[type] || "info";
+      titleEl.innerText = title;
+      msgEl.innerText = message;
+      box.style.display = "block";
 
-      if (type === "success") {
-        setTimeout(dismissAlert, 6000);
+      if (type === "success" || type === "info") {
+        setTimeout(dismissAlert, 5000);
       }
     }
 
@@ -1570,29 +2222,14 @@
       document.getElementById("globalAlert").style.display = "none";
     }
 
-    function handleApiError(res, defaultTitle) {
-      const err = (res.data && res.data.error) ? res.data.error : "Terjadi kesalahan pada respon server.";
-      
-      if (res.status === 409) {
-        showAlert("warning", "Konflik Data (409 Conflict)", err);
-      } else if (res.status === 403) {
-        const role = currentUser ? currentUser.role : "pengguna";
-        showAlert("danger", "Akses Ditolak (403 Forbidden)", `Peran '${role}' tidak berwenang mengeksekusi operasi ini.`);
-      } else if (res.status === 401) {
-        showLoggedOutApp();
-        showAlert("danger", "Sesi Berakhir (401 Unauthorized)", "Token tidak berlaku atau telah kedaluwarsa. Silakan masuk kembali.");
-      } else if (res.status === 404) {
-        showAlert("warning", "Data Tidak Ditemukan (404 Not Found)", `${err} (Isolasi data tenant aktif).`);
-      } else if (res.status === 503 || res.status >= 500) {
-        showAlert("danger", "Gangguan Layanan (503 Service Unavailable)", err);
-      } else {
-        showAlert("danger", defaultTitle, err);
-      }
-    }
-
     function escapeHtml(str) {
       if (!str) return "";
-      return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
   </script>
 </body>
